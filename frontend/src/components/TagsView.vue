@@ -58,7 +58,7 @@ function isAffix(tag: TagView | null | undefined) {
 
 function goTo(tag: TagView) {
   if (tag.path === route.path) return
-  router.push({ path: tag.fullPath, query: tag.query, params: tag.params })
+  router.push({ path: tag.fullPath, query: tag.query })
 }
 
 function closeTag(tag: TagView) {
@@ -68,7 +68,7 @@ function closeTag(tag: TagView) {
   if (isCurrent && idx !== -1) {
     const next = tagsStore.visitedViews[idx] || tagsStore.visitedViews[idx - 1]
     if (next) {
-      router.push({ path: next.fullPath, query: next.query, params: next.params })
+      router.push({ path: next.fullPath, query: next.query })
     } else {
       router.push('/dashboard')
     }
@@ -121,31 +121,34 @@ function closeSelected() {
 
 function closeOthers() {
   if (!selectedTag.value) return
-  tagsStore.delOthers(selectedTag.value)
-  if (route.path !== selectedTag.value.path) {
-    router.push({ path: selectedTag.value.fullPath, query: selectedTag.value.query, params: selectedTag.value.params })
+  const tag = selectedTag.value
+  tagsStore.delOthers(tag)
+  if (route.path !== tag.path) {
+    router.push({ path: tag.fullPath, query: tag.query })
   }
   closeContextMenu()
 }
 
 function closeLeft() {
   if (!selectedTag.value) return
+  const tag = selectedTag.value
   const currentIdx = tagsStore.visitedViews.findIndex((v) => v.path === route.path)
-  const selectedIdx = tagsStore.visitedViews.findIndex((v) => v.path === selectedTag.value.path)
-  tagsStore.delLeft(selectedTag.value)
+  const selectedIdx = tagsStore.visitedViews.findIndex((v) => v.path === tag.path)
+  tagsStore.delLeft(tag)
   if (currentIdx !== -1 && currentIdx < selectedIdx) {
-    router.push({ path: selectedTag.value.fullPath, query: selectedTag.value.query, params: selectedTag.value.params })
+    router.push({ path: tag.fullPath, query: tag.query })
   }
   closeContextMenu()
 }
 
 function closeRight() {
   if (!selectedTag.value) return
+  const tag = selectedTag.value
   const currentIdx = tagsStore.visitedViews.findIndex((v) => v.path === route.path)
-  const selectedIdx = tagsStore.visitedViews.findIndex((v) => v.path === selectedTag.value!.path)
-  tagsStore.delRight(selectedTag.value)
+  const selectedIdx = tagsStore.visitedViews.findIndex((v) => v.path === tag.path)
+  tagsStore.delRight(tag)
   if (currentIdx !== -1 && currentIdx > selectedIdx) {
-    router.push({ path: selectedTag.value.fullPath, query: selectedTag.value.query, params: selectedTag.value.params })
+    router.push({ path: tag.fullPath, query: tag.query })
   }
   closeContextMenu()
 }

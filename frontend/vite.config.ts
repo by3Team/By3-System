@@ -24,9 +24,9 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 500,
       rollupOptions: {
         output: {
-          manualChunks: {
-            'element-plus': ['element-plus'],
-            'vue-vendor': ['vue', 'vue-router', 'pinia']
+          manualChunks(id: string) {
+            if (id.includes('node_modules/element-plus')) return 'element-plus'
+            if (id.includes('node_modules/vue') || id.includes('node_modules/pinia')) return 'vue-vendor'
           }
         }
       }
