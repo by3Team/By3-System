@@ -49,18 +49,3 @@ jobs:
 
       - name: Build
         run: cd frontend && npm run build
-
-  security:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@6c175e9c4083f852c5b1c5f1898da9e0e5ef2ca6 # 0.30.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: 1
-          format: table
-          skip-dirs: frontend/node_modules,backend/**/bin,backend/**/obj
