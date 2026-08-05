@@ -1,0 +1,50 @@
+# .NET
+backend/**/bin/
+backend/**/obj/
+backend/**/*.user
+backend/**/*.suo
+backend/**/.vs/
+backend/**/appsettings.Development.json
+backend/**/appsettings.Production.json
+!backend/**/appsettings.json
+backend/coverage-results/
+backend/coverage-report/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/*.log
+
+# Python
+test/__pycache__/
+test/venv/
+test/*.pyc
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+frontend/.vscode/
+!frontend/.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Local security tooling
+.venv-security/
+tools/trivy/
+security-scan-*.log
+security-scan-report.md
+
+# Agent & local scripts
+AGENTS.md
+scripts/
+start-backend.bat
+start-frontend.bat
+.semgrepignore
+
+# OS
+.DS_Store
+Thumbs.db

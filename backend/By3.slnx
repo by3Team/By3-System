@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="By3.Api/By3.Api.csproj" />
+  <Project Path="By3.Repository/By3.Repository.csproj" />
+  <Project Path="By3.Service/By3.Service.csproj" />
+  <Project Path="By3.Tests/By3.Tests.csproj" />
+  <Project Path="By3.IntegrationTests/By3.IntegrationTests.csproj" />
+</Solution>

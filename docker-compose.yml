@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: by3-postgres
+    environment:
+      POSTGRES_DB: by3
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - /tmp
+    ports:
+      - "5432:5432"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: by3-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=by3;Username=postgres;Password=${POSTGRES_PASSWORD:-123456}
+      Jwt__Key: ${JWT_KEY:-your-super-secret-key-at-least-32-bytes-long!}
+      Jwt__Issuer: By3
+      Jwt__Audience: By3Client
+      Cors__AllowedOrigins: http://localhost
+      DataProtection__EncryptionKey: ${DATA_PROTECTION_KEY:-By3ProdPhoneEncryptionKey-ChangeMe!}
+      FileStorage__UploadPath: ./uploads
+      Jobs__UserSeed__DefaultPassword: ${JOBS_USERSEED_PASSWORD:-Demo123!}
+      TablePrefix: ${TABLE_PREFIX:-by3_}
+    ports:
+      - "5000:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: by3-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

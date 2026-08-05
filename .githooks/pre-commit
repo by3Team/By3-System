@@ -1,0 +1,12 @@
+#!/bin/sh
+# Pre-commit security scan with Semgrep
+# Install: git config core.hooksPath .githooks
+
+if ! command -v semgrep >/dev/null 2>&1; then
+  echo "[pre-commit] semgrep not found, skipping security scan"
+  echo "[pre-commit] install: pip install semgrep  (or see https://semgrep.dev/docs/getting-started/)"
+  exit 0
+fi
+
+echo "[pre-commit] Running semgrep --config=auto ."
+semgrep --config=auto .

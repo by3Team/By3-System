@@ -1,0 +1,91 @@
+// Copyright 2026 By3 Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Microsoft.EntityFrameworkCore;
+using By3.Repository.Entities;
+
+namespace By3.Repository.Repositories;
+
+public class MenuRepository
+{
+    private readonly AppDbContext _db;
+    public MenuRepository(AppDbContext db) => _db = db;
+
+    private IQueryable<SysMenu> Queryable() => _db.Menus;
+
+    public async Task<SysMenu?> GetByIdAsync(Guid id)
+        => await Queryable().FirstOrDefaultAsync(m => m.Id == id);
+
+    public async Task<List<SysMenu>> GetAllAsync()
+        => await Queryable()
+            .Where(m => m.IsEnabled)
+            .OrderBy(m => m.SortOrder)
+            .ToListAsync();
+
+    public async Task<Guid> CreateAsync(SysMenu menu)
+    {
+        _db.Menus.Add(menu);
+        await _db.SaveChangesAsync();
+        return menu.Id;
+    }
+
+    public async Task<int> UpdateAsync(SysMenu menu)
+    {
+        _db.Menus.Update(menu);
+        return await _db.SaveChangesAsync();
+    }
+
+    public async Task<int> DeleteAsync(Guid id)
+    {
+        var menu = await _db.Menus.FindAsync(id);
+        if (menu == null) return 0;
+        menu.IsDeleted = true;
+        return await _db.SaveChangesAsync();
+    }
+
+    public async Task<List<SysMenu>> GetMenusByRoleIdsAsync(List<Guid> roleIds)
+    {
+        var menuIds = await _db.RoleMenus
+            .Where(rm => roleIds.Contains(rm.RoleId))
+            .Select(rm => rm.MenuId)
+            .Distinct()
+            .ToListAsync();
+
+        return await Queryable()
+            .Where(m => menuIds.Contains(m.Id) && m.IsEnabled)
+            .OrderBy(m => m.SortOrder)
+            .ToListAsync();
+    }
+
+    public async Task<List<string>> GetPermissionsByRoleIdsAsync(List<Guid> roleIds)
+    {
+        var menuIds = await _db.RoleMenus
+            .Where(rm => roleIds.Contains(rm.RoleId))
+            .Select(rm => rm.MenuId)
+            .Distinct()
+            .ToListAsync();
+
+        return await Queryable()
+            .Where(m => menuIds.Contains(m.Id) && m.IsEnabled && m.Permission != null)
+            .Select(m => m.Permission!)
+            .ToListAsync();
+    }
+
+    public async Task<List<string>> GetAllPermissionsAsync()
+        => await Queryable()
+            .Where(m => m.IsEnabled && m.Permission != null && m.Permission != string.Empty)
+            .Select(m => m.Permission!)
+            .Distinct()
+            .ToListAsync();
+}

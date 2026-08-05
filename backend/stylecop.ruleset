@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="By3 Ruleset" Description="Code analysis rules for By3 RBAC system" ToolsVersion="16.0">
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <!-- 全局抑制 StyleCop 警告，仅保留错误级别 -->
+    <Rule Id="SA*" Action="None" />
+  </Rules>
+</RuleSet>

@@ -1,0 +1,151 @@
+Third-Party Software Notices
+
+This project uses the following third-party libraries:
+
+================================================================================
+
+Backend (.NET) Dependencies
+
+================================================================================
+
+Package: BCrypt.Net-Next
+License: BSD-3-Clause
+Copyright: Copyright (c) 2006-2024, Damien Miller and contributors
+https://github.com/BcryptNet/bcrypt.net
+
+Package: ClosedXML
+License: MIT
+Copyright: Copyright (c) 2016 ClosedXML
+https://github.com/ClosedXML/ClosedXML
+
+Package: FluentValidation
+License: Apache-2.0
+Copyright: Copyright (c) Jeremy Skinner
+https://github.com/FluentValidation/FluentValidation
+
+Package: MailKit
+License: MIT
+Copyright: Copyright (c) 2013-2024 Jeffrey Stedfast
+https://github.com/jstedfast/MailKit
+
+Package: Microsoft.EntityFrameworkCore
+License: MIT
+Copyright: Copyright (c) .NET Foundation and Contributors
+https://github.com/dotnet/efcore
+
+Package: Npgsql.EntityFrameworkCore.PostgreSQL
+License: PostgreSQL License
+Copyright: Copyright (c) 2002-2024, Npgsql Development Team
+https://github.com/npgsql/efcore.pg
+
+Package: Microsoft.AspNetCore.Authentication.JwtBearer
+License: MIT
+Copyright: Copyright (c) .NET Foundation and Contributors
+https://github.com/dotnet/aspnetcore
+
+Package: Asp.Versioning
+License: MIT
+Copyright: Copyright (c) .NET Foundation and Contributors
+https://github.com/dotnet/aspnet-api-versioning
+
+Package: Swashbuckle.AspNetCore
+License: MIT
+Copyright: Copyright (c) 2016 Richard Morris
+https://github.com/domaindrivendev/Swashbuckle.AspNetCore
+
+Package: Quartz
+License: Apache-2.0
+Copyright: Copyright 2007-2024 Marko Lahma
+https://github.com/quartznet/quartznet
+
+Package: SkiaSharp
+License: MIT
+Copyright: Copyright (c) 2015-2024 Microsoft Corporation
+https://github.com/mono/SkiaSharp
+
+Package: Microsoft.IdentityModel.JsonWebTokens
+License: MIT
+Copyright: Copyright (c) Microsoft Corporation
+https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet
+
+================================================================================
+
+Frontend (npm) Dependencies
+
+================================================================================
+
+Package: vue
+License: MIT
+Copyright: Copyright (c) 2018-present, Yuxi (Evan) You
+https://github.com/vuejs/core
+
+Package: vue-router
+License: MIT
+Copyright: Copyright (c) 2013-present Evan You
+https://github.com/vuejs/router
+
+Package: pinia
+License: MIT
+Copyright: Copyright (c) 2019-present Eduardo San Martin Morote
+https://github.com/vuejs/pinia
+
+Package: element-plus
+License: MIT
+Copyright: Copyright (c) 2020-present Element Plus
+https://github.com/element-plus/element-plus
+
+Package: axios
+License: MIT
+Copyright: Copyright (c) 2014-present Matt Zabriskie & Collaborators
+https://github.com/axios/axios
+
+Package: echarts
+License: Apache-2.0
+Copyright: Copyright (c) 2017-2024 The Apache Software Foundation
+https://github.com/apache/echarts
+
+Package: marked
+License: MIT
+Copyright: Copyright (c) 2011-2024, Christopher Jeffrey
+https://github.com/markedjs/marked
+
+Package: dompurify
+License: (Apache-2.0 OR MPL-2.0)
+Copyright: Copyright (c) Cure53
+https://github.com/cure53/DOMPurify
+
+================================================================================
+
+Build & Development Tools
+
+================================================================================
+
+Package: vite
+License: MIT
+Copyright: Copyright (c) 2019-present, Yuxi (Evan) You and Vite contributors
+https://github.com/vitejs/vite
+
+Package: vitest
+License: MIT
+Copyright: Copyright (c) 2021-Present VoidZero Inc.
+https://github.com/vitest-dev/vitest
+
+Package: typescript
+License: Apache-2.0
+Copyright: Copyright (c) Microsoft Corporation
+https://github.com/microsoft/TypeScript
+
+Package: eslint
+License: MIT
+Copyright: Copyright (c) OpenJS Foundation and other contributors
+https://github.com/eslint/eslint
+
+Package: prettier
+License: MIT
+Copyright: Copyright (c) James Long and contributors
+https://github.com/prettier/prettier
+
+================================================================================
+
+This project is licensed under the Apache License, Version 2.0.
+See the LICENSE file in the project root for the full license text.

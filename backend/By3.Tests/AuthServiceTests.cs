@@ -1,0 +1,44 @@
+// Copyright 2026 By3 Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using By3.Service.DTOs;
+
+namespace By3.Tests;
+
+public class AuthServiceTests
+{
+    [Fact]
+    public void ApiResult_Ok_Should_Return_Code_200()
+    {
+        var result = ApiResult<string>.Ok("data");
+        Assert.Equal(200, result.Code);
+        Assert.Equal("data", result.Data);
+    }
+
+    [Fact]
+    public void ApiResult_Error_Should_Return_Provided_Code()
+    {
+        var result = ApiResult<object>.Error("error", 400);
+        Assert.Equal(400, result.Code);
+        Assert.Equal("error", result.Message);
+    }
+
+    [Fact]
+    public void BCrypt_Should_Verify_Hashed_Password()
+    {
+        var password = "admin123";
+        var hash = BCrypt.Net.BCrypt.HashPassword(password);
+        Assert.True(BCrypt.Net.BCrypt.Verify(password, hash));
+    }
+}
