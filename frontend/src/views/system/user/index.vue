@@ -144,7 +144,7 @@ const resetPwdRules = {
   confirmPassword: [
     { required: true, message: '必填', trigger: 'blur' },
     {
-      validator: (_: any, value: string, callback: Function) => {
+      validator: (_: any, value: string, callback: (err?: Error) => void) => {
         if (value !== resetPwdForm.newPassword) callback(new Error('两次输入密码不一致'))
         else callback()
       },

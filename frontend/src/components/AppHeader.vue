@@ -85,7 +85,7 @@ const pwdRules = {
   confirmPassword: [
     { required: true, message: '请确认新密码', trigger: 'blur' },
     {
-      validator: (_: any, value: string, callback: Function) => {
+      validator: (_: any, value: string, callback: (err?: Error) => void) => {
         if (value !== pwdForm.newPassword) callback(new Error('两次输入密码不一致'))
         else callback()
       },
