@@ -1,0 +1,99 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # ============================================================
+  # 后端 NuGet 包（.NET 10 + EF Core 9）
+  # ============================================================
+  - package-ecosystem: nuget
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: Asia/Shanghai
+    # 分组：避免 PR 太多
+    groups:
+      aspnetcore:
+        patterns:
+          - "Microsoft.AspNetCore*"
+        update-types:
+          - minor
+          - patch
+      entityframework:
+        patterns:
+          - "Microsoft.EntityFrameworkCore*"
+          - "Npgsql.EntityFrameworkCore*"
+        update-types:
+          - minor
+          - patch
+    # 忽略：框架自带的包不要乱升（除非换 SDK 版本）
+    ignore:
+      - dependency-name: "Microsoft.AspNetCore.App"
+      - dependency-name: "Microsoft.NETCore.App"
+    commit-message:
+      prefix: "deps(nuget)"
+    # 可选：为 PR 打标签，方便筛选
+    labels:
+      - "dependencies"
+      - ".NET"
+
+  # ============================================================
+  # 前端 npm 包（Vue 3 + Vite + Element Plus）
+  # ============================================================
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: Asia/Shanghai
+    # 分组：将相关包合并到一个 PR
+    groups:
+      element-plus:
+        patterns:
+          - "element-plus"
+          - "@element-plus/*"
+        update-types:
+          - minor
+          - patch
+      vue-ecosystem:
+        patterns:
+          - "vue"
+          - "vue-router"
+          - "pinia"
+        update-types:
+          - minor
+          - patch
+      vite-ecosystem:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "vitest"
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: "deps(npm)"
+    labels:
+      - "dependencies"
+      - "Vue"
+
+  # ============================================================
+  # GitHub Actions（CI/CD 脚本）
+  # ============================================================
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: Asia/Shanghai
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "ci"
+      - "github-actions"
