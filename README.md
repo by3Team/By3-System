@@ -176,43 +176,6 @@ docker compose up -d
 
 新增功能时，在该目录下添加同名 Markdown 文件，并在首页功能列表中配置对应条目即可。
 
-## 安全工具链
-
-本地开发推荐安装 VS Code 插件（已写入 `.vscode/extensions.json`）：
-
-- **SonarLint** (`SonarSource.sonarlint-vscode`) — 静态代码质量与安全规则
-- **Snyk** (`snyk-security.snyk-vulnerability-scanner`) — 依赖漏洞扫描
-
-### 提交前扫描
-
-提交前自动运行 Semgrep：
-
-```bash
-# 启用仓库提交前钩子（如当前目录不是 git 仓库，需先 git init）
-git config core.hooksPath .githooks
-```
-
-> `.githooks/pre-commit` 已内置 `semgrep --config=auto .`。如果本地未安装 semgrep，钩子会跳过并提示安装。
-
-### 本地手动扫描
-
-不推送到 GitHub 也可以在本地跑完整扫描：
-
-```bash
-# Linux / macOS / Git Bash
-./scripts/security-scan.sh
-
-# Windows CMD / PowerShell
-scripts\security-scan.bat
-```
-
-该脚本会依次运行 `semgrep --config=auto .` 和 `trivy fs .`（仅 HIGH/CRITICAL）。
-如果工具未安装，脚本会给出安装提示，不会报错退出。
-
-### CI 扫描
-
-`.github/workflows/ci.yml` 的 `security` job 会在推送 / Pull Request 时自动执行 `trivy fs .`，仅对 **HIGH / CRITICAL** 级别漏洞失败。
-
 ## 文档
 
 - [数据库设计](docs/database-schema.md)
