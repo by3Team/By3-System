@@ -24,7 +24,7 @@ jobs:
         run: dotnet build backend/By3.slnx --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test backend/By3.Tests --no-build --verbosity normal
+        run: dotnet test backend/By3.Tests --configuration Release --verbosity normal
 
   frontend:
     runs-on: ubuntu-24.04
