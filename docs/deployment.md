@@ -64,7 +64,7 @@ curl http://localhost
 ### 4. 默认账号
 
 - 用户名：`admin`
-- 密码：`admin123`
+- 密码：`Demo123!`
 
 > ⚠️ 首次登录后请立即修改密码。
 

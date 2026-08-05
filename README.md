@@ -127,7 +127,7 @@ docker compose up -d
 ## 默认账号
 
 - 用户名：`admin`
-- 密码：`admin123`
+- 密码：`Demo123!`
 
 ## 项目结构
 

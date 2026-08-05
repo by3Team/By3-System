@@ -20,7 +20,7 @@
           </el-form-item>
         </el-form>
         <div class="login-tips">
-          <p>默认账号：admin / admin123</p>
+          <p>默认账号：admin / Demo123!</p>
         </div>
       </div>
       <div class="login-footer">
@@ -47,7 +47,7 @@ const dictStore = useDictStore()
 const formRef = ref()
 const loading = ref(false)
 
-const form = reactive({ userName: 'admin', password: 'admin123' })
+const form = reactive({ userName: 'admin', password: 'Demo123!' })
 const rules = {
   userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
