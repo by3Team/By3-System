@@ -5,7 +5,7 @@
 ## 前置条件
 
 1. 启动后端：`cd backend && dotnet run --project By3.Api`
-2. 获取管理员 Token：`POST /api/v1/auth/login` (admin/admin123)
+2. 获取管理员 Token：`POST /api/v1/auth/login` (admin/Demo123!)
 3. 创建普通测试用户并获取其 Token
 
 ## 测试用例
@@ -65,7 +65,7 @@ curl http://localhost:5000/api/v1/users \
 TOKEN=$(curl -s -X POST http://localhost:5000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: test-blacklist-1" \
-  -d '{"userName":"admin","password":"admin123"}' | jq -r '.data.token')
+  -d '{"userName":"admin","password":"Demo123!"}' | jq -r '.data.token')
 
 # 登出（Token加入黑名单）
 curl -X POST http://localhost:5000/api/v1/auth/logout \

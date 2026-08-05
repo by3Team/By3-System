@@ -145,7 +145,7 @@ ALTER TABLE by3_sysuser RENAME CONSTRAINT "PK_by3sysuser" TO "PK_by3_sysuser";
 
 默认账户：
 
-- 超级管理员：`admin` / `admin123`
+- 超级管理员：`admin` / `Demo123!`
 - 默认角色：超级管理员
 - 默认菜单：系统管理、文件管理、邮件管理、日志管理、系统设置、任务管理、对外 API 及其子菜单
 
