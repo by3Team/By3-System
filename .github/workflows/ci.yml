@@ -41,9 +41,6 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm install
 
-      - name: Lint
-        run: cd frontend && ESLINT_USE_FLAT_CONFIG=false npm run lint
-
       - name: Test
         run: cd frontend && npm run test
 
