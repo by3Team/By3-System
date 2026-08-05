@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@6bd8b7f7774af54e05833fcc91d4846326193e29 # v4.3.1
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build Backend
+        run: |
+          cd backend
+          dotnet restore By3.slnx
+          dotnet build By3.slnx -c Release --no-restore
+          dotnet publish By3.Api/By3.Api.csproj -c Release -o ./publish /p:UseAppHost=false
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Package Backend
+        run: |
+          cd backend/publish
+          tar -czf ../../by3-api-${{ github.ref_name }}-linux-x64.tar.gz .
+
+      - name: Package Frontend
+        run: |
+          tar -czf by3-frontend-${{ github.ref_name }}.tar.gz -C frontend/dist .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
+        with:
+          generate_release_notes: true
+          files: |
+            by3-api-${{ github.ref_name }}-linux-x64.tar.gz
+            by3-frontend-${{ github.ref_name }}.tar.gz
