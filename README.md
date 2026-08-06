@@ -19,6 +19,9 @@
 - Element Plus
 - Pinia
 - Vue Router 4
+- ECharts
+- WangEditor（富文本编辑器）
+- DOMPurify（HTML 净化）
 - Vitest
 
 ## 系统架构
@@ -52,41 +55,19 @@
 | 后端 API | `http://localhost:5000` | Kestrel / launchSettings http profile |
 | Swagger UI | `http://localhost:5000/swagger` | API 文档 |
 
-### 环境变量
+### 配置
 
-复制 `.env.example` 为 `.env`，或直接在 shell 中设置：
-
-```bash
-# Linux/macOS
-export ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=by3_dev;Username=postgres;Password=your_password"
-export Jwt__Key="your-super-secret-key-at-least-32-bytes-long!"
-export DataProtection__EncryptionKey="your-32-bytes-encryption-key!"
-export FileStorage__UploadPath="./uploads"
-export Jobs__UserSeed__DefaultPassword="Demo123!"
-export Cors__AllowedOrigins="http://localhost:5175"
-
-# Windows PowerShell
-$env:ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=by3_dev;Username=postgres;Password=your_password"
-$env:Jwt__Key="your-super-secret-key-at-least-32-bytes-long!"
-$env:DataProtection__EncryptionKey="your-32-bytes-encryption-key!"
-$env:FileStorage__UploadPath="./uploads"
-$env:Jobs__UserSeed__DefaultPassword="Demo123!"
-$env:Cors__AllowedOrigins="http://localhost:5175"
-```
+所有配置集中在 `backend/By3.Api/appsettings.json` 中。如需覆盖默认值（如数据库连接、JWT Key），可直接修改该文件，或通过环境变量覆盖（环境变量优先级更高）。
 
 ### 数据库初始化
 
-本项目采用手动 SQL 脚本管理数据库结构（不使用 EF Core 自动迁移）。启动后端前，请先创建数据库并导入初始表结构：
+应用首次启动时**自动创建数据库和表结构**，无需手动执行 SQL 脚本。只需确保 PostgreSQL 已运行且 `appsettings.json` 中的连接字符串正确。
 
-```bash
-# 1. 创建数据库（以 PostgreSQL 为例）
-createdb -h localhost -p 5432 -U postgres by3_dev
+启动后自动执行：
+1. 创建数据库和表结构（如不存在）
+2. 插入种子数据：管理员、角色、菜单、部门、岗位、字典、邮件模板、对外 API 接口等
 
-# 2. 导入初始表结构
-psql -h localhost -p 5432 -U postgres -d by3_dev -f database/migrations/V001__init_schema.sql
-```
-
-Windows 可使用 pgAdmin 或 psql 命令行完成同等操作。导入完成后，启动后端时会自动初始化种子数据（菜单、角色、字典、默认管理员等）。
+> 手动 SQL 脚本 `database/migrations/V001__init_schema.sql` 仍可用于手动建表（含完整字段注释），但通常不需要。
 
 ### 启动后端
 
@@ -106,7 +87,6 @@ start-backend.bat
 
 ```bash
 cd frontend
-cp .env.example .env.development
 npm install
 npm run dev
 ```
@@ -120,7 +100,6 @@ start-frontend.bat
 ### Docker Compose 启动
 
 ```bash
-cp .env.example .env
 docker compose up -d
 ```
 

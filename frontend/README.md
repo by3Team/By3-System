@@ -11,7 +11,10 @@
 - **Pinia**：状态管理
 - **Vue Router**：前端路由
 - **Axios**：HTTP 请求
+- **ECharts**：图表可视化
+- **WangEditor**：富文本编辑器
 - **Marked**：Markdown 渲染
+- **DOMPurify**：HTML 净化（防 XSS）
 
 ## 目录结构
 
@@ -30,6 +33,7 @@ frontend/
 │   │   ├── TagsView.vue    # 标签页
 │   │   ├── ThemeSettings.vue # 主题设置
 │   │   ├── MenuItem.vue    # 菜单项递归组件
+│   │   ├── RichTextEditor.vue # 富文本编辑器（WangEditor）
 │   │   └── upload/         # 上传组件
 │   ├── constants/          # 全局常量
 │   ├── directives/         # 自定义指令（如权限指令）
@@ -49,13 +53,23 @@ frontend/
 │   │   └── ...
 │   ├── App.vue
 │   └── main.ts
-├── .env.example            # 环境变量示例
-├── .env.development        # 开发环境配置
-├── .env.production         # 生产环境配置
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-└── README.md
+├── .env.example            # 环境变量模板，给开发者参考
+├── .env.development        # 开发环境变量（Vite dev server 用）
+├── .env.production         # 生产构建时读取的环境变量
+├── .eslintrc.cjs           # ESLint 代码检查规则配置
+├── .gitignore              # Git 忽略规则（node_modules、dist 等）
+├── .prettierrc             # Prettier 代码格式化规则
+├── .prettierignore         # Prettier 忽略的文件（dist、node_modules）
+├── Dockerfile              # 前端容器化构建镜像
+├── index.html              # Vite 入口 HTML，SPA 挂载点
+├── package.json            # 项目依赖和脚本定义
+├── package-lock.json       # 依赖版本锁定文件
+├── tsconfig.json           # TypeScript 总配置（引用下面两个子配置）
+├── tsconfig.app.json       # 应用代码 TS 配置（src/ 下的代码）
+├── tsconfig.node.json      # Node 环境 TS 配置（vite.config.ts 等）
+├── vite.config.ts          # Vite 构建配置（代理、别名、分包策略）
+├── vitest.config.ts        # Vitest 单元测试配置
+└── README.md               # 本说明文件
 ```
 
 ## 环境变量
