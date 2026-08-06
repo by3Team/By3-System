@@ -26,12 +26,18 @@ public class AuditLogFilter : IAsyncActionFilter
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<AuditLogFilter> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuditLogFilter"/> class.
+    /// </summary>
     public AuditLogFilter(IServiceScopeFactory scopeFactory, ILogger<AuditLogFilter> logger)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
+    /// <summary>
+    /// 在 Action 执行前后捕获请求与响应信息，异步写入审计日志。
+    /// </summary>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();

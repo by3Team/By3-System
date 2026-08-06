@@ -19,7 +19,14 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class CreateDictTypeDto
 {
+    /// <summary>
+    /// 字典名称
+    /// </summary>
     public string DictName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 字典类型
+    /// </summary>
     public string DictType { get; set; } = string.Empty;
 }
 
@@ -28,9 +35,24 @@ public class CreateDictTypeDto
 /// </summary>
 public class UpdateDictTypeDto
 {
+    /// <summary>
+    /// 字典类型ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 字典名称
+    /// </summary>
     public string? DictName { get; set; }
+
+    /// <summary>
+    /// 字典类型
+    /// </summary>
     public string? DictType { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
 }
 
@@ -39,10 +61,29 @@ public class UpdateDictTypeDto
 /// </summary>
 public class DictTypeListDto
 {
+    /// <summary>
+    /// 字典类型ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 字典名称
+    /// </summary>
     public string DictName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 字典类型
+    /// </summary>
     public string DictType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 }
 
@@ -51,11 +92,34 @@ public class DictTypeListDto
 /// </summary>
 public class CreateDictDataDto
 {
+    /// <summary>
+    /// 字典类型ID
+    /// </summary>
     public Guid DictTypeId { get; set; }
+
+    /// <summary>
+    /// 字典标签
+    /// </summary>
     public string DictLabel { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 字典值
+    /// </summary>
     public string DictValue { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 备注
+    /// </summary>
     public string? Remark { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int SortOrder { get; set; } = 0;
+
+    /// <summary>
+    /// 是否默认
+    /// </summary>
     public bool IsDefault { get; set; } = false;
 }
 
@@ -64,13 +128,44 @@ public class CreateDictDataDto
 /// </summary>
 public class UpdateDictDataDto
 {
+    /// <summary>
+    /// 字典数据ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 字典类型ID
+    /// </summary>
     public Guid? DictTypeId { get; set; }
+
+    /// <summary>
+    /// 字典标签
+    /// </summary>
     public string? DictLabel { get; set; }
+
+    /// <summary>
+    /// 字典值
+    /// </summary>
     public string? DictValue { get; set; }
+
+    /// <summary>
+    /// 备注
+    /// </summary>
     public string? Remark { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int? SortOrder { get; set; }
+
+    /// <summary>
+    /// 是否默认
+    /// </summary>
     public bool? IsDefault { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
 }
 
@@ -79,13 +174,48 @@ public class UpdateDictDataDto
 /// </summary>
 public class DictDataListDto
 {
+    /// <summary>
+    /// 字典数据ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 字典类型ID
+    /// </summary>
     public Guid DictTypeId { get; set; }
+
+    /// <summary>
+    /// 字典标签
+    /// </summary>
     public string DictLabel { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 字典值
+    /// </summary>
     public string DictValue { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 备注
+    /// </summary>
     public string? Remark { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int SortOrder { get; set; }
+
+    /// <summary>
+    /// 是否默认
+    /// </summary>
     public bool IsDefault { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 }

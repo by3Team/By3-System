@@ -74,6 +74,20 @@ $env:Jobs__UserSeed__DefaultPassword="Demo123!"
 $env:Cors__AllowedOrigins="http://localhost:5175"
 ```
 
+### 数据库初始化
+
+本项目采用手动 SQL 脚本管理数据库结构（不使用 EF Core 自动迁移）。启动后端前，请先创建数据库并导入初始表结构：
+
+```bash
+# 1. 创建数据库（以 PostgreSQL 为例）
+createdb -h localhost -p 5432 -U postgres by3_dev
+
+# 2. 导入初始表结构
+psql -h localhost -p 5432 -U postgres -d by3_dev -f database/migrations/V001__init_schema.sql
+```
+
+Windows 可使用 pgAdmin 或 psql 命令行完成同等操作。导入完成后，启动后端时会自动初始化种子数据（菜单、角色、字典、默认管理员等）。
+
 ### 启动后端
 
 ```bash
@@ -113,7 +127,7 @@ docker compose up -d
 ## 默认账号
 
 - 用户名：`admin`
-- 密码：`admin123`
+- 密码：`Demo123!`
 
 ## 项目结构
 

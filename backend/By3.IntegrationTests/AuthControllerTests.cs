@@ -22,7 +22,7 @@ public class AuthControllerTests : IntegrationTestBase
     [Fact]
     public async Task Login_With_Valid_Credentials_Should_Return_Token()
     {
-        var response = await PostAsJsonAsync("/api/v1/auth/login", new { userName = "admin", password = "admin123" });
+        var response = await PostAsJsonAsync("/api/v1/auth/login", new { userName = "admin", password = "Demo123!" });
         var result = await DeserializeAsync<TokenResponse>(response);
         Assert.False(string.IsNullOrEmpty(result!.Token));
     }

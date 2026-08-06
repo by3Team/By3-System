@@ -19,8 +19,19 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class PackageInfoDto
 {
+    /// <summary>
+    /// 包名称
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 包版本号
+    /// </summary>
     public string Version { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 许可证类型
+    /// </summary>
     public string License { get; set; } = string.Empty;
 }
 
@@ -29,7 +40,14 @@ public class PackageInfoDto
 /// </summary>
 public class ProjectPackagesDto
 {
+    /// <summary>
+    /// 项目名称
+    /// </summary>
     public string Project { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 依赖包列表
+    /// </summary>
     public List<PackageInfoDto> Packages { get; set; } = new();
 }
 
@@ -38,7 +56,14 @@ public class ProjectPackagesDto
 /// </summary>
 public class FrontendPackagesDto
 {
+    /// <summary>
+    /// 生产依赖包列表
+    /// </summary>
     public List<PackageInfoDto> Dependencies { get; set; } = new();
+
+    /// <summary>
+    /// 开发依赖包列表
+    /// </summary>
     public List<PackageInfoDto> DevDependencies { get; set; } = new();
 }
 
@@ -47,6 +72,13 @@ public class FrontendPackagesDto
 /// </summary>
 public class SystemPackagesDto
 {
+    /// <summary>
+    /// 后端项目依赖包列表
+    /// </summary>
     public List<ProjectPackagesDto> Backend { get; set; } = new();
+
+    /// <summary>
+    /// 前端依赖包信息
+    /// </summary>
     public FrontendPackagesDto Frontend { get; set; } = new();
 }

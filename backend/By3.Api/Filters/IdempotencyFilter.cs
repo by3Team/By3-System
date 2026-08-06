@@ -26,12 +26,18 @@ public class IdempotencyFilter : IAsyncActionFilter
     private readonly ILogger<IdempotencyFilter> _logger;
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IdempotencyFilter"/> class.
+    /// </summary>
     public IdempotencyFilter(IMemoryCache cache, ILogger<IdempotencyFilter> logger)
     {
         _cache = cache;
         _logger = logger;
     }
 
+    /// <summary>
+    /// 在 Action 执行前检查幂等性 Key，防止重复提交。
+    /// </summary>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         if (HttpMethods.IsGet(context.HttpContext.Request.Method) ||

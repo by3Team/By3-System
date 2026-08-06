@@ -26,12 +26,30 @@
 - CONTRIBUTING.md：贡献指南
 - SECURITY.md：安全策略
 - LICENSE：Apache 2.0 许可证
+- 后端所有公开方法和 DTO 字段添加 XML 文档注释，消除 StyleCop 警告
+- `ExternalApiAuthOptions`：对外 API 认证参数可配置化（限流窗口、幂等时长、失败封禁）
+- `DbSeeder` 新增部门/岗位测试数据（13 个部门、12 个岗位）
+- `DbSeeder` 新增 Token 通知邮件模板（`external_api_token_notify`）
+- `DbSeeder` 新增对外 API 接口注册数据（6 条默认路由）
+- `UserListDto` 新增 `RoleIds` 字段，支持编辑用户时角色回显
+- 邮件模板版本号自动生成（v1, v2, v3...），无需手动输入
+- 邮件模板版本编辑弹窗集成富文本编辑器（WangEditor）
+- `RichTextEditor` 组件：基于 WangEditor 的通用富文本编辑器
+- VSCode 调试配置（`.vscode/launch.json`、`tasks.json`）
 
 ### Changed
 - `DbSeeder` 默认管理员密码从配置 `Jobs:UserSeed:DefaultPassword` 读取，不再硬编码
 - `CreateUserValidator` 密码最低长度从6位提升至8位
 - `SysUser` 新增 `PasswordChangedAt` 字段
 - Swagger 配置加载 Service/Repository 的 XML 注释文件
+- 配置集中到 `appsettings.json`，移除 `.env` 文件依赖
+- 数据库启动时自动创建表结构（`EnsureCreatedAsync`），无需手动执行 SQL
+- `ExternalApiAuthenticationMiddleware` 参数从硬编码常量改为配置注入
+- Token 通知邮件从硬编码 HTML 改为模板系统（`SendBatchAsync`）
+- `start-backend.bat` 精简为仅 `dotnet run`，配置在 `appsettings.json` 中
+- TypeScript 降级至 5.7.x（vue-tsc 兼容）
+- `vite.config.ts` 中 `__dirname` 替换为 `import.meta.dirname`
+- `THIRD-PARTY-NOTICES.txt` 补充新增的前端依赖包
 
 ### Security
 - 移除 DbSeeder 中硬编码的默认密码

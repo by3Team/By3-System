@@ -39,6 +39,9 @@ public class PositionService
         }
     }
 
+    /// <summary>
+    /// 分页查询岗位列表。
+    /// </summary>
     public async Task<PageResult<PositionListDto>> GetListAsync(int page, int pageSize, string? keyword)
     {
         var items = await _repo.GetListAsync(page, pageSize, keyword);
@@ -52,12 +55,18 @@ public class PositionService
         };
     }
 
+    /// <summary>
+    /// 根据ID获取岗位详情。
+    /// </summary>
     public async Task<PositionListDto?> GetByIdAsync(Guid id)
     {
         var p = await _repo.GetByIdAsync(id);
         return p == null ? null : MapToDto(p);
     }
 
+    /// <summary>
+    /// 创建岗位。
+    /// </summary>
     public async Task<Guid> CreateAsync(CreatePositionDto dto)
     {
         var position = new SysPosition
@@ -71,6 +80,9 @@ public class PositionService
         return await _repo.CreateAsync(position);
     }
 
+    /// <summary>
+    /// 更新岗位信息。
+    /// </summary>
     public async Task<int> UpdateAsync(UpdatePositionDto dto)
     {
         var position = await _repo.GetByIdAsync(dto.Id);
@@ -86,6 +98,9 @@ public class PositionService
         return await _repo.UpdateAsync(position);
     }
 
+    /// <summary>
+    /// 删除岗位。
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
         => await _repo.DeleteAsync(id);
 

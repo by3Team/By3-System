@@ -323,6 +323,13 @@ body,
   height: 1em;
 }
 
+/* 修复 SVG 图标偶发不渲染：将 path 的 fill 属性强制解析为当前继承色，
+   避免 Chromium 在首次绘制时 currentColor 关键字未解析的渲染问题 */
+.el-menu-item .el-icon svg path,
+.el-sub-menu__title .el-icon svg path {
+  fill: currentColor !important;
+}
+
 /* 子菜单展开箭头：移除多余 padding，保证尺寸正常 */
 .el-sub-menu__icon-arrow {
   margin-right: 0;

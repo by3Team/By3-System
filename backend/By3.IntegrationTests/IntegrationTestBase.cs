@@ -37,7 +37,7 @@ public abstract class IntegrationTestBase : IDisposable
         Client.Dispose();
     }
 
-    protected async Task<string> LoginAsync(string userName = "admin", string password = "admin123")
+    protected async Task<string> LoginAsync(string userName = "admin", string password = "Demo123!")
     {
         if (_token != null) return _token;
 

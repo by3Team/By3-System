@@ -19,11 +19,38 @@ namespace By3.Service.Services;
 
 public interface IFileService
 {
+    /// <summary>
+    /// 上传单个文件。
+    /// </summary>
     Task<FileUploadResultDto> UploadAsync(IFormFile file, string category, string uploadMode, Guid? userId);
+
+    /// <summary>
+    /// 批量上传文件。
+    /// </summary>
     Task<List<FileUploadResultDto>> UploadMultipleAsync(List<IFormFile> files, string category, Guid? userId);
+
+    /// <summary>
+    /// 根据 ID 获取文件记录。
+    /// </summary>
     Task<FileRecordDto?> GetByIdAsync(Guid id);
+
+    /// <summary>
+    /// 分页查询文件记录列表。
+    /// </summary>
     Task<PageResult<FileRecordDto>> GetListAsync(int page, int pageSize, string? keyword, string? category);
+
+    /// <summary>
+    /// 删除文件记录。
+    /// </summary>
     Task<int> DeleteAsync(Guid id);
+
+    /// <summary>
+    /// 获取文件内容流。
+    /// </summary>
     Task<Stream?> GetFileStreamAsync(Guid id);
+
+    /// <summary>
+    /// 导出文件记录为 Excel。
+    /// </summary>
     Task<byte[]> ExportExcelAsync(string? category);
 }

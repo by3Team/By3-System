@@ -16,10 +16,20 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace By3.Api.Authorization;
 
+/// <summary>
+/// 权限授权要求：基于权限标识符的授权策略。
+/// </summary>
 public class PermissionRequirement : IAuthorizationRequirement
 {
+    /// <summary>
+    /// 权限标识符（如 user:list、role:create）。
+    /// </summary>
     public string Permission { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PermissionRequirement"/> class.
+    /// </summary>
+    /// <param name="permission">权限标识符</param>
     public PermissionRequirement(string permission)
     {
         Permission = permission;

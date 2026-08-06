@@ -39,12 +39,18 @@ public class MenuService
         }
     }
 
+    /// <summary>
+    /// 获取所有菜单树形结构。
+    /// </summary>
     public async Task<List<MenuTreeDto>> GetAllAsync()
     {
         var menus = await _repo.GetAllAsync();
         return BuildTree(menus);
     }
 
+    /// <summary>
+    /// 根据ID获取菜单详情。
+    /// </summary>
     public async Task<MenuTreeDto?> GetByIdAsync(Guid id)
     {
         var m = await _repo.GetByIdAsync(id);
@@ -63,6 +69,9 @@ public class MenuService
         };
     }
 
+    /// <summary>
+    /// 创建菜单。
+    /// </summary>
     public async Task<Guid> CreateAsync(CreateMenuDto dto)
     {
         var menu = new SysMenu
@@ -81,6 +90,9 @@ public class MenuService
         return await _repo.CreateAsync(menu);
     }
 
+    /// <summary>
+    /// 更新菜单信息。
+    /// </summary>
     public async Task<int> UpdateAsync(UpdateMenuDto dto)
     {
         var menu = await _repo.GetByIdAsync(dto.Id);
@@ -101,9 +113,15 @@ public class MenuService
         return await _repo.UpdateAsync(menu);
     }
 
+    /// <summary>
+    /// 删除菜单。
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
         => await _repo.DeleteAsync(id);
 
+    /// <summary>
+    /// 获取系统所有权限标识列表。
+    /// </summary>
     public async Task<List<string>> GetAllPermissionsAsync()
         => await _repo.GetAllPermissionsAsync();
 

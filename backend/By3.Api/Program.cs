@@ -153,7 +153,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 // JWT
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrWhiteSpace(jwtKey))
-    throw new InvalidOperationException("Jwt:Key 未配置，请在环境变量或 User Secrets 中设置。");
+    throw new InvalidOperationException("Jwt:Key 未配置，请在 appsettings.json 中设置。");
 if (jwtKey.Length < 32)
     throw new InvalidOperationException("Jwt:Key 长度至少 32 字节。");
 
@@ -218,6 +218,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
+
+// 对外 API 认证配置绑定
+builder.Services.Configure<ExternalApiAuthOptions>(builder.Configuration.GetRequiredSection("ExternalApiAuth"));
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo

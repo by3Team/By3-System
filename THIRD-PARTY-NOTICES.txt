@@ -114,6 +114,31 @@ License: (Apache-2.0 OR MPL-2.0)
 Copyright: Copyright (c) Cure53
 https://github.com/cure53/DOMPurify
 
+Package: @element-plus/icons-vue
+License: MIT
+Copyright: Copyright (c) 2020-present Element Plus
+https://github.com/element-plus/element-plus-icons
+
+Package: uuid
+License: MIT
+Copyright: Copyright (c) 2010-2024 Robert Kieffer and other contributors
+https://github.com/uuidjs/uuid
+
+Package: @wangeditor/editor
+License: MIT
+Copyright: Copyright (c) 2021 wangeditor team
+https://github.com/wangeditor/editor
+
+Package: @wangeditor/editor-for-vue
+License: MIT
+Copyright: Copyright (c) 2021 wangeditor team
+https://github.com/wangeditor/editor-for-vue
+
+Package: @vue/devtools-api
+License: MIT
+Copyright: Copyright (c) 2018-present Guillaume Chau
+https://github.com/vuejs/devtools
+
 ================================================================================
 
 Build & Development Tools

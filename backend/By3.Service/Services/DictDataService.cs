@@ -39,6 +39,9 @@ public class DictDataService
         }
     }
 
+    /// <summary>
+    /// 分页查询字典数据列表
+    /// </summary>
     public async Task<PageResult<DictDataListDto>> GetListAsync(int page, int pageSize, Guid? dictTypeId)
     {
         var items = await _repo.GetListAsync(page, pageSize, dictTypeId);
@@ -52,24 +55,36 @@ public class DictDataService
         };
     }
 
+    /// <summary>
+    /// 根据类型ID获取字典数据列表
+    /// </summary>
     public async Task<List<DictDataListDto>> GetByTypeIdAsync(Guid dictTypeId)
     {
         var items = await _repo.GetByTypeIdAsync(dictTypeId);
         return items.Select(MapToDto).ToList();
     }
 
+    /// <summary>
+    /// 根据类型编码获取字典数据列表
+    /// </summary>
     public async Task<List<DictDataListDto>> GetByTypeCodeAsync(string dictTypeCode)
     {
         var items = await _repo.GetByTypeCodeAsync(dictTypeCode);
         return items.Select(MapToDto).ToList();
     }
 
+    /// <summary>
+    /// 根据ID获取字典数据
+    /// </summary>
     public async Task<DictDataListDto?> GetByIdAsync(Guid id)
     {
         var d = await _repo.GetByIdAsync(id);
         return d == null ? null : MapToDto(d);
     }
 
+    /// <summary>
+    /// 创建字典数据
+    /// </summary>
     public async Task<Guid> CreateAsync(CreateDictDataDto dto)
     {
         var data = new SysDictData
@@ -86,6 +101,9 @@ public class DictDataService
         return await _repo.CreateAsync(data);
     }
 
+    /// <summary>
+    /// 更新字典数据
+    /// </summary>
     public async Task<int> UpdateAsync(UpdateDictDataDto dto)
     {
         var data = await _repo.GetByIdAsync(dto.Id);
@@ -104,6 +122,9 @@ public class DictDataService
         return await _repo.UpdateAsync(data);
     }
 
+    /// <summary>
+    /// 删除字典数据
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
         => await _repo.DeleteAsync(id);
 

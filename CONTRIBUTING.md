@@ -14,16 +14,15 @@
 ```bash
 # 克隆仓库
 git clone <your-fork-url>
-cd rbac-system
+cd By3-System
 
-# 后端
+# 后端（配置项在 backend/By3.Api/appsettings.json 中，首次启动自动建库建表）
 cd backend
 dotnet build By3.slnx
 dotnet run --project By3.Api
 
 # 前端（新终端）
 cd frontend
-cp .env.example .env.development
 npm install
 npm run dev
 ```
@@ -31,9 +30,9 @@ npm run dev
 ## 分支策略
 
 - `main` — 稳定版本，仅通过 PR 合入
-- `develop` — 开发分支，日常开发基于此分支
-- `feature/*` — 功能分支，从 `develop` 创建
-- `fix/*` — 修复分支，从 `develop` 创建
+- `dev` — 开发分支，日常开发基于此分支
+- `feat/*` — 功能分支，从 `dev` 创建
+- `fix/*` — 修复分支，从 `dev` 创建
 
 ## 提交规范
 
@@ -102,9 +101,10 @@ docs(api): 更新 Swagger 注释
 
 ## 数据库变更
 
-项目不使用 EF Core 迁移，数据库结构通过手动 SQL 脚本维护：
+项目启动时通过 EF Core `EnsureCreatedAsync()` 自动创建数据库和表结构，无需手动执行 SQL。
 
-- 脚本位于 `database/migrations/`
+手动 SQL 脚本仍保留在 `database/migrations/` 中，用于参考表结构或手动建表：
+
 - 命名格式：`V{序号}__{描述}.sql`
 - 新增表或字段需同步更新 `docs/database-schema.md`
 

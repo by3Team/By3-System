@@ -15,22 +15,27 @@
 namespace By3.Api.Options;
 
 /// <summary>
-/// 文件上传配置。
+/// 对外 API 签名认证中间件配置。
 /// </summary>
-public class FileUploadOptions
+public class ExternalApiAuthOptions
 {
     /// <summary>
-    /// 最大请求体大小（字节）。
+    /// 限流窗口（秒）。默认 1 秒。
     /// </summary>
-    public long MaxRequestBodySize { get; set; }
+    public int RateWindowSeconds { get; set; } = 1;
 
     /// <summary>
-    /// multipart 请求体长度限制（字节）。
+    /// 幂等 Key 缓存时长（小时）。默认 24 小时。
     /// </summary>
-    public long MultipartBodyLengthLimit { get; set; }
+    public int IdempotencyWindowHours { get; set; } = 24;
 
     /// <summary>
-    /// 表单值长度限制（字节）。
+    /// 连续认证失败最大次数，超过则临时封禁。默认 5 次。
     /// </summary>
-    public int ValueLengthLimit { get; set; }
+    public int MaxConsecutiveFailures { get; set; } = 5;
+
+    /// <summary>
+    /// 失败计数窗口（分钟）。默认 15 分钟。
+    /// </summary>
+    public int FailureWindowMinutes { get; set; } = 15;
 }

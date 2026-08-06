@@ -25,6 +25,9 @@ public class RequestBodyCaptureFilter : IAsyncResourceFilter
 {
     private const int MaxBodyLength = 64 * 1024;
 
+    /// <summary>
+    /// 在资源执行前捕获请求体内容，存入 HttpContext 供审计日志使用。
+    /// </summary>
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
         var request = context.HttpContext.Request;

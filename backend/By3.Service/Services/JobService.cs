@@ -29,6 +29,9 @@ public class JobService
         _jobLogRepo = jobLogRepo;
     }
 
+    /// <summary>
+    /// 分页查询定时任务列表
+    /// </summary>
     public async Task<PageResult<JobDto>> GetListAsync(int page, int pageSize, string? keyword = null, string? isEnabled = null)
     {
         bool? enabled = isEnabled?.ToLowerInvariant() switch
@@ -50,12 +53,18 @@ public class JobService
         };
     }
 
+    /// <summary>
+    /// 根据ID获取定时任务
+    /// </summary>
     public async Task<JobDto?> GetByIdAsync(Guid id)
     {
         var job = await _jobRepo.GetByIdAsync(id);
         return job == null ? null : MapToDto(job);
     }
 
+    /// <summary>
+    /// 创建定时任务
+    /// </summary>
     public async Task<Guid> CreateAsync(JobCreateDto dto)
     {
         var job = new SysJob
@@ -74,6 +83,9 @@ public class JobService
         return await _jobRepo.CreateAsync(job);
     }
 
+    /// <summary>
+    /// 更新定时任务
+    /// </summary>
     public async Task<int> UpdateAsync(Guid id, JobUpdateDto dto)
     {
         var job = await _jobRepo.GetByIdAsync(id);
@@ -91,11 +103,17 @@ public class JobService
         return await _jobRepo.UpdateAsync(job);
     }
 
+    /// <summary>
+    /// 删除定时任务
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
     {
         return await _jobRepo.DeleteAsync(id);
     }
 
+    /// <summary>
+    /// 分页查询任务执行日志
+    /// </summary>
     public async Task<PageResult<JobLogDto>> GetLogsAsync(JobLogQueryDto query)
     {
         var repoQuery = new JobLogQuery

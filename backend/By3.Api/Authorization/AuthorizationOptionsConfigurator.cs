@@ -22,11 +22,17 @@ public class AuthorizationOptionsConfigurator : IConfigureOptions<AuthorizationO
 {
     private readonly IServiceProvider _serviceProvider;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthorizationOptionsConfigurator"/> class.
+    /// </summary>
     public AuthorizationOptionsConfigurator(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
+    /// <summary>
+    /// 从数据库加载权限并注册为授权策略。
+    /// </summary>
     public void Configure(AuthorizationOptions options)
     {
         using var scope = _serviceProvider.CreateScope();

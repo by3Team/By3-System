@@ -39,6 +39,9 @@ public class DictTypeService
         }
     }
 
+    /// <summary>
+    /// 分页查询字典类型列表
+    /// </summary>
     public async Task<PageResult<DictTypeListDto>> GetListAsync(int page, int pageSize, string? keyword)
     {
         var items = await _repo.GetListAsync(page, pageSize, keyword);
@@ -52,12 +55,18 @@ public class DictTypeService
         };
     }
 
+    /// <summary>
+    /// 根据ID获取字典类型
+    /// </summary>
     public async Task<DictTypeListDto?> GetByIdAsync(Guid id)
     {
         var t = await _repo.GetByIdAsync(id);
         return t == null ? null : MapToDto(t);
     }
 
+    /// <summary>
+    /// 创建字典类型
+    /// </summary>
     public async Task<Guid> CreateAsync(CreateDictTypeDto dto)
     {
         var type = new SysDictType
@@ -70,6 +79,9 @@ public class DictTypeService
         return await _repo.CreateAsync(type);
     }
 
+    /// <summary>
+    /// 更新字典类型
+    /// </summary>
     public async Task<int> UpdateAsync(UpdateDictTypeDto dto)
     {
         var type = await _repo.GetByIdAsync(dto.Id);
@@ -84,6 +96,9 @@ public class DictTypeService
         return await _repo.UpdateAsync(type);
     }
 
+    /// <summary>
+    /// 删除字典类型
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
         => await _repo.DeleteAsync(id);
 

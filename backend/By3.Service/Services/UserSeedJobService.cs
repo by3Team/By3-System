@@ -37,6 +37,9 @@ public class UserSeedJobService
         _positionRepo = positionRepo;
     }
 
+    /// <summary>
+    /// 执行用户数据种子任务：批量生成模拟用户并备份现有数据。
+    /// </summary>
     public async Task<JobExecutionResult> ExecuteAsync(Guid jobId, string jobName, string configJson, CancellationToken cancellationToken = default)
     {
         var config = ParseConfig(configJson);
@@ -70,6 +73,9 @@ public class UserSeedJobService
         };
     }
 
+    /// <summary>
+    /// 解析任务配置 JSON，失败则返回默认配置。
+    /// </summary>
     private static UserSeedJobConfig ParseConfig(string configJson)
     {
         if (string.IsNullOrWhiteSpace(configJson))
@@ -88,6 +94,9 @@ public class UserSeedJobService
         }
     }
 
+    /// <summary>
+    /// 解析备份目录路径（相对路径基于应用根目录）。
+    /// </summary>
     private static string ResolveBackupDirectory(string configDirectory)
     {
         if (string.IsNullOrWhiteSpace(configDirectory))
@@ -100,6 +109,9 @@ public class UserSeedJobService
         return Path.GetFullPath(Path.Combine(baseDir, configDirectory));
     }
 
+    /// <summary>
+    /// 生成指定数量的模拟用户数据。
+    /// </summary>
     private static List<SysUser> GenerateMockUsers(int batchSize, List<SysDepartment> departments, List<SysPosition> positions, string defaultPassword)
     {
         var users = new List<SysUser>(batchSize);
@@ -136,6 +148,9 @@ public class UserSeedJobService
         return users;
     }
 
+    /// <summary>
+    /// 将用户列表导出为 CSV 备份文件。
+    /// </summary>
     private static async Task WriteUsersToCsvAsync(List<SysUser> users, string filePath, CancellationToken cancellationToken)
     {
         var sb = new StringBuilder();
@@ -149,6 +164,9 @@ public class UserSeedJobService
         await File.WriteAllTextAsync(filePath, sb.ToString(), new UTF8Encoding(true), cancellationToken);
     }
 
+    /// <summary>
+    /// CSV 字段转义（处理逗号、引号、换行）。
+    /// </summary>
     private static string Escape(string? value)
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;
@@ -158,6 +176,9 @@ public class UserSeedJobService
         return escaped;
     }
 
+    /// <summary>
+    /// 清理旧备份文件，保留指定数量的最新备份。
+    /// </summary>
     private static int CleanupOldBackups(string backupDir, int keepCount)
     {
         if (!Directory.Exists(backupDir)) return 0;

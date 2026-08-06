@@ -23,6 +23,9 @@ public class AuditLogService
     private readonly AuditLogRepository _repo;
     public AuditLogService(AuditLogRepository repo) => _repo = repo;
 
+    /// <summary>
+    /// 分页查询审计日志列表
+    /// </summary>
     public async Task<PageResult<AuditLogListDto>> GetListAsync(int page, int pageSize, AuditLogQueryDto? query = null)
     {
         var repoQuery = query == null ? null : new AuditLogQuery
@@ -45,12 +48,18 @@ public class AuditLogService
         };
     }
 
+    /// <summary>
+    /// 根据ID获取审计日志详情
+    /// </summary>
     public async Task<AuditLogDetailDto?> GetByIdAsync(Guid id)
     {
         var log = await _repo.GetByIdAsync(id);
         return log == null ? null : MapToDetailDto(log);
     }
 
+    /// <summary>
+    /// 创建审计日志
+    /// </summary>
     public async Task CreateAsync(CreateAuditLogDto dto)
     {
         var log = new SysAuditLog
@@ -75,6 +84,9 @@ public class AuditLogService
         await _repo.CreateAsync(log);
     }
 
+    /// <summary>
+    /// 将审计日志实体映射为列表 DTO。
+    /// </summary>
     private static AuditLogListDto MapToListDto(SysAuditLog log) => new()
     {
         Id = log.Id,
@@ -91,6 +103,9 @@ public class AuditLogService
             || !string.IsNullOrWhiteSpace(log.ResponseResult)
     };
 
+    /// <summary>
+    /// 将审计日志实体映射为详情 DTO。
+    /// </summary>
     private static AuditLogDetailDto MapToDetailDto(SysAuditLog log) => new()
     {
         Id = log.Id,
@@ -112,6 +127,9 @@ public class AuditLogService
         CreatedAt = log.CreatedAt
     };
 
+    /// <summary>
+    /// 将 JSON 字符串格式化为易读形式，解析失败则原样返回。
+    /// </summary>
     private static string? SafeJsonPretty(string? json)
     {
         if (string.IsNullOrWhiteSpace(json)) return json;

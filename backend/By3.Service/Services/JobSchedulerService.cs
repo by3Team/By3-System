@@ -26,15 +26,27 @@ public class JobSchedulerService
         _hostedService = hostedService;
     }
 
+    /// <summary>
+    /// 注册或更新定时任务调度。
+    /// </summary>
     public Task ScheduleAsync(JobScheduleDto job, CancellationToken cancellationToken = default)
         => _hostedService.ScheduleJobAsync(MapToEntity(job), cancellationToken);
 
+    /// <summary>
+    /// 移除指定定时任务调度。
+    /// </summary>
     public Task UnscheduleAsync(Guid jobId, string jobGroup, CancellationToken cancellationToken = default)
         => _hostedService.UnscheduleJobAsync(jobId, jobGroup, cancellationToken);
 
+    /// <summary>
+    /// 立即触发指定定时任务执行。
+    /// </summary>
     public Task TriggerAsync(Guid jobId, string jobGroup, CancellationToken cancellationToken = default)
         => _hostedService.TriggerJobAsync(jobId, jobGroup, cancellationToken);
 
+    /// <summary>
+    /// 切换定时任务启用/停用状态。
+    /// </summary>
     public async Task<bool> ToggleAsync(JobScheduleDto job, CancellationToken cancellationToken = default)
     {
         if (job.IsEnabled)
@@ -49,9 +61,15 @@ public class JobSchedulerService
         return true;
     }
 
+    /// <summary>
+    /// 获取指定任务的下次触发时间。
+    /// </summary>
     public Task<DateTimeOffset?> GetNextFireTimeAsync(Guid jobId, string jobGroup, CancellationToken cancellationToken = default)
         => _hostedService.GetNextFireTimeAsync(jobId, jobGroup, cancellationToken);
 
+    /// <summary>
+    /// 根据 Cron 表达式计算下次触发时间。
+    /// </summary>
     public DateTimeOffset? GetNextFireTimeFromCron(string cronExpression)
         => QuartzSchedulerHostedService.GetNextFireTimeFromCron(cronExpression);
 

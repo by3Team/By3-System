@@ -19,14 +19,49 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class CreateUserDto
 {
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string UserName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 密码
+    /// </summary>
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 邮箱
+    /// </summary>
     public string? Email { get; set; }
+
+    /// <summary>
+    /// 手机号
+    /// </summary>
     public string? Phone { get; set; }
+
+    /// <summary>
+    /// 真实姓名
+    /// </summary>
     public string? RealName { get; set; }
+
+    /// <summary>
+    /// 性别
+    /// </summary>
     public string? Gender { get; set; }
+
+    /// <summary>
+    /// 部门ID
+    /// </summary>
     public Guid? DepartmentId { get; set; }
+
+    /// <summary>
+    /// 岗位ID
+    /// </summary>
     public Guid? PositionId { get; set; }
+
+    /// <summary>
+    /// 角色ID列表
+    /// </summary>
     public List<Guid> RoleIds { get; set; } = new();
 }
 
@@ -35,14 +70,49 @@ public class CreateUserDto
 /// </summary>
 public class UpdateUserDto
 {
+    /// <summary>
+    /// 用户ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 邮箱
+    /// </summary>
     public string? Email { get; set; }
+
+    /// <summary>
+    /// 手机号
+    /// </summary>
     public string? Phone { get; set; }
+
+    /// <summary>
+    /// 真实姓名
+    /// </summary>
     public string? RealName { get; set; }
+
+    /// <summary>
+    /// 性别
+    /// </summary>
     public string? Gender { get; set; }
+
+    /// <summary>
+    /// 部门ID
+    /// </summary>
     public Guid? DepartmentId { get; set; }
+
+    /// <summary>
+    /// 岗位ID
+    /// </summary>
     public Guid? PositionId { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
+
+    /// <summary>
+    /// 角色ID列表
+    /// </summary>
     public List<Guid> RoleIds { get; set; } = new();
 }
 
@@ -51,19 +121,79 @@ public class UpdateUserDto
 /// </summary>
 public class UserListDto
 {
+    /// <summary>
+    /// 用户ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string UserName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 邮箱
+    /// </summary>
     public string? Email { get; set; }
+
+    /// <summary>
+    /// 手机号
+    /// </summary>
     public string? Phone { get; set; }
+
+    /// <summary>
+    /// 真实姓名
+    /// </summary>
     public string? RealName { get; set; }
+
+    /// <summary>
+    /// 性别
+    /// </summary>
     public string? Gender { get; set; }
+
+    /// <summary>
+    /// 性别名称
+    /// </summary>
     public string? GenderName { get; set; }
+
+    /// <summary>
+    /// 部门ID
+    /// </summary>
     public Guid? DepartmentId { get; set; }
+
+    /// <summary>
+    /// 部门名称
+    /// </summary>
     public string? DepartmentName { get; set; }
+
+    /// <summary>
+    /// 岗位ID
+    /// </summary>
     public Guid? PositionId { get; set; }
+
+    /// <summary>
+    /// 岗位名称
+    /// </summary>
     public string? PositionName { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// 角色ID列表
+    /// </summary>
+    public List<Guid> RoleIds { get; set; } = new();
+
+    /// <summary>
+    /// 角色名称列表
+    /// </summary>
     public List<string> RoleNames { get; set; } = new();
 }
 
@@ -72,5 +202,8 @@ public class UserListDto
 /// </summary>
 public class ResetPasswordDto
 {
+    /// <summary>
+    /// 新密码
+    /// </summary>
     public string NewPassword { get; set; } = string.Empty;
 }
