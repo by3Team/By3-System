@@ -133,7 +133,7 @@ public class AuthService
     private void RecordLoginFailure(string userName, string failKey, LoginFailInfo existingInfo)
     {
         var now = DateTime.UtcNow;
-        var info = existingInfo.FailCount > 0 && (now - existingInfo.FirstFailAt).TotalMinutes < 5
+        var info = existingInfo != null && existingInfo.FailCount > 0 && (now - existingInfo.FirstFailAt).TotalMinutes < 5
             ? existingInfo
             : new LoginFailInfo();
 
