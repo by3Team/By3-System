@@ -24,12 +24,18 @@ public class GlobalExceptionFilter : IExceptionFilter
     private readonly ILogger<GlobalExceptionFilter> _logger;
     private readonly IHostEnvironment _env;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GlobalExceptionFilter"/> class.
+    /// </summary>
     public GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger, IHostEnvironment env)
     {
         _logger = logger;
         _env = env;
     }
 
+    /// <summary>
+    /// 捕获未处理异常并返回统一的错误响应。
+    /// </summary>
     public void OnException(ExceptionContext context)
     {
         var request = context.HttpContext.Request;

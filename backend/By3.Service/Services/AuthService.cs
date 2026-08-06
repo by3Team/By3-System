@@ -44,6 +44,9 @@ public class AuthService
         _config = config;
     }
 
+    /// <summary>
+    /// 用户登录，验证账号密码并返回令牌。
+    /// </summary>
     public async Task<LoginResultDto?> LoginAsync(LoginDto dto, string? ip)
     {
         var user = await _userRepo.GetByUserNameAsync(dto.UserName);
@@ -124,6 +127,9 @@ public class AuthService
         };
     }
 
+    /// <summary>
+    /// 记录登录失败次数，连续失败5次则锁定15分钟。
+    /// </summary>
     private void RecordLoginFailure(string userName, string failKey, LoginFailInfo existingInfo)
     {
         var now = DateTime.UtcNow;
@@ -146,6 +152,9 @@ public class AuthService
         }
     }
 
+    /// <summary>
+    /// 使用刷新令牌获取新的访问令牌。
+    /// </summary>
     public async Task<LoginResultDto?> RefreshTokenAsync(string refreshToken)
     {
         var principal = await ValidateRefreshToken(refreshToken);
@@ -182,6 +191,9 @@ public class AuthService
         };
     }
 
+    /// <summary>
+    /// 获取用户的权限标识列表。
+    /// </summary>
     public async Task<List<string>> GetUserPermissionsAsync(Guid userId)
     {
         string cacheKey = $"user_permissions_{userId}";
@@ -195,6 +207,9 @@ public class AuthService
         return perms;
     }
 
+    /// <summary>
+    /// 修改用户密码。
+    /// </summary>
     public async Task<bool> ChangePasswordAsync(Guid userId, string oldPassword, string newPassword)
     {
         var user = await _userRepo.GetByIdAsync(userId);
@@ -213,6 +228,9 @@ public class AuthService
         return true;
     }
 
+    /// <summary>
+    /// 获取用户的菜单列表（含缓存）。
+    /// </summary>
     internal async Task<List<SysMenu>> GetUserMenusAsync(Guid userId)
     {
         string cacheKey = $"user_menus_{userId}";
@@ -226,18 +244,27 @@ public class AuthService
         return menus;
     }
 
+    /// <summary>
+    /// 获取用户的菜单树形结构。
+    /// </summary>
     public async Task<List<MenuTreeDto>> GetUserMenusWithTreeAsync(Guid userId)
     {
         var menus = await GetUserMenusAsync(userId);
         return BuildMenuTree(menus);
     }
 
+    /// <summary>
+    /// 清除指定用户的缓存数据。
+    /// </summary>
     public void ClearUserCache(Guid userId)
     {
         _cache.Remove($"user_permissions_{userId}");
         _cache.Remove($"user_menus_{userId}");
     }
 
+    /// <summary>
+    /// 将令牌加入黑名单。
+    /// </summary>
     public void BlacklistToken(string token)
     {
         var jti = GetTokenJti(token);
@@ -250,12 +277,18 @@ public class AuthService
         }
     }
 
+    /// <summary>
+    /// 检查令牌是否已被加入黑名单。
+    /// </summary>
     public bool IsTokenBlacklisted(string token)
     {
         var jti = GetTokenJti(token);
         return !string.IsNullOrEmpty(jti) && _cache.TryGetValue($"token_blacklist_{jti}", out _);
     }
 
+    /// <summary>
+    /// 生成 JWT 访问令牌。
+    /// </summary>
     private string GenerateAccessToken(SysUser user, List<Guid> roleIds, List<string> permissions, out DateTime expiresAt)
     {
         var jwtKey = _config["Jwt:Key"];
@@ -291,6 +324,9 @@ public class AuthService
         return handler.CreateToken(descriptor);
     }
 
+    /// <summary>
+    /// 生成 JWT 刷新令牌。
+    /// </summary>
     private string GenerateRefreshToken(Guid userId)
     {
         var jwtKey = _config["Jwt:Key"];
@@ -320,6 +356,9 @@ public class AuthService
         return handler.CreateToken(descriptor);
     }
 
+    /// <summary>
+    /// 验证刷新令牌的有效性（签名、过期、类型、黑名单）。
+    /// </summary>
     private async Task<ClaimsPrincipal?> ValidateRefreshToken(string refreshToken)
     {
         try
@@ -357,6 +396,9 @@ public class AuthService
         }
     }
 
+    /// <summary>
+    /// 从令牌中提取 JTI（唯一标识）。
+    /// </summary>
     private string? GetTokenJti(string? token)
     {
         if (string.IsNullOrEmpty(token)) return null;
@@ -372,6 +414,9 @@ public class AuthService
         }
     }
 
+    /// <summary>
+    /// 从令牌中提取过期时间。
+    /// </summary>
     private DateTime? GetTokenExpiry(string? token)
     {
         if (string.IsNullOrEmpty(token)) return null;
@@ -387,6 +432,9 @@ public class AuthService
         }
     }
 
+    /// <summary>
+    /// 将扁平菜单列表构建为树形结构。
+    /// </summary>
     private static List<MenuTreeDto> BuildMenuTree(List<SysMenu> menus)
     {
         var dict = menus.ToDictionary(m => m.Id, m => new MenuTreeDto

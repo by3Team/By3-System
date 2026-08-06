@@ -43,7 +43,16 @@ public static class DatabaseInitializer
         }
         else
         {
-            logger.LogInformation("Database:AutoMigrate 为 false，跳过自动迁移。");
+            // 自动创建数据库和表结构（幂等：已存在则跳过）
+            var created = await db.Database.EnsureCreatedAsync();
+            if (created)
+            {
+                logger.LogInformation("数据库及表结构已自动创建。");
+            }
+            else
+            {
+                logger.LogInformation("数据库已存在，跳过建表。");
+            }
         }
 
         if (autoSeed)
@@ -65,3 +74,4 @@ public static class DatabaseInitializer
         }
     }
 }
+

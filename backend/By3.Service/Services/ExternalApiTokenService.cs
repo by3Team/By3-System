@@ -18,6 +18,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using By3.Repository.Data;
 using By3.Repository.Entities;
 using By3.Repository.Repositories;
 using By3.Service.DTOs;
@@ -67,6 +68,9 @@ public class ExternalApiTokenService
     private string? ClientIp
         => _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 
+    /// <summary>
+    /// 分页查询对外 API Token 列表。
+    /// </summary>
     public async Task<PageResult<ExternalApiTokenDto>> GetListAsync(int page, int pageSize, string? keyword = null, string? isEnabled = null, bool? includeDeleted = null)
     {
         var includeDeletedValue = includeDeleted ?? false;
@@ -115,6 +119,9 @@ public class ExternalApiTokenService
         return Encoding.UTF8.GetBytes(string.Join("\r\n", lines));
     }
 
+    /// <summary>
+    /// 解析启用状态字符串为布尔值。
+    /// </summary>
     private static bool? ParseIsEnabled(string? isEnabled)
     {
         return isEnabled?.ToLowerInvariant() switch
@@ -125,6 +132,9 @@ public class ExternalApiTokenService
         };
     }
 
+    /// <summary>
+    /// 格式化允许访问的接口名称用于 CSV 导出。
+    /// </summary>
     private static string FormatAllowedApisForExport(ExternalApiTokenDto dto, Dictionary<Guid, string> apiMap)
     {
         if (dto.AllowedApiIds == null || dto.AllowedApiIds.Count == 0) return "全部接口";
@@ -134,12 +144,18 @@ public class ExternalApiTokenService
         return string.Join("、", names);
     }
 
+    /// <summary>
+    /// 格式化 Token 状态用于 CSV 导出。
+    /// </summary>
     private static string FormatStatusForExport(ExternalApiTokenDto dto)
     {
         if (dto.IsDeleted) return "已删除";
         return dto.IsEnabled ? "启用" : "停用";
     }
 
+    /// <summary>
+    /// CSV 字段转义（处理逗号、引号、换行）。
+    /// </summary>
     private static string EscapeCsv(string? value)
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;
@@ -149,6 +165,9 @@ public class ExternalApiTokenService
         return text;
     }
 
+    /// <summary>
+    /// 根据 ID 获取 Token 详情（敏感字段脱敏）。
+    /// </summary>
     public async Task<ExternalApiTokenDto?> GetByIdAsync(Guid id, bool includeDeleted = false)
     {
         var token = await _tokenRepo.GetByIdAsync(id, includeDeleted);
@@ -177,6 +196,9 @@ public class ExternalApiTokenService
         return dto;
     }
 
+    /// <summary>
+    /// 创建对外 API Token。
+    /// </summary>
     public async Task<ExternalApiTokenDto> CreateAsync(CreateExternalApiTokenDto dto)
     {
         var expireType = NormalizeExpireType(dto.ExpireType);
@@ -203,6 +225,9 @@ public class ExternalApiTokenService
         return MapToDto(token);
     }
 
+    /// <summary>
+    /// 更新 Token 信息。
+    /// </summary>
     public async Task<int> UpdateAsync(Guid id, UpdateExternalApiTokenDto dto)
     {
         var token = await _tokenRepo.GetByIdAsync(id, includeDeleted: true);
@@ -227,6 +252,9 @@ public class ExternalApiTokenService
         return result;
     }
 
+    /// <summary>
+    /// 逻辑删除 Token。
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
     {
         var token = await _tokenRepo.GetByIdAsync(id, includeDeleted: true);
@@ -244,6 +272,9 @@ public class ExternalApiTokenService
         return result;
     }
 
+    /// <summary>
+    /// 重新生成 Token 的 ApiKey/ApiSecret，旧 Key 可设缓冲期。
+    /// </summary>
     public async Task<ExternalApiTokenDto?> RegenerateAsync(Guid id, RegenerateExternalApiTokenDto dto)
     {
         var token = await _tokenRepo.GetByIdAsync(id, includeDeleted: true);
@@ -307,6 +338,9 @@ public class ExternalApiTokenService
         return MapToDto(token);
     }
 
+    /// <summary>
+    /// 后台异步发送 Token 重新生成的邮件通知。
+    /// </summary>
     private async Task SendRegenerateNotificationAsync(SysExternalApiToken token, Guid? operatorId, string graceRemark)
     {
         try
@@ -332,27 +366,30 @@ public class ExternalApiTokenService
             if (contactEmails.Count == 0 && string.IsNullOrWhiteSpace(adminEmail))
                 return;
 
-            var subject = "对外 API Token 已重新生成";
-            var body = $@"<p>应用名称：<strong>{token.AppName}</strong></p>
-<p>新 ApiKey：{token.ApiKey}</p>
-<p>新 ApiSecret：{token.ApiSecret}</p>
-<p>有效期类型：{token.ExpireType}</p>
-<p>状态：{graceRemark}</p>
-<p>操作时间：{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC</p>";
-
-            var ccList = string.IsNullOrWhiteSpace(adminEmail) ? null : new List<string> { adminEmail };
-
-            if (contactEmails.Count > 0)
+            var variables = new Dictionary<string, string>
             {
-                foreach (var contact in contactEmails)
+                ["AppName"] = token.AppName,
+                ["ApiKey"] = token.ApiKey,
+                ["ApiSecret"] = token.ApiSecret,
+                ["ExpireType"] = token.ExpireType,
+                ["GraceRemark"] = graceRemark,
+                ["OperateTime"] = $"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC"
+            };
+
+            var allRecipients = new List<string>(contactEmails);
+            if (!string.IsNullOrWhiteSpace(adminEmail) && !allRecipients.Contains(adminEmail, StringComparer.OrdinalIgnoreCase))
+                allRecipients.Add(adminEmail);
+
+            foreach (var address in allRecipients)
+            {
+                await emailService.SendBatchAsync(new SendEmailDto
                 {
-                    var finalCc = ccList?.Where(c => !c.Equals(contact, StringComparison.OrdinalIgnoreCase)).ToList();
-                    await emailService.SendRawAsync(contact, finalCc, subject, body, "html");
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(adminEmail))
-            {
-                await emailService.SendRawAsync(adminEmail, null, subject, body, "html");
+                    TemplateId = DbSeeder.TokenNotifyTemplateId,
+                    Version = "v1",
+                    ToAddresses = new List<string> { address },
+                    CcAddresses = new List<string>(),
+                    Variables = variables
+                });
             }
         }
         catch
@@ -361,6 +398,9 @@ public class ExternalApiTokenService
         }
     }
 
+    /// <summary>
+    /// 分页查询 Token 历史凭证记录。
+    /// </summary>
     public async Task<PageResult<ExternalApiTokenHistoryDto>> GetHistoryAsync(Guid tokenId, int page, int pageSize, string? status = null)
     {
         var items = await _historyRepo.GetListAsync(tokenId, page, pageSize, status);
@@ -375,11 +415,17 @@ public class ExternalApiTokenService
         };
     }
 
+    /// <summary>
+    /// 立即使指定历史凭证失效。
+    /// </summary>
     public async Task<int> InvalidateHistoryAsync(Guid historyId)
     {
         return await _historyRepo.InvalidateAsync(historyId, CurrentUserId);
     }
 
+    /// <summary>
+    /// 分页查询 Token 操作日志。
+    /// </summary>
     public async Task<PageResult<ExternalApiTokenLogDto>> GetLogsAsync(Guid tokenId, int page, int pageSize)
     {
         var items = await _tokenLogRepo.GetListAsync(tokenId, page, pageSize);
@@ -394,6 +440,9 @@ public class ExternalApiTokenService
         };
     }
 
+    /// <summary>
+    /// 记录对外接口访问日志。
+    /// </summary>
     public async Task LogAccessAsync(CreateExternalApiAccessLogDto dto)
     {
         var log = new SysExternalApiAccessLog
@@ -412,6 +461,9 @@ public class ExternalApiTokenService
         await _logRepo.CreateAsync(log);
     }
 
+    /// <summary>
+    /// 记录 Token 操作日志。
+    /// </summary>
     private async Task AddLogAsync(SysExternalApiToken token, string action, string remark)
     {
         var log = new SysExternalApiTokenLog
@@ -429,12 +481,18 @@ public class ExternalApiTokenService
         await _tokenLogRepo.CreateAsync(log);
     }
 
+    /// <summary>
+    /// 校验 Token 未被逻辑删除，否则抛出异常。
+    /// </summary>
     private static void EnsureNotDeleted(SysExternalApiToken token)
     {
         if (token.IsDeleted)
             throw new InvalidOperationException("Token 已删除，禁止操作");
     }
 
+    /// <summary>
+    /// 将时间统一转换为 UTC。
+    /// </summary>
     private static DateTime? ToUtc(DateTime? value)
     {
         if (!value.HasValue) return null;
@@ -447,16 +505,25 @@ public class ExternalApiTokenService
         };
     }
 
+    /// <summary>
+    /// 生成 ApiKey（by3_ 前缀 + 32 位随机十六进制）。
+    /// </summary>
     private static string GenerateApiKey()
     {
         return $"by3_{Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLower()}";
     }
 
+    /// <summary>
+    /// 生成 ApiSecret（64 位随机十六进制）。
+    /// </summary>
     private static string GenerateApiSecret()
     {
         return Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLower();
     }
 
+    /// <summary>
+    /// 标准化有效期类型（30/60/90/custom）。
+    /// </summary>
     private static string NormalizeExpireType(string? expireType)
     {
         return expireType switch
@@ -468,6 +535,9 @@ public class ExternalApiTokenService
         };
     }
 
+    /// <summary>
+    /// 根据有效期类型计算过期时间。
+    /// </summary>
     private static DateTime? CalcExpireTime(string expireType, DateTime? customExpireTime)
     {
         return expireType switch
@@ -479,6 +549,9 @@ public class ExternalApiTokenService
         };
     }
 
+    /// <summary>
+    /// 将 Token 实体映射为 DTO。
+    /// </summary>
     private static ExternalApiTokenDto MapToDto(SysExternalApiToken token) => new()
     {
         Id = token.Id,
@@ -499,6 +572,9 @@ public class ExternalApiTokenService
         UpdatedAt = token.UpdatedAt
     };
 
+    /// <summary>
+    /// 将历史凭证实体映射为 DTO。
+    /// </summary>
     private static ExternalApiTokenHistoryDto MapHistoryToDto(SysExternalApiTokenHistory history) => new()
     {
         Id = history.Id,
@@ -513,6 +589,9 @@ public class ExternalApiTokenService
         CreatedAt = history.CreatedAt
     };
 
+    /// <summary>
+    /// 脱敏处理：清空 ApiSecret 和 PreviousApiSecret。
+    /// </summary>
     private static ExternalApiTokenDto MaskSecrets(ExternalApiTokenDto dto)
     {
         dto.ApiSecret = string.Empty;
@@ -520,6 +599,9 @@ public class ExternalApiTokenService
         return dto;
     }
 
+    /// <summary>
+    /// 将操作日志实体映射为 DTO。
+    /// </summary>
     private static ExternalApiTokenLogDto MapLogToDto(SysExternalApiTokenLog log) => new()
     {
         Id = log.Id,
@@ -533,12 +615,18 @@ public class ExternalApiTokenService
         CreatedAt = log.CreatedAt
     };
 
+    /// <summary>
+    /// 序列化允许访问的接口 ID 列表为 JSON。
+    /// </summary>
     private static string? SerializeAllowedApiIds(List<Guid> ids)
     {
         if (ids == null || ids.Count == 0) return null;
         return JsonSerializer.Serialize(ids);
     }
 
+    /// <summary>
+    /// 反序列化允许访问的接口 ID 列表。
+    /// </summary>
     private static List<Guid> ParseAllowedApiIds(string? json)
     {
         if (string.IsNullOrWhiteSpace(json)) return new List<Guid>();

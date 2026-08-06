@@ -28,12 +28,18 @@ public class EmailSettingService
         _repo = repo;
     }
 
+    /// <summary>
+    /// 获取当前邮件发送端配置，不存在时返回默认值。
+    /// </summary>
     public async Task<EmailSettingDto> GetAsync()
     {
         var setting = await _repo.GetOrCreateDefaultAsync();
         return MapToDto(setting);
     }
 
+    /// <summary>
+    /// 保存邮件发送端配置。
+    /// </summary>
     public async Task<EmailSettingDto> SaveAsync(EmailSettingDto dto)
     {
         var entity = new SysEmailSetting

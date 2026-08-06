@@ -70,10 +70,10 @@
       </el-table>
     </el-dialog>
 
-    <el-dialog :title="versionFormTitle" v-model="versionFormVisible" width="600px">
+    <el-dialog :title="versionFormTitle" v-model="versionFormVisible" width="900px" top="5vh">
       <el-form :model="versionForm" :rules="versionRules" ref="versionFormRef" label-width="100px">
-        <el-form-item label="版本号" prop="version">
-          <el-input v-model="versionForm.version" :disabled="isEditVersion" />
+        <el-form-item label="版本号" v-if="isEditVersion">
+          <el-input v-model="versionForm.version" disabled />
         </el-form-item>
         <el-form-item label="邮件主题" prop="subject">
           <el-input v-model="versionForm.subject" />
@@ -85,7 +85,8 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="邮件内容" prop="body">
-          <el-input v-model="versionForm.body" type="textarea" :rows="12" placeholder="HTML 格式可直接输入 HTML 标签；纯文本将按原样发送" />
+          <RichTextEditor v-if="versionForm.bodyFormat === 'html'" v-model="versionForm.body" :height="400" placeholder="编辑 HTML 邮件内容" />
+          <el-input v-else v-model="versionForm.body" type="textarea" :rows="20" placeholder="纯文本内容" />
         </el-form-item>
         <el-form-item label="状态" v-if="isEditVersion">
           <el-switch v-model="versionForm.isEnabled" />
@@ -144,6 +145,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { emailApi } from '@/api'
 import { useDictStore } from '@/store/dict'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 
 const dictStore = useDictStore()
 const loading = ref(false)
@@ -168,7 +170,6 @@ const isEditVersion = ref(false)
 const versionFormRef = ref()
 const versionForm = reactive<any>({ templateId: '', version: '', subject: '', body: '', bodyFormat: 'html', isEnabled: true })
 const versionRules = {
-  version: [{ required: true, message: '必填', trigger: 'blur' }],
   subject: [{ required: true, message: '必填', trigger: 'blur' }],
   body: [{ required: true, message: '必填', trigger: 'blur' }]
 }
@@ -246,7 +247,8 @@ async function handleSubmitVersion() {
     await emailApi.updateVersion(versionForm.id, versionForm)
     ElMessage.success('更新成功')
   } else {
-    await emailApi.createVersion(versionForm)
+    const { version, ...rest } = versionForm
+    await emailApi.createVersion(rest)
     ElMessage.success('创建成功')
   }
   versionFormVisible.value = false

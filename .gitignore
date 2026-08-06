@@ -41,6 +41,7 @@ security-scan-report.md
 # Agent & local scripts
 AGENTS.md
 scripts/
+.mimocode/
 .semgrepignore
 
 # OS

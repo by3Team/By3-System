@@ -14,6 +14,8 @@
 
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using By3.Api.Options;
 using By3.Repository.Repositories;
 using By3.Service.DTOs;
 using By3.Service.Services;
@@ -28,19 +30,21 @@ public class ExternalApiAuthenticationMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExternalApiAuthenticationMiddleware> _logger;
+    private readonly ExternalApiAuthOptions _options;
 
-    // 限流窗口与失败封禁阈值（可后续迁移到配置）
-    private static readonly TimeSpan RateWindow = TimeSpan.FromSeconds(1);
-    private static readonly TimeSpan IdempotencyWindow = TimeSpan.FromHours(24);
-    private static readonly int MaxConsecutiveFailures = 5;
-    private static readonly TimeSpan FailureWindow = TimeSpan.FromMinutes(15);
-
-    public ExternalApiAuthenticationMiddleware(RequestDelegate next, ILogger<ExternalApiAuthenticationMiddleware> logger)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ExternalApiAuthenticationMiddleware"/> class.
+    /// </summary>
+    public ExternalApiAuthenticationMiddleware(RequestDelegate next, ILogger<ExternalApiAuthenticationMiddleware> logger, IOptions<ExternalApiAuthOptions> options)
     {
         _next = next;
         _logger = logger;
+        _options = options.Value;
     }
 
+    /// <summary>
+    /// 处理请求，执行对外 API 的签名认证与校验流程。
+    /// </summary>
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? string.Empty;
@@ -122,7 +126,7 @@ public class ExternalApiAuthenticationMiddleware
         // 4. AK/SK 连续失败封禁校验
         var cache = context.RequestServices.GetRequiredService<IMemoryCache>();
         var failureKey = $"external_api_fail:{apiKey}";
-        if (cache.TryGetValue(failureKey, out int failureCount) && failureCount >= MaxConsecutiveFailures)
+        if (cache.TryGetValue(failureKey, out int failureCount) && failureCount >= _options.MaxConsecutiveFailures)
         {
             logDto.ErrorMessage = "该 ApiKey 因连续失败次数过多已被临时封禁";
             await LogAsync(context, logDto);
@@ -222,7 +226,7 @@ public class ExternalApiAuthenticationMiddleware
         if (registeredApi.RequireIdempotency && !string.IsNullOrWhiteSpace(idempotencyKey))
         {
             var idemKey = $"external_api_idem:{apiKey}:{idempotencyKey}";
-            cache.Set(idemKey, true, IdempotencyWindow);
+            cache.Set(idemKey, true, TimeSpan.FromHours(_options.IdempotencyWindowHours));
         }
 
         // 10. 重置失败计数
@@ -235,6 +239,9 @@ public class ExternalApiAuthenticationMiddleware
         await _next(context);
     }
 
+    /// <summary>
+    /// 收集请求参数（Query + Form），用于签名计算。
+    /// </summary>
     private static async Task<Dictionary<string, string?>> BuildRequestParamsAsync(HttpContext context)
     {
         var parameters = new Dictionary<string, string?>();
@@ -259,22 +266,26 @@ public class ExternalApiAuthenticationMiddleware
     /// <summary>
     /// 简单的固定窗口限流：缓存中记录当前窗口内的请求次数。
     /// </summary>
-    private static bool TryAcquireRateLimit(IMemoryCache cache, string key, int limit)
+    private bool TryAcquireRateLimit(IMemoryCache cache, string key, int limit)
     {
+        var window = TimeSpan.FromSeconds(_options.RateWindowSeconds);
         if (cache.TryGetValue(key, out int count))
         {
             if (count >= limit)
                 return false;
 
-            cache.Set(key, count + 1, RateWindow);
+            cache.Set(key, count + 1, window);
             return true;
         }
 
-        cache.Set(key, 1, RateWindow);
+        cache.Set(key, 1, window);
         return true;
     }
 
-    private static async Task LogFailureAsync(HttpContext context, CreateExternalApiAccessLogDto dto, string? apiKey)
+    /// <summary>
+    /// 记录认证失败次数并写入访问日志，达到阈值后临时封禁该 ApiKey。
+    /// </summary>
+    private async Task LogFailureAsync(HttpContext context, CreateExternalApiAccessLogDto dto, string? apiKey)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return;
@@ -284,7 +295,7 @@ public class ExternalApiAuthenticationMiddleware
             var cache = context.RequestServices.GetRequiredService<IMemoryCache>();
             var failureKey = $"external_api_fail:{apiKey}";
             var count = cache.TryGetValue(failureKey, out int c) ? c : 0;
-            cache.Set(failureKey, count + 1, FailureWindow);
+            cache.Set(failureKey, count + 1, TimeSpan.FromMinutes(_options.FailureWindowMinutes));
         }
         catch (Exception ex)
         {
@@ -295,6 +306,9 @@ public class ExternalApiAuthenticationMiddleware
         await LogAsync(context, dto);
     }
 
+    /// <summary>
+    /// 写入对外 API 访问日志。
+    /// </summary>
     private static async Task LogAsync(HttpContext context, CreateExternalApiAccessLogDto dto)
     {
         try
@@ -309,6 +323,9 @@ public class ExternalApiAuthenticationMiddleware
         }
     }
 
+    /// <summary>
+    /// 输出 JSON 格式的错误响应。
+    /// </summary>
     private static async Task WriteErrorAsync(HttpContext context, int statusCode, string message)
     {
         context.Response.StatusCode = statusCode;

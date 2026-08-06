@@ -18,11 +18,17 @@ public class SecurityHeadersMiddleware
 {
     private readonly RequestDelegate _next;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SecurityHeadersMiddleware"/> class.
+    /// </summary>
     public SecurityHeadersMiddleware(RequestDelegate next)
     {
         _next = next;
     }
 
+    /// <summary>
+    /// 处理请求，注入安全响应头。
+    /// </summary>
     public async Task InvokeAsync(HttpContext context)
     {
         var headers = context.Response.Headers;

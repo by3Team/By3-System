@@ -189,6 +189,153 @@ public static class DbSeeder
 
         // 对外 API 菜单（增量添加）
         await EnsureExternalApiMenuAsync(db);
+
+        // 对外 API 接口注册数据（增量添加）
+        await EnsureExternalApiRoutesAsync(db);
+
+        // 部门与岗位测试数据（增量添加）
+        await EnsureDepartmentAndPositionAsync(db);
+
+        // Token 通知邮件模板（增量添加）
+        await EnsureTokenNotifyTemplateAsync(db);
+    }
+
+    private static async Task EnsureDepartmentAndPositionAsync(AppDbContext db)
+    {
+        // 部门测试数据
+        if (!await db.Departments.AnyAsync())
+        {
+            var techId = Guid.NewGuid();
+            var opsId = Guid.NewGuid();
+            var hrId = Guid.NewGuid();
+            var salesId = Guid.NewGuid();
+
+            var departments = new List<SysDepartment>
+            {
+                new() { Id = techId, DeptName = "技术部", DeptCode = "TECH", SortOrder = 1, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "前端组", DeptCode = "TECH-FE", ParentId = techId, SortOrder = 1, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "后端组", DeptCode = "TECH-BE", ParentId = techId, SortOrder = 2, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "测试组", DeptCode = "TECH-QA", ParentId = techId, SortOrder = 3, CreatedAt = DateTime.UtcNow },
+                new() { Id = opsId, DeptName = "运维部", DeptCode = "OPS", SortOrder = 2, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "系统运维", DeptCode = "OPS-SYS", ParentId = opsId, SortOrder = 1, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "网络运维", DeptCode = "OPS-NET", ParentId = opsId, SortOrder = 2, CreatedAt = DateTime.UtcNow },
+                new() { Id = hrId, DeptName = "人力资源部", DeptCode = "HR", SortOrder = 3, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "招聘组", DeptCode = "HR-REC", ParentId = hrId, SortOrder = 1, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "培训组", DeptCode = "HR-TRN", ParentId = hrId, SortOrder = 2, CreatedAt = DateTime.UtcNow },
+                new() { Id = salesId, DeptName = "销售部", DeptCode = "SALES", SortOrder = 4, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "华东区", DeptCode = "SALES-EAST", ParentId = salesId, SortOrder = 1, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), DeptName = "华南区", DeptCode = "SALES-SOUTH", ParentId = salesId, SortOrder = 2, CreatedAt = DateTime.UtcNow },
+            };
+            db.Departments.AddRange(departments);
+            await db.SaveChangesAsync();
+        }
+
+        // 岗位测试数据
+        if (!await db.Positions.AnyAsync())
+        {
+            var positions = new List<SysPosition>
+            {
+                new() { Id = Guid.NewGuid(), PositionName = "总经理", PositionCode = "GM", SortOrder = 1, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "部门经理", PositionCode = "DEPT_MGR", SortOrder = 2, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "项目经理", PositionCode = "PM", SortOrder = 3, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "高级工程师", PositionCode = "SR_ENG", SortOrder = 4, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "中级工程师", PositionCode = "MID_ENG", SortOrder = 5, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "初级工程师", PositionCode = "JR_ENG", SortOrder = 6, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "测试工程师", PositionCode = "QA_ENG", SortOrder = 7, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "运维工程师", PositionCode = "OPS_ENG", SortOrder = 8, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "产品经理", PositionCode = "PD", SortOrder = 9, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "UI 设计师", PositionCode = "UI", SortOrder = 10, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "销售代表", PositionCode = "SALES_REP", SortOrder = 11, CreatedAt = DateTime.UtcNow },
+                new() { Id = Guid.NewGuid(), PositionName = "人事专员", PositionCode = "HR_SPEC", SortOrder = 12, CreatedAt = DateTime.UtcNow },
+            };
+            db.Positions.AddRange(positions);
+            await db.SaveChangesAsync();
+        }
+
+        // 给 admin 用户分配部门和岗位
+        var admin = await db.Users.FirstOrDefaultAsync(u => u.UserName == "admin");
+        if (admin != null && admin.DepartmentId == null)
+        {
+            var techDept = await db.Departments.FirstOrDefaultAsync(d => d.DeptCode == "TECH");
+            var gmPosition = await db.Positions.FirstOrDefaultAsync(p => p.PositionCode == "GM");
+            if (techDept != null) admin.DepartmentId = techDept.Id;
+            if (gmPosition != null) admin.PositionId = gmPosition.Id;
+            admin.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// 确保 Token 通知邮件模板存在（固定编码 external_api_token_notify）。
+    /// </summary>
+    public static readonly Guid TokenNotifyTemplateId = Guid.Parse("99999999-9999-9999-9999-999999999999");
+
+    private static async Task EnsureTokenNotifyTemplateAsync(AppDbContext db)
+    {
+        var templateCode = "external_api_token_notify";
+        var template = await db.EmailTemplates.FirstOrDefaultAsync(t => t.TemplateCode == templateCode);
+        if (template == null)
+        {
+            template = new SysEmailTemplate
+            {
+                Id = TokenNotifyTemplateId,
+                TemplateCode = templateCode,
+                TemplateName = "对外 API Token 通知",
+                Description = "Token 重新生成、启用、禁用等变更通知邮件",
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.EmailTemplates.Add(template);
+            await db.SaveChangesAsync();
+        }
+
+        var version = await db.EmailTemplateVersions.FirstOrDefaultAsync(v => v.TemplateId == template.Id && v.Version == "v1");
+        if (version == null)
+        {
+            db.EmailTemplateVersions.Add(new SysEmailTemplateVersion
+            {
+                Id = Guid.NewGuid(),
+                TemplateId = template.Id,
+                Version = "v1",
+                Subject = "【By3】对外 API Token 已重新生成",
+                Body = @"<div style=""font-family: 'Microsoft YaHei', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;"">
+  <h2 style=""color: #333; border-bottom: 2px solid #409EFF; padding-bottom: 10px;"">对外 API Token 变更通知</h2>
+  <p>您好，您的对外 API Token 已发生变更，详情如下：</p>
+  <table style=""width: 100%; border-collapse: collapse; margin: 15px 0;"">
+    <tr style=""background: #f5f7fa;"">
+      <td style=""padding: 10px; border: 1px solid #ebeef5; font-weight: bold; width: 140px;"">应用名称</td>
+      <td style=""padding: 10px; border: 1px solid #ebeef5;"">{AppName}</td>
+    </tr>
+    <tr>
+      <td style=""padding: 10px; border: 1px solid #ebeef5; font-weight: bold;"">新 ApiKey</td>
+      <td style=""padding: 10px; border: 1px solid #ebeef5; font-family: monospace; color: #409EFF;"">{ApiKey}</td>
+    </tr>
+    <tr style=""background: #f5f7fa;"">
+      <td style=""padding: 10px; border: 1px solid #ebeef5; font-weight: bold;"">新 ApiSecret</td>
+      <td style=""padding: 10px; border: 1px solid #ebeef5; font-family: monospace; color: #E6A23C;"">{ApiSecret}</td>
+    </tr>
+    <tr>
+      <td style=""padding: 10px; border: 1px solid #ebeef5; font-weight: bold;"">有效期类型</td>
+      <td style=""padding: 10px; border: 1px solid #ebeef5;"">{ExpireType} 天</td>
+    </tr>
+    <tr style=""background: #f5f7fa;"">
+      <td style=""padding: 10px; border: 1px solid #ebeef5; font-weight: bold;"">旧 Key 状态</td>
+      <td style=""padding: 10px; border: 1px solid #ebeef5;"">{GraceRemark}</td>
+    </tr>
+    <tr>
+      <td style=""padding: 10px; border: 1px solid #ebeef5; font-weight: bold;"">操作时间</td>
+      <td style=""padding: 10px; border: 1px solid #ebeef5;"">{OperateTime}</td>
+    </tr>
+  </table>
+  <p style=""color: #F56C6C; font-size: 14px;"">请妥善保管新的 ApiKey 和 ApiSecret，切勿泄露给他人。</p>
+  <p style=""color: #999; font-size: 12px; margin-top: 30px;"">此邮件由系统自动发送，请勿直接回复。</p>
+</div>",
+                BodyFormat = "html",
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+        }
     }
 
     private static async Task EnsureDictTypeAsync(AppDbContext db, Guid id, string dictName, string dictType, (string Label, string Value, string Remark, int Sort, bool Default)[] items)
@@ -581,4 +728,92 @@ public static class DbSeeder
             await db.SaveChangesAsync();
         }
     }
+
+    /// <summary>
+    /// 注册默认的对外 API 接口路由。
+    /// </summary>
+    private static async Task EnsureExternalApiRoutesAsync(AppDbContext db)
+    {
+        if (await db.ExternalApis.AnyAsync()) return;
+
+        var routes = new List<SysExternalApi>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ApiName = "用户列表",
+                Route = "/external/v1/users",
+                Method = "GET",
+                Description = "获取用户分页列表",
+                RateLimitPerSecond = 10,
+                RequireIdempotency = true,
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ApiName = "系统包信息",
+                Route = "/external/v1/systeminfo/packages",
+                Method = "GET",
+                Description = "获取系统前后端引入包信息",
+                RateLimitPerSecond = 10,
+                RequireIdempotency = true,
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ApiName = "部门树",
+                Route = "/external/v1/departments",
+                Method = "GET",
+                Description = "获取部门树形结构",
+                RateLimitPerSecond = 10,
+                RequireIdempotency = false,
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ApiName = "部门详情",
+                Route = "/external/v1/departments/{id}",
+                Method = "GET",
+                Description = "根据ID获取部门详情",
+                RateLimitPerSecond = 10,
+                RequireIdempotency = false,
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ApiName = "岗位列表",
+                Route = "/external/v1/positions",
+                Method = "GET",
+                Description = "获取岗位分页列表",
+                RateLimitPerSecond = 10,
+                RequireIdempotency = false,
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ApiName = "岗位详情",
+                Route = "/external/v1/positions/{id}",
+                Method = "GET",
+                Description = "根据ID获取岗位详情",
+                RateLimitPerSecond = 10,
+                RequireIdempotency = false,
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        db.ExternalApis.AddRange(routes);
+        await db.SaveChangesAsync();
+    }
 }
+

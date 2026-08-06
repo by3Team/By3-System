@@ -39,18 +39,27 @@ public class DepartmentService
         }
     }
 
+    /// <summary>
+    /// 获取部门树形结构。
+    /// </summary>
     public async Task<List<DepartmentTreeDto>> GetTreeAsync()
     {
         var all = await _repo.GetAllAsync();
         return BuildTree(all);
     }
 
+    /// <summary>
+    /// 根据ID获取部门详情。
+    /// </summary>
     public async Task<DepartmentTreeDto?> GetByIdAsync(Guid id)
     {
         var dept = await _repo.GetByIdAsync(id);
         return dept == null ? null : MapToDto(dept);
     }
 
+    /// <summary>
+    /// 创建部门。
+    /// </summary>
     public async Task<Guid> CreateAsync(CreateDepartmentDto dto)
     {
         var dept = new SysDepartment
@@ -65,6 +74,9 @@ public class DepartmentService
         return await _repo.CreateAsync(dept);
     }
 
+    /// <summary>
+    /// 更新部门信息。
+    /// </summary>
     public async Task<int> UpdateAsync(UpdateDepartmentDto dto)
     {
         var dept = await _repo.GetByIdAsync(dto.Id);
@@ -81,9 +93,15 @@ public class DepartmentService
         return await _repo.UpdateAsync(dept);
     }
 
+    /// <summary>
+    /// 删除部门。
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
         => await _repo.DeleteAsync(id);
 
+    /// <summary>
+    /// 将部门实体映射为树形 DTO。
+    /// </summary>
     private static DepartmentTreeDto MapToDto(SysDepartment dept) => new()
     {
         Id = dept.Id,
@@ -95,6 +113,9 @@ public class DepartmentService
         CreatedAt = dept.CreatedAt
     };
 
+    /// <summary>
+    /// 将扁平部门列表构建为树形结构。
+    /// </summary>
     private static List<DepartmentTreeDto> BuildTree(List<SysDepartment> departments)
     {
         var dict = departments.ToDictionary(d => d.Id, d => MapToDto(d));

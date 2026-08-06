@@ -83,6 +83,9 @@ public class UserService
         return _dataProtection.Encrypt(phone);
     }
 
+    /// <summary>
+    /// 分页查询用户列表。
+    /// </summary>
     public async Task<PageResult<UserListDto>> GetListAsync(int page, int pageSize, string? keyword)
     {
         var users = await _repo.GetListAsync(page, pageSize, keyword);
@@ -112,6 +115,7 @@ public class UserService
                 PositionName = position?.PositionName,
                 IsEnabled = u.IsEnabled,
                 CreatedAt = u.CreatedAt,
+                RoleIds = rids,
                 RoleNames = roleNames
             });
         }
@@ -119,6 +123,9 @@ public class UserService
         return new PageResult<UserListDto> { Total = total, Items = items, Page = page, PageSize = pageSize };
     }
 
+    /// <summary>
+    /// 根据ID获取用户详情。
+    /// </summary>
     public async Task<UserListDto?> GetByIdAsync(Guid id)
     {
         var u = await _repo.GetByIdAsync(id);
@@ -141,10 +148,14 @@ public class UserService
             PositionName = position?.PositionName,
             IsEnabled = u.IsEnabled,
             CreatedAt = u.CreatedAt,
+            RoleIds = rids,
             RoleNames = roles.Where(r => rids.Contains(r.Id)).Select(r => r.RoleName).ToList()
         };
     }
 
+    /// <summary>
+    /// 创建用户。
+    /// </summary>
     public async Task<Guid> CreateAsync(CreateUserDto dto)
     {
         var user = new SysUser
@@ -165,6 +176,9 @@ public class UserService
         return user.Id;
     }
 
+    /// <summary>
+    /// 更新用户信息。
+    /// </summary>
     public async Task<int> UpdateAsync(UpdateUserDto dto)
     {
         var user = await _repo.GetByIdAsync(dto.Id);
@@ -189,6 +203,9 @@ public class UserService
         return result;
     }
 
+    /// <summary>
+    /// 删除用户。
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
     {
         _cache.Remove($"user_permissions_{id}");
@@ -196,9 +213,15 @@ public class UserService
         return await _repo.DeleteAsync(id);
     }
 
+    /// <summary>
+    /// 获取用户关联的角色ID列表。
+    /// </summary>
     public async Task<List<Guid>> GetUserRoleIdsAsync(Guid userId)
         => await _repo.GetRoleIdsByUserIdAsync(userId);
 
+    /// <summary>
+    /// 重置用户密码。
+    /// </summary>
     public async Task<int> ResetPasswordAsync(Guid userId, string newPassword)
     {
         var user = await _repo.GetByIdAsync(userId);

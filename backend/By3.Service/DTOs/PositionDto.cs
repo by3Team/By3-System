@@ -19,8 +19,19 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class CreatePositionDto
 {
+    /// <summary>
+    /// 岗位名称
+    /// </summary>
     public string PositionName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 岗位编码
+    /// </summary>
     public string? PositionCode { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int SortOrder { get; set; } = 0;
 }
 
@@ -29,10 +40,29 @@ public class CreatePositionDto
 /// </summary>
 public class UpdatePositionDto
 {
+    /// <summary>
+    /// 岗位ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 岗位名称
+    /// </summary>
     public string? PositionName { get; set; }
+
+    /// <summary>
+    /// 岗位编码
+    /// </summary>
     public string? PositionCode { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int? SortOrder { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
 }
 
@@ -41,10 +71,33 @@ public class UpdatePositionDto
 /// </summary>
 public class PositionListDto
 {
+    /// <summary>
+    /// 岗位ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 岗位名称
+    /// </summary>
     public string PositionName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 岗位编码
+    /// </summary>
     public string? PositionCode { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int SortOrder { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 }

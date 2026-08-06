@@ -21,12 +21,18 @@ public class RequestTimingMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<RequestTimingMiddleware> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RequestTimingMiddleware"/> class.
+    /// </summary>
     public RequestTimingMiddleware(RequestDelegate next, ILogger<RequestTimingMiddleware> logger)
     {
         _next = next;
         _logger = logger;
     }
 
+    /// <summary>
+    /// 处理请求并记录耗时日志。
+    /// </summary>
     public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();

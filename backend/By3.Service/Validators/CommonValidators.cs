@@ -17,6 +17,9 @@ using By3.Service.DTOs;
 
 namespace By3.Service.Validators;
 
+/// <summary>
+/// 登录请求参数验证器。
+/// </summary>
 public class LoginValidator : AbstractValidator<LoginDto>
 {
     public LoginValidator()
@@ -26,6 +29,9 @@ public class LoginValidator : AbstractValidator<LoginDto>
     }
 }
 
+/// <summary>
+/// 创建用户参数验证器。
+/// </summary>
 public class CreateUserValidator : AbstractValidator<CreateUserDto>
 {
     public CreateUserValidator()
@@ -39,6 +45,9 @@ public class CreateUserValidator : AbstractValidator<CreateUserDto>
     }
 }
 
+/// <summary>
+/// 更新用户参数验证器。
+/// </summary>
 public class UpdateUserValidator : AbstractValidator<UpdateUserDto>
 {
     public UpdateUserValidator()
@@ -47,6 +56,9 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserDto>
     }
 }
 
+/// <summary>
+/// 重置密码参数验证器。
+/// </summary>
 public class ResetPasswordValidator : AbstractValidator<ResetPasswordDto>
 {
     public ResetPasswordValidator()
@@ -58,6 +70,9 @@ public class ResetPasswordValidator : AbstractValidator<ResetPasswordDto>
     }
 }
 
+/// <summary>
+/// 修改密码参数验证器。
+/// </summary>
 public class ChangePasswordValidator : AbstractValidator<ChangePasswordDto>
 {
     public ChangePasswordValidator()
@@ -71,6 +86,9 @@ public class ChangePasswordValidator : AbstractValidator<ChangePasswordDto>
     }
 }
 
+/// <summary>
+/// 创建角色参数验证器。
+/// </summary>
 public class CreateRoleValidator : AbstractValidator<CreateRoleDto>
 {
     public CreateRoleValidator()
@@ -79,6 +97,9 @@ public class CreateRoleValidator : AbstractValidator<CreateRoleDto>
     }
 }
 
+/// <summary>
+/// 更新角色参数验证器。
+/// </summary>
 public class UpdateRoleValidator : AbstractValidator<UpdateRoleDto>
 {
     public UpdateRoleValidator()
@@ -87,6 +108,9 @@ public class UpdateRoleValidator : AbstractValidator<UpdateRoleDto>
     }
 }
 
+/// <summary>
+/// 创建菜单参数验证器。
+/// </summary>
 public class CreateMenuValidator : AbstractValidator<CreateMenuDto>
 {
     public CreateMenuValidator()
@@ -96,6 +120,9 @@ public class CreateMenuValidator : AbstractValidator<CreateMenuDto>
     }
 }
 
+/// <summary>
+/// 更新菜单参数验证器。
+/// </summary>
 public class UpdateMenuValidator : AbstractValidator<UpdateMenuDto>
 {
     public UpdateMenuValidator()
