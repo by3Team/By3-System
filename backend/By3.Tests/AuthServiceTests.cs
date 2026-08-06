@@ -37,7 +37,7 @@ public class AuthServiceTests
     [Fact]
     public void BCrypt_Should_Verify_Hashed_Password()
     {
-        var password = "admin123";
+        var password = "Demo123!";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
         Assert.True(BCrypt.Net.BCrypt.Verify(password, hash));
     }

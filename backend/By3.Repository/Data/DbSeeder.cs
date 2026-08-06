@@ -31,7 +31,7 @@ public static class DbSeeder
             {
                 Id = adminId,
                 UserName = "admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(defaultPassword ?? "admin123"),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(defaultPassword ?? "Demo123!"),
                 RealName = "超级管理员",
                 Email = "admin@example.com",
                 IsEnabled = true,
