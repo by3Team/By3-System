@@ -37,6 +37,9 @@ public class QuartzSchedulerHostedService : IHostedService
         _serviceProvider = serviceProvider;
     }
 
+    /// <summary>
+    /// 启动调度器，加载并注册所有已启用的定时任务。
+    /// </summary>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
@@ -53,6 +56,9 @@ public class QuartzSchedulerHostedService : IHostedService
         }
     }
 
+    /// <summary>
+    /// 停止调度器。
+    /// </summary>
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         if (_scheduler != null)
@@ -61,6 +67,9 @@ public class QuartzSchedulerHostedService : IHostedService
         }
     }
 
+    /// <summary>
+    /// 注册或更新定时任务到 Quartz 调度器。
+    /// </summary>
     public async Task ScheduleJobAsync(SysJob job, CancellationToken cancellationToken = default)
     {
         if (_scheduler == null) throw new InvalidOperationException("Scheduler not started");
@@ -92,6 +101,9 @@ public class QuartzSchedulerHostedService : IHostedService
         await _scheduler.ScheduleJob(jobDetail, trigger, cancellationToken);
     }
 
+    /// <summary>
+    /// 从调度器中移除指定任务。
+    /// </summary>
     public async Task UnscheduleJobAsync(Guid jobId, string jobGroup, CancellationToken cancellationToken = default)
     {
         if (_scheduler == null) return;
@@ -103,6 +115,9 @@ public class QuartzSchedulerHostedService : IHostedService
         }
     }
 
+    /// <summary>
+    /// 立即触发指定任务执行。
+    /// </summary>
     public async Task TriggerJobAsync(Guid jobId, string jobGroup, CancellationToken cancellationToken = default)
     {
         if (_scheduler == null) throw new InvalidOperationException("Scheduler not started");
@@ -123,6 +138,9 @@ public class QuartzSchedulerHostedService : IHostedService
         await _scheduler.TriggerJob(jobKey, cancellationToken);
     }
 
+    /// <summary>
+    /// 获取指定任务的下次触发时间。
+    /// </summary>
     public async Task<DateTimeOffset?> GetNextFireTimeAsync(Guid jobId, string jobGroup, CancellationToken cancellationToken = default)
     {
         if (_scheduler == null) return null;
@@ -132,6 +150,9 @@ public class QuartzSchedulerHostedService : IHostedService
         return trigger?.GetNextFireTimeUtc();
     }
 
+    /// <summary>
+    /// 根据 Cron 表达式计算下次触发时间。
+    /// </summary>
     public static DateTimeOffset? GetNextFireTimeFromCron(string cronExpression)
     {
         try

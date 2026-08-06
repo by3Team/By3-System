@@ -19,9 +19,24 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class CreateDepartmentDto
 {
+    /// <summary>
+    /// 部门名称
+    /// </summary>
     public string DeptName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 部门编码
+    /// </summary>
     public string? DeptCode { get; set; }
+
+    /// <summary>
+    /// 父级部门ID
+    /// </summary>
     public Guid? ParentId { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int SortOrder { get; set; } = 0;
 }
 
@@ -30,11 +45,34 @@ public class CreateDepartmentDto
 /// </summary>
 public class UpdateDepartmentDto
 {
+    /// <summary>
+    /// 部门ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 部门名称
+    /// </summary>
     public string? DeptName { get; set; }
+
+    /// <summary>
+    /// 部门编码
+    /// </summary>
     public string? DeptCode { get; set; }
+
+    /// <summary>
+    /// 父级部门ID
+    /// </summary>
     public Guid? ParentId { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int? SortOrder { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
 }
 
@@ -43,12 +81,43 @@ public class UpdateDepartmentDto
 /// </summary>
 public class DepartmentTreeDto
 {
+    /// <summary>
+    /// 部门ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 部门名称
+    /// </summary>
     public string DeptName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 部门编码
+    /// </summary>
     public string? DeptCode { get; set; }
+
+    /// <summary>
+    /// 父级部门ID
+    /// </summary>
     public Guid? ParentId { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int SortOrder { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// 子部门列表
+    /// </summary>
     public List<DepartmentTreeDto> Children { get; set; } = new();
 }

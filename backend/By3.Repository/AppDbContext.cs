@@ -18,10 +18,16 @@ using By3.Repository.Entities;
 
 namespace By3.Repository;
 
+/// <summary>
+/// 应用数据库上下文，定义所有实体映射及表结构。
+/// </summary>
 public class AppDbContext : DbContext
 {
     private readonly string _tablePrefix;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AppDbContext"/> class.
+    /// </summary>
     public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration configuration) : base(options)
     {
         _tablePrefix = configuration["TablePrefix"]?.Trim() ?? "by3_";
@@ -36,30 +42,94 @@ public class AppDbContext : DbContext
     /// <returns>前缀 + 表名，例如 by3_sysuser。</returns>
     public string TableName(string name) => $"{_tablePrefix}{name}";
 
+    // ========== 用户与权限 ==========
+
+    /// <summary>用户表</summary>
     public DbSet<SysUser> Users => Set<SysUser>();
+
+    /// <summary>角色表</summary>
     public DbSet<SysRole> Roles => Set<SysRole>();
+
+    /// <summary>菜单表</summary>
     public DbSet<SysMenu> Menus => Set<SysMenu>();
+
+    /// <summary>用户-角色关联表</summary>
     public DbSet<SysUserRole> UserRoles => Set<SysUserRole>();
+
+    /// <summary>角色-菜单关联表</summary>
     public DbSet<SysRoleMenu> RoleMenus => Set<SysRoleMenu>();
+
+    // ========== 日志 ==========
+
+    /// <summary>操作审计日志表</summary>
     public DbSet<SysAuditLog> AuditLogs => Set<SysAuditLog>();
+
+    /// <summary>登录日志表</summary>
     public DbSet<SysLoginLog> LoginLogs => Set<SysLoginLog>();
+
+    // ========== 组织架构 ==========
+
+    /// <summary>部门表</summary>
     public DbSet<SysDepartment> Departments => Set<SysDepartment>();
+
+    /// <summary>岗位表</summary>
     public DbSet<SysPosition> Positions => Set<SysPosition>();
+
+    // ========== 字典 ==========
+
+    /// <summary>字典类型表</summary>
     public DbSet<SysDictType> DictTypes => Set<SysDictType>();
+
+    /// <summary>字典数据表</summary>
     public DbSet<SysDictData> DictData => Set<SysDictData>();
+
+    // ========== 文件 ==========
+
+    /// <summary>文件记录表</summary>
     public DbSet<SysFileRecord> FileRecords => Set<SysFileRecord>();
+
+    // ========== 邮件 ==========
+
+    /// <summary>邮件模板表</summary>
     public DbSet<SysEmailTemplate> EmailTemplates => Set<SysEmailTemplate>();
+
+    /// <summary>邮件模板版本表</summary>
     public DbSet<SysEmailTemplateVersion> EmailTemplateVersions => Set<SysEmailTemplateVersion>();
+
+    /// <summary>邮件发送日志表</summary>
     public DbSet<SysEmailLog> EmailLogs => Set<SysEmailLog>();
+
+    /// <summary>邮件发送配置表</summary>
     public DbSet<SysEmailSetting> EmailSettings => Set<SysEmailSetting>();
+
+    // ========== 定时任务 ==========
+
+    /// <summary>定时任务表</summary>
     public DbSet<SysJob> Jobs => Set<SysJob>();
+
+    /// <summary>定时任务执行日志表</summary>
     public DbSet<SysJobLog> JobLogs => Set<SysJobLog>();
+
+    // ========== 对外 API ==========
+
+    /// <summary>对外 API Token 表</summary>
     public DbSet<SysExternalApiToken> ExternalApiTokens => Set<SysExternalApiToken>();
+
+    /// <summary>对外 API Token 操作日志表</summary>
     public DbSet<SysExternalApiTokenLog> ExternalApiTokenLogs => Set<SysExternalApiTokenLog>();
+
+    /// <summary>对外 API Token 历史凭证表</summary>
     public DbSet<SysExternalApiTokenHistory> ExternalApiTokenHistories => Set<SysExternalApiTokenHistory>();
+
+    /// <summary>对外 API 访问日志表</summary>
     public DbSet<SysExternalApiAccessLog> ExternalApiAccessLogs => Set<SysExternalApiAccessLog>();
+
+    /// <summary>对外 API 接口注册表</summary>
     public DbSet<SysExternalApi> ExternalApis => Set<SysExternalApi>();
 
+    /// <summary>
+    /// 配置实体映射，为所有表设置表名、字段约束和索引。
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -89,6 +159,7 @@ public class AppDbContext : DbContext
         ConfigureSysExternalApi(modelBuilder);
     }
 
+    /// <summary>配置用户表映射。</summary>
     private void ConfigureSysUser(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysUser>(entity =>
@@ -108,6 +179,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置角色表映射。</summary>
     private void ConfigureSysRole(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysRole>(entity =>
@@ -124,6 +196,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置菜单表映射。</summary>
     private void ConfigureSysMenu(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysMenu>(entity =>
@@ -146,6 +219,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置用户-角色关联表映射。</summary>
     private void ConfigureSysUserRole(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysUserRole>(entity =>
@@ -159,6 +233,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置角色-菜单关联表映射。</summary>
     private void ConfigureSysRoleMenu(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysRoleMenu>(entity =>
@@ -172,6 +247,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置操作审计日志表映射。</summary>
     private void ConfigureSysAuditLog(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysAuditLog>(entity =>
@@ -199,6 +275,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置登录日志表映射。</summary>
     private void ConfigureSysLoginLog(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysLoginLog>(entity =>
@@ -215,6 +292,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置部门表映射。</summary>
     private void ConfigureSysDepartment(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysDepartment>(entity =>
@@ -234,6 +312,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置岗位表映射。</summary>
     private void ConfigureSysPosition(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysPosition>(entity =>
@@ -251,6 +330,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置字典类型表映射。</summary>
     private void ConfigureSysDictType(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysDictType>(entity =>
@@ -268,6 +348,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置字典数据表映射。</summary>
     private void ConfigureSysDictData(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysDictData>(entity =>
@@ -289,6 +370,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置文件记录表映射。</summary>
     private void ConfigureSysFileRecord(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysFileRecord>(entity =>
@@ -310,6 +392,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置邮件模板表映射。</summary>
     private void ConfigureSysEmailTemplate(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysEmailTemplate>(entity =>
@@ -328,6 +411,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置邮件模板版本表映射。</summary>
     private void ConfigureSysEmailTemplateVersion(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysEmailTemplateVersion>(entity =>
@@ -348,6 +432,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置邮件发送日志表映射。</summary>
     private void ConfigureSysEmailLog(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysEmailLog>(entity =>
@@ -369,6 +454,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置邮件发送配置表映射。</summary>
     private void ConfigureSysEmailSetting(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysEmailSetting>(entity =>
@@ -388,6 +474,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置定时任务表映射。</summary>
     private void ConfigureSysJob(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysJob>(entity =>
@@ -408,6 +495,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置定时任务执行日志表映射。</summary>
     private void ConfigureSysJobLog(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysJobLog>(entity =>
@@ -429,6 +517,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置对外 API Token 表映射。</summary>
     private void ConfigureSysExternalApiToken(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysExternalApiToken>(entity =>
@@ -456,6 +545,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置对外 API Token 操作日志表映射。</summary>
     private void ConfigureSysExternalApiTokenLog(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysExternalApiTokenLog>(entity =>
@@ -474,6 +564,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置对外 API Token 历史凭证表映射。</summary>
     private void ConfigureSysExternalApiTokenHistory(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysExternalApiTokenHistory>(entity =>
@@ -494,6 +585,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置对外 API 访问日志表映射。</summary>
     private void ConfigureSysExternalApiAccessLog(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysExternalApiAccessLog>(entity =>
@@ -514,6 +606,7 @@ public class AppDbContext : DbContext
         });
     }
 
+    /// <summary>配置对外 API 接口注册表映射。</summary>
     private void ConfigureSysExternalApi(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SysExternalApi>(entity =>

@@ -19,9 +19,24 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class PageResult<T>
 {
+    /// <summary>
+    /// 总记录数
+    /// </summary>
     public int Total { get; set; }
+
+    /// <summary>
+    /// 数据列表
+    /// </summary>
     public List<T> Items { get; set; } = new();
+
+    /// <summary>
+    /// 当前页码
+    /// </summary>
     public int Page { get; set; }
+
+    /// <summary>
+    /// 每页条数
+    /// </summary>
     public int PageSize { get; set; }
 }
 
@@ -30,8 +45,19 @@ public class PageResult<T>
 /// </summary>
 public class ApiResult<T>
 {
+    /// <summary>
+    /// 状态码
+    /// </summary>
     public int Code { get; set; }
+
+    /// <summary>
+    /// 响应消息
+    /// </summary>
     public string Message { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 响应数据
+    /// </summary>
     public T? Data { get; set; }
 
     public static ApiResult<T> Ok(T? data, string message = "success")

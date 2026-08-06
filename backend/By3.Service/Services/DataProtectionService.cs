@@ -33,7 +33,7 @@ public class DataProtectionService
         _logger = logger;
         var keyString = configuration["DataProtection:EncryptionKey"];
         if (string.IsNullOrWhiteSpace(keyString))
-            throw new InvalidOperationException("DataProtection:EncryptionKey 未配置，请在环境变量或 User Secrets 中设置。");
+            throw new InvalidOperationException("DataProtection:EncryptionKey 未配置，请在 appsettings.json 中设置。");
 
         // 确保密钥为 32 字节（AES-256）
         var normalized = new StringBuilder();

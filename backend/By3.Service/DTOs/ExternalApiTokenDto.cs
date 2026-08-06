@@ -19,25 +19,84 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class ExternalApiTokenDto
 {
+    /// <summary>
+    /// Token 唯一标识
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 应用名称
+    /// </summary>
     public string AppName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// API 访问密钥
+    /// </summary>
     public string ApiKey { get; set; } = string.Empty;
 
     /// <summary>
     /// ApiSecret 仅在创建/重生成时返回，列表查询返回空字符串。
     /// </summary>
     public string ApiSecret { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Token 描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 过期时间
+    /// </summary>
     public DateTime? ExpireTime { get; set; }
+
+    /// <summary>
+    /// 过期类型（天数）
+    /// </summary>
     public string ExpireType { get; set; } = "30";
+
+    /// <summary>
+    /// 允许访问的 API 接口标识列表
+    /// </summary>
     public List<Guid> AllowedApiIds { get; set; } = new();
+
+    /// <summary>
+    /// 联系邮箱
+    /// </summary>
     public string ContactEmail { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// 是否已删除
+    /// </summary>
     public bool IsDeleted { get; set; }
+
+    /// <summary>
+    /// 上一密钥有效截止时间
+    /// </summary>
     public DateTime? PreviousValidUntil { get; set; }
+
+    /// <summary>
+    /// 上一 API 访问密钥
+    /// </summary>
     public string? PreviousApiKey { get; set; }
+
+    /// <summary>
+    /// 上一 API 密钥
+    /// </summary>
     public string? PreviousApiSecret { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// 最后更新时间
+    /// </summary>
     public DateTime? UpdatedAt { get; set; }
 }
 
@@ -46,12 +105,39 @@ public class ExternalApiTokenDto
 /// </summary>
 public class CreateExternalApiTokenDto
 {
+    /// <summary>
+    /// 应用名称
+    /// </summary>
     public string AppName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Token 描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 过期时间
+    /// </summary>
     public DateTime? ExpireTime { get; set; }
+
+    /// <summary>
+    /// 过期类型（天数）
+    /// </summary>
     public string ExpireType { get; set; } = "30";
+
+    /// <summary>
+    /// 允许访问的 API 接口标识列表
+    /// </summary>
     public List<Guid> AllowedApiIds { get; set; } = new();
+
+    /// <summary>
+    /// 联系邮箱
+    /// </summary>
     public string ContactEmail { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; } = true;
 }
 
@@ -60,12 +146,39 @@ public class CreateExternalApiTokenDto
 /// </summary>
 public class UpdateExternalApiTokenDto
 {
+    /// <summary>
+    /// 应用名称
+    /// </summary>
     public string AppName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Token 描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 过期时间
+    /// </summary>
     public DateTime? ExpireTime { get; set; }
+
+    /// <summary>
+    /// 过期类型（天数）
+    /// </summary>
     public string ExpireType { get; set; } = "30";
+
+    /// <summary>
+    /// 允许访问的 API 接口标识列表
+    /// </summary>
     public List<Guid> AllowedApiIds { get; set; } = new();
+
+    /// <summary>
+    /// 联系邮箱
+    /// </summary>
     public string ContactEmail { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
 }
 
@@ -74,13 +187,44 @@ public class UpdateExternalApiTokenDto
 /// </summary>
 public class CreateExternalApiAccessLogDto
 {
+    /// <summary>
+    /// API 访问密钥
+    /// </summary>
     public string ApiKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求路径
+    /// </summary>
     public string RequestPath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求方法
+    /// </summary>
     public string RequestMethod { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求参数
+    /// </summary>
     public string? RequestParams { get; set; }
+
+    /// <summary>
+    /// 客户端 IP 地址
+    /// </summary>
     public string? IpAddress { get; set; }
+
+    /// <summary>
+    /// 响应状态
+    /// </summary>
     public string Status { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 错误信息
+    /// </summary>
     public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// 幂等键
+    /// </summary>
     public string? IdempotencyKey { get; set; }
 }
 
@@ -89,14 +233,49 @@ public class CreateExternalApiAccessLogDto
 /// </summary>
 public class ExternalApiAccessLogDto
 {
+    /// <summary>
+    /// 日志唯一标识
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// API 访问密钥
+    /// </summary>
     public string ApiKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求路径
+    /// </summary>
     public string RequestPath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求方法
+    /// </summary>
     public string RequestMethod { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求参数
+    /// </summary>
     public string? RequestParams { get; set; }
+
+    /// <summary>
+    /// 客户端 IP 地址
+    /// </summary>
     public string? IpAddress { get; set; }
+
+    /// <summary>
+    /// 响应状态
+    /// </summary>
     public string Status { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 错误信息
+    /// </summary>
     public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 }
 
@@ -121,14 +300,49 @@ public class RegenerateExternalApiTokenDto
 /// </summary>
 public class ExternalApiTokenLogDto
 {
+    /// <summary>
+    /// 日志唯一标识
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 关联 Token 标识
+    /// </summary>
     public Guid TokenId { get; set; }
+
+    /// <summary>
+    /// 操作类型
+    /// </summary>
     public string Action { get; set; } = string.Empty;
+
+    /// <summary>
+    /// API 访问密钥
+    /// </summary>
     public string ApiKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 操作者 IP 地址
+    /// </summary>
     public string? IpAddress { get; set; }
+
+    /// <summary>
+    /// 操作人标识
+    /// </summary>
     public Guid? OperatorId { get; set; }
+
+    /// <summary>
+    /// 操作人名称
+    /// </summary>
     public string? OperatorName { get; set; }
+
+    /// <summary>
+    /// 备注
+    /// </summary>
     public string? Remark { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 }
 
@@ -137,15 +351,54 @@ public class ExternalApiTokenLogDto
 /// </summary>
 public class ExternalApiTokenHistoryDto
 {
+    /// <summary>
+    /// 历史记录唯一标识
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 关联 Token 标识
+    /// </summary>
     public Guid TokenId { get; set; }
+
+    /// <summary>
+    /// 应用名称
+    /// </summary>
     public string AppName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// API 访问密钥
+    /// </summary>
     public string ApiKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// API 密钥
+    /// </summary>
     public string ApiSecret { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 过期时间
+    /// </summary>
     public DateTime? ExpireTime { get; set; }
+
+    /// <summary>
+    /// 有效截止时间
+    /// </summary>
     public DateTime? ValidUntil { get; set; }
+
+    /// <summary>
+    /// 作废时间
+    /// </summary>
     public DateTime? InvalidatedAt { get; set; }
+
+    /// <summary>
+    /// 作废操作人标识
+    /// </summary>
     public Guid? InvalidatedBy { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 
     /// <summary>

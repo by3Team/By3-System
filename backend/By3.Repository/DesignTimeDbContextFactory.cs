@@ -28,7 +28,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("DefaultConnection 未配置，请在环境变量或 User Secrets 中设置。");
+            throw new InvalidOperationException("DefaultConnection 未配置，请在 appsettings.json 中设置。");
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseNpgsql(connectionString);

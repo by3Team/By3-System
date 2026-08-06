@@ -23,6 +23,9 @@ public class LoginLogService
     private readonly LoginLogRepository _repo;
     public LoginLogService(LoginLogRepository repo) => _repo = repo;
 
+    /// <summary>
+    /// 分页查询登录日志列表
+    /// </summary>
     public async Task<PageResult<LoginLogDto>> GetListAsync(int page, int pageSize, LoginLogQueryDto? query = null)
     {
         var repoQuery = query == null ? null : new LoginLogQuery

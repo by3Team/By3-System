@@ -20,6 +20,9 @@ namespace By3.Service.Services;
 
 public class SystemInfoService
 {
+    /// <summary>
+    /// 获取系统前后端依赖包及许可证信息。
+    /// </summary>
     public SystemPackagesDto GetPackages()
     {
         var repoRoot = FindRepoRoot();
@@ -31,6 +34,9 @@ public class SystemInfoService
         return result;
     }
 
+    /// <summary>
+    /// 向上查找项目根目录（通过定位 frontend/package.json）。
+    /// </summary>
     private static string? FindRepoRoot()
     {
         // 通过查找 frontend/package.json 定位项目根目录
@@ -50,6 +56,9 @@ public class SystemInfoService
 
 
 
+    /// <summary>
+    /// 读取后端各 .csproj 中的 NuGet 包引用及许可证信息。
+    /// </summary>
     private static List<ProjectPackagesDto> ReadBackendPackages(string solutionRoot)
     {
         var backendDir = Path.Combine(solutionRoot, "backend");
@@ -88,6 +97,9 @@ public class SystemInfoService
         return result.OrderBy(p => p.Project).ToList();
     }
 
+    /// <summary>
+    /// 读取前端 package.json 中的 npm 依赖及许可证信息。
+    /// </summary>
     private static FrontendPackagesDto ReadFrontendPackages(string solutionRoot)
     {
         var packageJsonPath = Path.Combine(solutionRoot, "frontend", "package.json");

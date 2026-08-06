@@ -19,6 +19,9 @@ namespace By3.Api.Authorization;
 
 public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {
+    /// <summary>
+    /// 根据用户声明中的权限列表判断是否满足权限要求。
+    /// </summary>
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {
         var permissionsClaim = context.User.FindFirst("permissions");

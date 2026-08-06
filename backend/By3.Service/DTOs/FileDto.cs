@@ -19,13 +19,44 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class FileRecordDto
 {
+    /// <summary>
+    /// 文件ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 文件名称
+    /// </summary>
     public string FileName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 原始文件名
+    /// </summary>
     public string OriginalFileName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 文件大小（字节）
+    /// </summary>
     public long FileSize { get; set; }
+
+    /// <summary>
+    /// 内容类型
+    /// </summary>
     public string ContentType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 文件分类
+    /// </summary>
     public string FileCategory { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 上传模式
+    /// </summary>
     public string UploadMode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 }
 
@@ -34,8 +65,23 @@ public class FileRecordDto
 /// </summary>
 public class FileUploadResultDto
 {
+    /// <summary>
+    /// 文件ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 原始文件名
+    /// </summary>
     public string OriginalFileName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 文件大小（字节）
+    /// </summary>
     public long FileSize { get; set; }
+
+    /// <summary>
+    /// 下载地址
+    /// </summary>
     public string DownloadUrl { get; set; } = string.Empty;
 }

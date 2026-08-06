@@ -34,6 +34,9 @@ public class FileService : IFileService
         _uploadRoot = configuration["FileStorage:UploadPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "uploads");
     }
 
+    /// <summary>
+    /// 上传单个文件
+    /// </summary>
     public async Task<FileUploadResultDto> UploadAsync(IFormFile file, string category, string uploadMode, Guid? userId)
     {
         if (file == null || file.Length == 0)
@@ -77,6 +80,9 @@ public class FileService : IFileService
         };
     }
 
+    /// <summary>
+    /// 批量上传文件
+    /// </summary>
     public async Task<List<FileUploadResultDto>> UploadMultipleAsync(List<IFormFile> files, string category, Guid? userId)
     {
         var results = new List<FileUploadResultDto>();
@@ -87,12 +93,18 @@ public class FileService : IFileService
         return results;
     }
 
+    /// <summary>
+    /// 根据ID获取文件记录
+    /// </summary>
     public async Task<FileRecordDto?> GetByIdAsync(Guid id)
     {
         var record = await _repo.GetByIdAsync(id);
         return record == null ? null : MapToDto(record);
     }
 
+    /// <summary>
+    /// 分页查询文件记录列表
+    /// </summary>
     public async Task<PageResult<FileRecordDto>> GetListAsync(int page, int pageSize, string? keyword, string? category)
     {
         var items = await _repo.GetListAsync(page, pageSize, keyword, category);
@@ -106,6 +118,9 @@ public class FileService : IFileService
         };
     }
 
+    /// <summary>
+    /// 删除文件及其记录
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
     {
         var record = await _repo.GetByIdAsync(id);
@@ -118,6 +133,9 @@ public class FileService : IFileService
         return await _repo.DeleteAsync(id);
     }
 
+    /// <summary>
+    /// 获取文件流用于下载
+    /// </summary>
     public async Task<Stream?> GetFileStreamAsync(Guid id)
     {
         var record = await _repo.GetByIdAsync(id);
@@ -127,6 +145,9 @@ public class FileService : IFileService
         return File.OpenRead(fullPath);
     }
 
+    /// <summary>
+    /// 导出文件记录为Excel
+    /// </summary>
     public async Task<byte[]> ExportExcelAsync(string? category)
     {
         var records = await _repo.GetAllAsync(category);
@@ -162,6 +183,9 @@ public class FileService : IFileService
         return stream.ToArray();
     }
 
+    /// <summary>
+    /// 校验文件扩展名是否在字典配置的允许范围内。
+    /// </summary>
     private async Task ValidateFileExtensionAsync(string category, string ext)
     {
         var dictItems = await _dictRepo.GetByTypeCodeAsync("sys_file_category");
@@ -180,6 +204,9 @@ public class FileService : IFileService
             throw new ArgumentException($"文件类型 {ext} 不允许上传，当前分类支持：{item.Remark}");
     }
 
+    /// <summary>
+    /// 解析文件存储分类：优先匹配传入的 category，否则按扩展名自动匹配。
+    /// </summary>
     private async Task<string> ResolveFileCategoryAsync(string category, string ext)
     {
         var dictItems = await _dictRepo.GetByTypeCodeAsync("sys_file_category");
@@ -198,9 +225,15 @@ public class FileService : IFileService
         return matched?.DictValue ?? "general";
     }
 
+    /// <summary>
+    /// 将相对路径转换为磁盘绝对路径。
+    /// </summary>
     private string GetFullPath(string relativePath)
         => Path.Combine(_uploadRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
 
+    /// <summary>
+    /// 将文件记录实体映射为 DTO。
+    /// </summary>
     private static FileRecordDto MapToDto(SysFileRecord record) => new()
     {
         Id = record.Id,

@@ -38,6 +38,9 @@ public class ExternalApiService
         _tokenRepository = tokenRepository;
     }
 
+    /// <summary>
+    /// 分页查询对外接口列表。
+    /// </summary>
     public async Task<PageResult<ExternalApiDto>> GetListAsync(int page, int pageSize, string? keyword = null, string? isEnabled = null)
     {
         bool? enabled = isEnabled?.ToLowerInvariant() switch
@@ -59,18 +62,27 @@ public class ExternalApiService
         };
     }
 
+    /// <summary>
+    /// 根据 ID 获取对外接口信息。
+    /// </summary>
     public async Task<ExternalApiDto?> GetByIdAsync(Guid id)
     {
         var api = await _repository.GetByIdAsync(id);
         return api == null ? null : MapToDto(api);
     }
 
+    /// <summary>
+    /// 根据路由和请求方法获取对外接口信息。
+    /// </summary>
     public async Task<ExternalApiDto?> GetByRouteAsync(string route, string method)
     {
         var api = await _repository.GetByRouteAsync(route, method);
         return api == null ? null : MapToDto(api);
     }
 
+    /// <summary>
+    /// 创建对外接口。
+    /// </summary>
     public async Task<Guid> CreateAsync(CreateExternalApiDto dto)
     {
         if (await _repository.ExistsAsync(dto.Route, dto.Method))
@@ -93,6 +105,9 @@ public class ExternalApiService
         return api.Id;
     }
 
+    /// <summary>
+    /// 更新对外接口信息。
+    /// </summary>
     public async Task<int> UpdateAsync(Guid id, UpdateExternalApiDto dto)
     {
         var api = await _repository.GetByIdAsync(id);
@@ -113,6 +128,9 @@ public class ExternalApiService
         return await _repository.UpdateAsync(api);
     }
 
+    /// <summary>
+    /// 删除对外接口。
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
     {
         return await _repository.DeleteAsync(id);
@@ -177,6 +195,9 @@ public class ExternalApiService
         };
     }
 
+    /// <summary>
+    /// 构建近 30 天每日请求统计。
+    /// </summary>
     private static List<ExternalApiDailyStatDto> BuildDailyStats(DateTime since, List<SysExternalApiAccessLog> logs)
     {
         var result = new List<ExternalApiDailyStatDto>();
@@ -205,6 +226,9 @@ public class ExternalApiService
         return result;
     }
 
+    /// <summary>
+    /// 获取已授权指定接口的 Token 列表。
+    /// </summary>
     private async Task<List<ExternalApiAllowedTokenDto>> GetAllowedTokensAsync(Guid apiId)
     {
         var tokens = await _tokenRepository.GetAllNonDeletedAsync();
@@ -221,6 +245,9 @@ public class ExternalApiService
             .ToList();
     }
 
+    /// <summary>
+    /// 反序列化允许访问的接口 ID 列表。
+    /// </summary>
     private static List<Guid> ParseAllowedApiIds(string? json)
     {
         if (string.IsNullOrWhiteSpace(json)) return new List<Guid>();
@@ -234,6 +261,9 @@ public class ExternalApiService
         }
     }
 
+    /// <summary>
+    /// 将对外接口实体映射为 DTO。
+    /// </summary>
     private static ExternalApiDto MapToDto(SysExternalApi api) => new()
     {
         Id = api.Id,

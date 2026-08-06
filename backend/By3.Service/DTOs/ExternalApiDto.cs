@@ -19,16 +19,59 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class ExternalApiDto
 {
+    /// <summary>
+    /// 接口唯一标识
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 接口名称
+    /// </summary>
     public string ApiName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求路由
+    /// </summary>
     public string Route { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求方法（GET / POST 等）
+    /// </summary>
     public string Method { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 接口描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 每秒请求限制
+    /// </summary>
     public int RateLimitPerSecond { get; set; }
+
+    /// <summary>
+    /// 是否要求幂等
+    /// </summary>
     public bool RequireIdempotency { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// 是否已删除
+    /// </summary>
     public bool IsDeleted { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// 最后更新时间
+    /// </summary>
     public DateTime? UpdatedAt { get; set; }
 }
 
@@ -37,12 +80,39 @@ public class ExternalApiDto
 /// </summary>
 public class CreateExternalApiDto
 {
+    /// <summary>
+    /// 接口名称
+    /// </summary>
     public string ApiName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求路由
+    /// </summary>
     public string Route { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求方法（GET / POST 等）
+    /// </summary>
     public string Method { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 接口描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 每秒请求限制
+    /// </summary>
     public int RateLimitPerSecond { get; set; } = 0;
+
+    /// <summary>
+    /// 是否要求幂等
+    /// </summary>
     public bool RequireIdempotency { get; set; } = true;
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; } = true;
 }
 
@@ -51,12 +121,39 @@ public class CreateExternalApiDto
 /// </summary>
 public class UpdateExternalApiDto
 {
+    /// <summary>
+    /// 接口名称
+    /// </summary>
     public string ApiName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求路由
+    /// </summary>
     public string Route { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求方法（GET / POST 等）
+    /// </summary>
     public string Method { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 接口描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 每秒请求限制
+    /// </summary>
     public int RateLimitPerSecond { get; set; }
+
+    /// <summary>
+    /// 是否要求幂等
+    /// </summary>
     public bool RequireIdempotency { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
 }
 
@@ -65,17 +162,59 @@ public class UpdateExternalApiDto
 /// </summary>
 public class ExternalApiStatsDto
 {
+    /// <summary>
+    /// 接口唯一标识
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 接口名称
+    /// </summary>
     public string ApiName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求路由
+    /// </summary>
     public string Route { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求方法（GET / POST 等）
+    /// </summary>
     public string Method { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 每秒请求限制
+    /// </summary>
     public int RateLimitPerSecond { get; set; }
+
+    /// <summary>
+    /// 是否要求幂等
+    /// </summary>
     public bool RequireIdempotency { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
 
+    /// <summary>
+    /// 总请求数
+    /// </summary>
     public int TotalRequests { get; set; }
+
+    /// <summary>
+    /// 成功请求数
+    /// </summary>
     public int SuccessCount { get; set; }
+
+    /// <summary>
+    /// 失败请求数
+    /// </summary>
     public int FailureCount { get; set; }
+
+    /// <summary>
+    /// 最后调用时间
+    /// </summary>
     public DateTime? LastCallAt { get; set; }
 
     /// <summary>
@@ -94,9 +233,24 @@ public class ExternalApiStatsDto
 /// </summary>
 public class ExternalApiDailyStatDto
 {
+    /// <summary>
+    /// 统计日期
+    /// </summary>
     public string Date { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 请求总数
+    /// </summary>
     public int Count { get; set; }
+
+    /// <summary>
+    /// 成功请求数
+    /// </summary>
     public int SuccessCount { get; set; }
+
+    /// <summary>
+    /// 失败请求数
+    /// </summary>
     public int FailureCount { get; set; }
 }
 
@@ -105,8 +259,23 @@ public class ExternalApiDailyStatDto
 /// </summary>
 public class ExternalApiAllowedTokenDto
 {
+    /// <summary>
+    /// Token 唯一标识
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 应用名称
+    /// </summary>
     public string AppName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// API 访问密钥
+    /// </summary>
     public string ApiKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
 }

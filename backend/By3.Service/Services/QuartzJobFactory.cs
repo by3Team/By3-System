@@ -27,6 +27,9 @@ public class QuartzJobFactory : IJobFactory
         _serviceProvider = serviceProvider;
     }
 
+    /// <summary>
+    /// 通过 DI 容器创建 Job 实例。
+    /// </summary>
     public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
     {
         var jobType = bundle.JobDetail.JobType;
@@ -42,6 +45,9 @@ public class QuartzJobFactory : IJobFactory
         return job;
     }
 
+    /// <summary>
+    /// 释放 Job 实例。
+    /// </summary>
     public void ReturnJob(IJob job)
     {
         (job as IDisposable)?.Dispose();

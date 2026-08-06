@@ -19,13 +19,44 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class CreateMenuDto
 {
+    /// <summary>
+    /// 菜单名称
+    /// </summary>
     public string MenuName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 权限标识
+    /// </summary>
     public string? Permission { get; set; }
+
+    /// <summary>
+    /// 路由地址
+    /// </summary>
     public string? Route { get; set; }
+
+    /// <summary>
+    /// 图标
+    /// </summary>
     public string? Icon { get; set; }
+
+    /// <summary>
+    /// 组件路径
+    /// </summary>
     public string? Component { get; set; }
+
+    /// <summary>
+    /// 菜单类型
+    /// </summary>
     public int MenuType { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int SortOrder { get; set; }
+
+    /// <summary>
+    /// 父级菜单ID
+    /// </summary>
     public Guid? ParentId { get; set; }
 }
 
@@ -34,14 +65,53 @@ public class CreateMenuDto
 /// </summary>
 public class UpdateMenuDto
 {
+    /// <summary>
+    /// 菜单ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 菜单名称
+    /// </summary>
     public string? MenuName { get; set; }
+
+    /// <summary>
+    /// 权限标识
+    /// </summary>
     public string? Permission { get; set; }
+
+    /// <summary>
+    /// 路由地址
+    /// </summary>
     public string? Route { get; set; }
+
+    /// <summary>
+    /// 图标
+    /// </summary>
     public string? Icon { get; set; }
+
+    /// <summary>
+    /// 组件路径
+    /// </summary>
     public string? Component { get; set; }
+
+    /// <summary>
+    /// 菜单类型
+    /// </summary>
     public int? MenuType { get; set; }
+
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int? SortOrder { get; set; }
+
+    /// <summary>
+    /// 父级菜单ID
+    /// </summary>
     public Guid? ParentId { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
 }

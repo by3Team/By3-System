@@ -67,47 +67,41 @@ backend/
 
 ## 配置说明
 
-项目使用三层配置：
+所有配置集中在 `By3.Api/appsettings.json` 中，JSON 不支持注释，以下为各配置节说明。
 
-- `appsettings.json`：通用配置结构和非敏感默认值。
-- `appsettings.Development.json`：本地开发默认值，包含数据库连接、JWT Key、数据保护密钥、文件上传路径。
-- `appsettings.Production.json`：生产环境配置，敏感值留空，强制通过环境变量注入。
+### 快速开始
 
-主要配置节：
+1. 确保 PostgreSQL 已安装并运行。
+2. 修改 `appsettings.json` 中的 `ConnectionStrings:DefaultConnection`，填入你的数据库连接信息。
+3. 创建数据库并执行初始化脚本（见下方「数据库初始化」章节）。
+4. 运行 `dotnet run --project By3.Api`，启动后自动连接数据库并插入种子数据。
 
-- `ConnectionStrings:DefaultConnection`：PostgreSQL 连接字符串。
-- `Jwt`：JWT 密钥、签发人、受众、Token 过期时间。
-- `Cors:AllowedOrigins`：允许跨域来源。
-- `RateLimiting`：限流参数。
-- `FileUpload`：请求体/文件大小限制。
-- `FileStorage:UploadPath`：上传文件物理存储路径。
-- `DataProtection:EncryptionKey`：敏感数据 AES 加密密钥。
-- `Jobs:UserSeed:DefaultPassword`：用户种子任务默认密码。
-- `Swagger:IsEnabled`：是否启用 Swagger UI。默认 `Development` 环境启用，`Production` 环境关闭；也可通过环境变量 `Swagger__IsEnabled=true/false` 显式覆盖。
-- `TablePrefix`：数据库表前缀，默认 `by3_`，生成的表名为 `{prefix}{表名}`，例如 `by3_sysuser`。
+> **连接字符串格式**：`Host=地址;Port=端口;Database=数据库名;Username=用户名;Password=密码`
 
-**注意：生产环境敏感配置（连接字符串、JWT Key、数据保护密钥、文件上传路径等）请通过环境变量或 User Secrets 提供，不要提交到代码仓库。**
+### 主要配置节
 
-环境变量示例：
-
-```bash
-export ASPNETCORE_ENVIRONMENT=Production
-export ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=by3;Username=postgres;Password=your_password"
-export Jwt__Key="your-super-secret-key-at-least-32-bytes-long!"
-export Jwt__Issuer="By3"
-export Jwt__Audience="By3Client"
-export DataProtection__EncryptionKey="your-32-bytes-encryption-key!"
-export Cors__AllowedOrigins="http://localhost"
-```
-
-Windows CMD 示例：
-
-```cmd
-set ASPNETCORE_ENVIRONMENT=Development
-set ConnectionStrings__DefaultConnection=Host=localhost;Port=5432;Database=by3_dev;Username=postgres;Password=123456
-set Jwt__Key=your-super-secret-key-at-least-32-bytes-long!
-set DataProtection__EncryptionKey=By3DevPhoneEncryptionKey-ChangeInProd!
-```
+| 配置路径 | 说明 | 默认值 |
+|----------|------|--------|
+| `ConnectionStrings:DefaultConnection` | PostgreSQL 连接字符串 | `Host=localhost;Port=5432;Database=by3_dev;Username=postgres;Password=123456` |
+| `Database:AutoMigrate` | 启动时是否自动迁移（已弃用，保留为 false） | `false` |
+| `Database:AutoSeed` | 启动时是否自动插入种子数据 | `true` |
+| `Jwt:Key` | JWT 签名密钥（长度至少 32 字节） | `your-super-secret-key-at-least-32-bytes-long!` |
+| `Jwt:Issuer` | JWT 签发人 | `By3` |
+| `Jwt:Audience` | JWT 受众 | `By3Client` |
+| `Jwt:AccessTokenExpireHours` | 访问令牌过期时间（小时） | `8` |
+| `Jwt:RefreshTokenExpireDays` | 刷新令牌过期时间（天） | `7` |
+| `Cors:AllowedOrigins` | 允许跨域来源（多个用逗号分隔） | `http://localhost:5175` |
+| `RateLimiting` | 限流参数（全局、默认、登录） | 见文件 |
+| `FileUpload:MaxRequestBodySize` | 最大请求体大小（字节） | `104857600`（100MB） |
+| `FileStorage:UploadPath` | 上传文件物理存储路径 | `./uploads` |
+| `DataProtection:EncryptionKey` | 敏感数据 AES 加密密钥（长度至少 32 字节） | `By3DevPhoneEncryptionKey-ChangeInProd!` |
+| `Jobs:UserSeed:DefaultPassword` | 用户种子任务默认密码 | `Demo123!` |
+| `Swagger:IsEnabled` | 是否启用 Swagger UI | `false` |
+| `ExternalApiAuth:RateWindowSeconds` | 对外 API 单 AK 限流窗口（秒） | `1` |
+| `ExternalApiAuth:IdempotencyWindowHours` | 幂等 Key 缓存时长（小时） | `24` |
+| `ExternalApiAuth:MaxConsecutiveFailures` | 连续认证失败最大次数 | `5` |
+| `ExternalApiAuth:FailureWindowMinutes` | 失败计数窗口（分钟） | `15` |
+| `TablePrefix` | 数据库表前缀 | `by3_` |
 
 ### 数据库初始化（手动 SQL）
 
@@ -115,41 +109,28 @@ set DataProtection__EncryptionKey=By3DevPhoneEncryptionKey-ChangeInProd!
 
 最终版脚本位于 `database/migrations/V001__init_schema.sql`，包含完整的建表语句及所有表/字段中文注释。
 
-首次部署或重建数据库时，请手动执行：
+### 数据库初始化
 
-```bash
-# 创建数据库
-psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE by3_dev;"
+应用首次启动时会**自动创建数据库和表结构**，无需手动执行 SQL 脚本。只需确保 PostgreSQL 已运行且连接字符串配置正确。
 
-# 执行初始化脚本
-psql -h localhost -p 5432 -U postgres -d by3_dev -f database/migrations/V001__init_schema.sql
-```
+启动后自动执行：
+1. 检测数据库是否存在，不存在则自动创建
+2. 检测表结构是否存在，不存在则自动创建所有表
+3. 根据 `Database:AutoSeed` 配置插入种子数据
 
-### 历史数据库升级
-
-如果数据库已使用旧版 `by3sys*`（无下划线）表名初始化，需先手动执行重命名操作：
-
-```sql
--- 示例：重命名用户表及其约束、索引
-ALTER TABLE by3sysuser RENAME TO by3_sysuser;
-ALTER TABLE by3_sysuser RENAME CONSTRAINT "PK_by3sysuser" TO "PK_by3_sysuser";
--- 其他表、约束、索引按相同规则处理
-```
-
-建议新建数据库并重新导入 V001 脚本，以获得完整的字段注释。
-
-启动时会根据 `Database:AutoSeed` 配置决定是否初始化种子数据：
-
-- `Database:AutoSeed: true`：自动插入超级管理员、默认角色、菜单、字典等种子数据。
-- `Database:AutoSeed: false`：跳过种子数据初始化。
-
-默认账户：
+种子数据包含：
 
 - 超级管理员：`admin` / `Demo123!`
-- 默认角色：超级管理员
-- 默认菜单：系统管理、文件管理、邮件管理、日志管理、系统设置、任务管理、对外 API 及其子菜单
+- 角色：超级管理员（全部权限）、普通用户（只读权限）
+- 菜单：系统管理、文件管理、邮件管理、日志管理、系统设置、任务管理、对外 API
+- 部门：技术部、运维部、人力资源部、销售部（含子部门）
+- 岗位：总经理、部门经理、工程师等 12 个岗位
+- 字典：性别、启用状态、菜单类型、是否、文件类型
+- 邮件模板：Token 通知模板
+- 定时任务：人员数据插入（默认禁用）
+- 对外 API 接口：6 条默认路由
 
-> 注意：`Database:AutoMigrate` 已统一设置为 `false`，程序启动时不会执行 EF Core 迁移。
+> 手动 SQL 脚本 `database/migrations/V001__init_schema.sql` 仍可用于手动建表（含完整字段注释），但通常不需要。
 
 ## 运行方式
 

@@ -39,6 +39,9 @@ public class EmailService
         _settingRepo = settingRepo;
     }
 
+    /// <summary>
+    /// 分页查询邮件模板列表。
+    /// </summary>
     public async Task<PageResult<EmailTemplateDto>> GetTemplateListAsync(int page, int pageSize, string? keyword)
     {
         var items = await _templateRepo.GetListAsync(page, pageSize, keyword);
@@ -52,12 +55,18 @@ public class EmailService
         };
     }
 
+    /// <summary>
+    /// 根据 ID 获取邮件模板。
+    /// </summary>
     public async Task<EmailTemplateDto?> GetTemplateByIdAsync(Guid id)
     {
         var template = await _templateRepo.GetByIdAsync(id);
         return template == null ? null : MapTemplateToDto(template);
     }
 
+    /// <summary>
+    /// 创建邮件模板。
+    /// </summary>
     public async Task<Guid> CreateTemplateAsync(CreateEmailTemplateDto dto, Guid? userId)
     {
         var template = new SysEmailTemplate
@@ -72,6 +81,9 @@ public class EmailService
         return await _templateRepo.CreateAsync(template);
     }
 
+    /// <summary>
+    /// 更新邮件模板信息。
+    /// </summary>
     public async Task<int> UpdateTemplateAsync(UpdateEmailTemplateDto dto)
     {
         var template = await _templateRepo.GetByIdAsync(dto.Id);
@@ -83,31 +95,56 @@ public class EmailService
         return await _templateRepo.UpdateAsync(template);
     }
 
+    /// <summary>
+    /// 删除邮件模板。
+    /// </summary>
     public async Task<int> DeleteTemplateAsync(Guid id)
         => await _templateRepo.DeleteAsync(id);
 
+    /// <summary>
+    /// 获取指定模板的所有版本列表。
+    /// </summary>
     public async Task<List<EmailTemplateVersionDto>> GetVersionsByTemplateIdAsync(Guid templateId)
     {
         var versions = await _versionRepo.GetByTemplateIdAsync(templateId);
         return versions.Select(MapVersionToDto).ToList();
     }
 
+    /// <summary>
+    /// 根据 ID 获取模板版本。
+    /// </summary>
     public async Task<EmailTemplateVersionDto?> GetVersionByIdAsync(Guid id)
     {
         var version = await _versionRepo.GetByIdAsync(id);
         return version == null ? null : MapVersionToDto(version);
     }
 
+    /// <summary>
+    /// 创建邮件模板版本。
+    /// </summary>
     public async Task<Guid> CreateVersionAsync(CreateEmailTemplateVersionDto dto, Guid? userId)
     {
-        if (await _versionRepo.ExistsAsync(dto.TemplateId, dto.Version))
-            throw new InvalidOperationException($"版本 {dto.Version} 已存在");
+        var versionStr = dto.Version;
+        if (string.IsNullOrWhiteSpace(versionStr))
+        {
+            var existingVersions = await _versionRepo.GetByTemplateIdAsync(dto.TemplateId);
+            var maxNum = existingVersions
+                .Select(v => v.Version)
+                .Where(v => v.StartsWith("v") && int.TryParse(v[1..], out _))
+                .Select(v => int.Parse(v[1..]))
+                .DefaultIfEmpty(0)
+                .Max();
+            versionStr = $"v{maxNum + 1}";
+        }
+
+        if (await _versionRepo.ExistsAsync(dto.TemplateId, versionStr))
+            throw new InvalidOperationException($"版本 {versionStr} 已存在");
 
         var version = new SysEmailTemplateVersion
         {
             Id = Guid.NewGuid(),
             TemplateId = dto.TemplateId,
-            Version = dto.Version,
+            Version = versionStr,
             Subject = dto.Subject,
             Body = dto.Body,
             BodyFormat = dto.BodyFormat ?? "html",
@@ -117,6 +154,9 @@ public class EmailService
         return await _versionRepo.CreateAsync(version);
     }
 
+    /// <summary>
+    /// 更新邮件模板版本内容。
+    /// </summary>
     public async Task<int> UpdateVersionAsync(UpdateEmailTemplateVersionDto dto)
     {
         var version = await _versionRepo.GetByIdAsync(dto.Id);
@@ -129,9 +169,15 @@ public class EmailService
         return await _versionRepo.UpdateAsync(version);
     }
 
+    /// <summary>
+    /// 删除邮件模板版本。
+    /// </summary>
     public async Task<int> DeleteVersionAsync(Guid id)
         => await _versionRepo.DeleteAsync(id);
 
+    /// <summary>
+    /// 批量发送邮件，按模板渲染内容并记录日志。
+    /// </summary>
     public async Task SendBatchAsync(SendEmailDto dto)
     {
         var version = await ResolveVersionAsync(dto.TemplateId, dto.Version);
@@ -171,6 +217,9 @@ public class EmailService
         }
     }
 
+    /// <summary>
+    /// 发送测试邮件（前缀 [TEST]）。
+    /// </summary>
     public async Task SendTestAsync(TestEmailDto dto)
     {
         var version = await ResolveVersionAsync(dto.TemplateId, dto.Version);
@@ -183,6 +232,9 @@ public class EmailService
         await SendEmailAsync(dto.ToAddress, ccList, "[TEST] " + subject, body, version.BodyFormat);
     }
 
+    /// <summary>
+    /// 分页查询邮件发送日志。
+    /// </summary>
     public async Task<PageResult<EmailLogDto>> GetLogListAsync(int page, int pageSize, string? keyword, string? status)
     {
         var items = await _logRepo.GetListAsync(page, pageSize, keyword, status);
@@ -226,6 +278,9 @@ public class EmailService
         }
     }
 
+    /// <summary>
+    /// 解析模板版本：按版本号或最新激活版本查找。
+    /// </summary>
     private async Task<SysEmailTemplateVersion?> ResolveVersionAsync(Guid templateId, string version)
     {
         if (!string.IsNullOrWhiteSpace(version))
@@ -236,6 +291,9 @@ public class EmailService
         return await _versionRepo.GetActiveByTemplateIdAsync(templateId);
     }
 
+    /// <summary>
+    /// 通过 SMTP 发送邮件。
+    /// </summary>
     private async Task SendEmailAsync(string toAddress, List<string> ccAddresses, string subject, string body, string bodyFormat)
     {
         var setting = await _settingRepo.GetAsync() ?? throw new InvalidOperationException("邮件发送端未配置，请先在系统设置中配置");
@@ -269,6 +327,9 @@ public class EmailService
         await client.DisconnectAsync(true);
     }
 
+    /// <summary>
+    /// 替换内容中的模板变量（{key} 格式）。
+    /// </summary>
     private static string ReplaceVariables(string content, Dictionary<string, string>? variables)
     {
         if (variables == null) return content;
@@ -279,6 +340,9 @@ public class EmailService
         return content;
     }
 
+    /// <summary>
+    /// 将邮件模板实体映射为 DTO。
+    /// </summary>
     private static EmailTemplateDto MapTemplateToDto(SysEmailTemplate t) => new()
     {
         Id = t.Id,
@@ -289,6 +353,9 @@ public class EmailService
         CreatedAt = t.CreatedAt
     };
 
+    /// <summary>
+    /// 将模板版本实体映射为 DTO。
+    /// </summary>
     private static EmailTemplateVersionDto MapVersionToDto(SysEmailTemplateVersion v) => new()
     {
         Id = v.Id,
@@ -301,6 +368,9 @@ public class EmailService
         CreatedAt = v.CreatedAt
     };
 
+    /// <summary>
+    /// 将邮件日志实体映射为 DTO。
+    /// </summary>
     private static EmailLogDto MapLogToDto(SysEmailLog l) => new()
     {
         Id = l.Id,
@@ -333,7 +403,7 @@ public class UpdateEmailTemplateDto
 public class CreateEmailTemplateVersionDto
 {
     public Guid TemplateId { get; set; }
-    public string Version { get; set; } = string.Empty;
+    public string? Version { get; set; }
     public string Subject { get; set; } = string.Empty;
     public string Body { get; set; } = string.Empty;
     public string BodyFormat { get; set; } = "html";

@@ -25,7 +25,7 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("DefaultConnection 未配置，请在环境变量或 User Secrets 中设置。");
+            throw new InvalidOperationException("DefaultConnection 未配置，请在 appsettings.json 中设置。");
 
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 

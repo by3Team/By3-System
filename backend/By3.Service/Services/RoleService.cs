@@ -41,6 +41,9 @@ public class RoleService
         }
     }
 
+    /// <summary>
+    /// 分页查询角色列表。
+    /// </summary>
     public async Task<PageResult<RoleListDto>> GetListAsync(int page, int pageSize, string? keyword)
     {
         var roles = await _repo.GetListAsync(page, pageSize, keyword);
@@ -61,6 +64,9 @@ public class RoleService
         };
     }
 
+    /// <summary>
+    /// 获取所有角色列表。
+    /// </summary>
     public async Task<List<RoleListDto>> GetAllAsync()
     {
         var roles = await _repo.GetListAsync();
@@ -74,6 +80,9 @@ public class RoleService
         }).ToList();
     }
 
+    /// <summary>
+    /// 根据ID获取角色详情。
+    /// </summary>
     public async Task<RoleListDto?> GetByIdAsync(Guid id)
     {
         var r = await _repo.GetByIdAsync(id);
@@ -88,6 +97,9 @@ public class RoleService
         };
     }
 
+    /// <summary>
+    /// 创建角色。
+    /// </summary>
     public async Task<Guid> CreateAsync(CreateRoleDto dto)
     {
         var role = new SysRole
@@ -102,6 +114,9 @@ public class RoleService
         return role.Id;
     }
 
+    /// <summary>
+    /// 更新角色信息。
+    /// </summary>
     public async Task<int> UpdateAsync(UpdateRoleDto dto)
     {
         var role = await _repo.GetByIdAsync(dto.Id);
@@ -119,9 +134,15 @@ public class RoleService
         return result;
     }
 
+    /// <summary>
+    /// 删除角色。
+    /// </summary>
     public async Task<int> DeleteAsync(Guid id)
         => await _repo.DeleteAsync(id);
 
+    /// <summary>
+    /// 获取角色关联的菜单ID列表。
+    /// </summary>
     public async Task<List<Guid>> GetRoleMenuIdsAsync(Guid roleId)
         => await _repo.GetMenuIdsByRoleIdAsync(roleId);
 }

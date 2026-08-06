@@ -128,6 +128,12 @@ public static class LicenseResolver
         ["uuid"] = "MIT",
         ["@types/uuid"] = "MIT",
         ["@types/node"] = "MIT",
+        ["@types/dompurify"] = "MIT",
+        ["dompurify"] = "Apache-2.0",
+        ["echarts"] = "Apache-2.0",
+        ["@vue/devtools-api"] = "MIT",
+        ["@wangeditor/editor"] = "MIT",
+        ["@wangeditor/editor-for-vue"] = "MIT",
         ["vite"] = "MIT",
         ["@vitejs/plugin-vue"] = "MIT",
         ["typescript"] = "Apache-2.0",
@@ -144,6 +150,9 @@ public static class LicenseResolver
         ["vue-eslint-parser"] = "MIT"
     };
 
+    /// <summary>
+    /// 解析 NuGet 包的许可证类型。
+    /// </summary>
     public static string ResolveNuGetLicense(string packageName)
     {
         if (NuGetLicenseMap.TryGetValue(packageName, out var license))
@@ -151,6 +160,9 @@ public static class LicenseResolver
         return "未知";
     }
 
+    /// <summary>
+    /// 解析 npm 包的许可证类型，优先查映射表，其次读 node_modules。
+    /// </summary>
     public static string ResolveNpmLicense(string packageName, string? repoRoot)
     {
         if (NpmLicenseMap.TryGetValue(packageName, out var license))

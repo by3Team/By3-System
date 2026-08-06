@@ -19,8 +19,19 @@ namespace By3.Service.DTOs;
 /// </summary>
 public class CreateRoleDto
 {
+    /// <summary>
+    /// 角色名称
+    /// </summary>
     public string RoleName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 角色描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 菜单ID列表
+    /// </summary>
     public List<Guid> MenuIds { get; set; } = new();
 }
 
@@ -29,10 +40,29 @@ public class CreateRoleDto
 /// </summary>
 public class UpdateRoleDto
 {
+    /// <summary>
+    /// 角色ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 角色名称
+    /// </summary>
     public string? RoleName { get; set; }
+
+    /// <summary>
+    /// 角色描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
+
+    /// <summary>
+    /// 菜单ID列表
+    /// </summary>
     public List<Guid> MenuIds { get; set; } = new();
 }
 
@@ -41,9 +71,28 @@ public class UpdateRoleDto
 /// </summary>
 public class RoleListDto
 {
+    /// <summary>
+    /// 角色ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 角色名称
+    /// </summary>
     public string RoleName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 角色描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 }
