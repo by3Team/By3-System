@@ -2,13 +2,14 @@
 
 本文档列出 By3 系统所有可配置的环境变量。
 
+> **注意**：所有配置集中在 `backend/By3.Api/appsettings.json` 中。环境变量是可选的，可用于覆盖任意配置项。
+
 ## 配置优先级
 
-ASP.NET Core 配置加载顺序（后加载的优先级更高）：
-1. `appsettings.json` — 通用默认值
-2. `appsettings.{Environment}.json` — 环境特定值
-3. 环境变量 — 生产环境推荐方式
-4. 命令行参数 — 最高优先级
+配置加载顺序（后加载的优先级更高）：
+1. `appsettings.json` — 默认值
+2. 环境变量 — 覆盖，生产环境可选
+3. 命令行参数 — 最高优先级
 
 ## 后端环境变量
 
@@ -89,7 +90,7 @@ ASP.NET Core 配置加载顺序（后加载的优先级更高）：
 
 ## Docker Compose 环境变量
 
-Docker Compose 使用 `.env` 文件（从 `.env.example` 复制）：
+Docker Compose 读取环境变量，值可在 `docker-compose.yml` 中直接设置或通过环境变量传入：
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
@@ -101,7 +102,7 @@ Docker Compose 使用 `.env` 文件（从 `.env.example` 复制）：
 
 ## 生产环境部署清单
 
-生产环境必须通过环境变量设置以下敏感配置，**不能使用默认值**：
+生产环境需设置以下敏感配置（可直接写入 `appsettings.json`，或通过环境变量覆盖）：
 
 1. `ConnectionStrings__DefaultConnection` — 使用强密码
 2. `Jwt__Key` — 至少32字节的随机密钥

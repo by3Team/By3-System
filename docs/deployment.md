@@ -16,20 +16,27 @@
 
 适用于快速启动和生产环境。
 
-### 1. 准备环境变量
+### 1. 准备配置文件
 
-```bash
-cp .env.example .env
-```
+编辑 `backend/By3.Api/appsettings.json`，修改以下敏感配置：
 
-编辑 `.env`，修改以下敏感配置：
-
-```bash
-# 必须修改的配置
-POSTGRES_PASSWORD=<强密码>
-JWT_KEY=<至少32字节的随机密钥>
-DATA_PROTECTION_KEY=<至少32字节的随机密钥>
-JOBS_USERSEED_PASSWORD=<强密码>
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=postgres;Port=5432;Database=by3;Username=postgres;Password=<强密码>"
+  },
+  "Jwt": {
+    "Key": "<至少32字节的随机密钥>"
+  },
+  "DataProtection": {
+    "EncryptionKey": "<至少32字节的随机密钥>"
+  },
+  "Jobs": {
+    "UserSeed": {
+      "DefaultPassword": "<强密码>"
+    }
+  }
+}
 ```
 
 生成随机密钥：
@@ -125,31 +132,44 @@ CREATE DATABASE by3_dev;
 
 ### 3. 初始化数据库结构
 
+应用首次启动时会通过 `EnsureCreatedAsync` 自动创建数据库表结构，无需手动执行 SQL。
+
+如需手动初始化（可选）：
+
 ```bash
 psql -h localhost -p 5432 -U postgres -d by3_dev -f database/migrations/V001__init_schema.sql
 ```
 
 ### 4. 配置后端
 
-设置环境变量：
+编辑 `backend/By3.Api/appsettings.json`，修改数据库连接、密钥等配置：
 
-```bash
-# Linux/macOS
-export ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=by3_dev;Username=postgres;Password=your_password"
-export Jwt__Key="your-super-secret-key-at-least-32-bytes-long!"
-export DataProtection__EncryptionKey="your-32-bytes-encryption-key!"
-export FileStorage__UploadPath="./uploads"
-export Jobs__UserSeed__DefaultPassword="Demo123!"
-export Cors__AllowedOrigins="http://localhost:5175"
-
-# Windows PowerShell
-$env:ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=by3_dev;Username=postgres;Password=your_password"
-$env:Jwt__Key="your-super-secret-key-at-least-32-bytes-long!"
-$env:DataProtection__EncryptionKey="your-32-bytes-encryption-key!"
-$env:FileStorage__UploadPath="./uploads"
-$env:Jobs__UserSeed__DefaultPassword="Demo123!"
-$env:Cors__AllowedOrigins="http://localhost:5175"
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=by3_dev;Username=postgres;Password=your_password"
+  },
+  "Jwt": {
+    "Key": "your-super-secret-key-at-least-32-bytes-long!"
+  },
+  "DataProtection": {
+    "EncryptionKey": "your-32-bytes-encryption-key!"
+  },
+  "FileStorage": {
+    "UploadPath": "./uploads"
+  },
+  "Jobs": {
+    "UserSeed": {
+      "DefaultPassword": "Demo123!"
+    }
+  },
+  "Cors": {
+    "AllowedOrigins": "http://localhost:5175"
+  }
+}
 ```
+
+> 也可以通过环境变量覆盖配置项（格式：`Section__Key`），例如 `ConnectionStrings__DefaultConnection`。
 
 ### 5. 启动后端
 
@@ -165,7 +185,6 @@ dotnet run --project By3.Api --configuration Release
 
 ```bash
 cd frontend
-cp .env.example .env.development
 npm install
 npm run build
 ```
@@ -211,11 +230,11 @@ start-frontend.bat
 
 | 配置项 | 说明 | 修改方式 |
 |--------|------|---------|
-| `ConnectionStrings__DefaultConnection` | 数据库连接 | 环境变量 |
-| `Jwt__Key` | JWT 签名密钥（≥32字节） | 环境变量 |
-| `DataProtection__EncryptionKey` | 数据加密密钥（≥32字节） | 环境变量 |
-| `Jobs__UserSeed__DefaultPassword` | 种子用户密码 | 环境变量 |
-| `Cors__AllowedOrigins` | 前端域名 | 环境变量 |
+| `ConnectionStrings__DefaultConnection` | 数据库连接 | appsettings.json 或环境变量覆盖 |
+| `Jwt__Key` | JWT 签名密钥（≥32字节） | appsettings.json 或环境变量覆盖 |
+| `DataProtection__EncryptionKey` | 数据加密密钥（≥32字节） | appsettings.json 或环境变量覆盖 |
+| `Jobs__UserSeed__DefaultPassword` | 种子用户密码 | appsettings.json 或环境变量覆盖 |
+| `Cors__AllowedOrigins` | 前端域名 | appsettings.json 或环境变量覆盖 |
 
 ### 建议修改的配置
 
