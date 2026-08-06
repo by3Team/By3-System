@@ -73,6 +73,7 @@ erDiagram
         uuid PositionId FK
         bool IsEnabled
         bool IsDeleted
+        datetime PasswordChangedAt
         datetime CreatedAt
         datetime UpdatedAt
         uuid CreatedBy
@@ -117,7 +118,6 @@ erDiagram
         uuid Id PK
         string PositionName
         string PositionCode
-        string Description
         int SortOrder
         bool IsEnabled
         bool IsDeleted
@@ -196,8 +196,6 @@ erDiagram
         uuid Id PK
         string TemplateName
         string TemplateCode
-        string Subject
-        string Body
         bool IsEnabled
     }
 
@@ -228,26 +226,42 @@ erDiagram
         string JobGroup
         string CronExpression
         string JobType
+        string Description
+        string ConfigJson
         bool IsEnabled
+        bool IsDeleted
+        uuid CreatedBy
+        uuid UpdatedBy
     }
 
     SysExternalApi {
         uuid Id PK
         string ApiName
-        string ApiPath
-        string HttpMethod
+        string Route
+        string Method
+        string Description
         bool IsEnabled
         bool RequireIdempotency
-        int RateLimit
+        int RateLimitPerSecond
+        bool IsDeleted
     }
 
     SysExternalApiToken {
         uuid Id PK
-        string TokenName
+        string AppName
         string ApiKey
         string ApiSecret
-        datetime ExpiresAt
+        string ExpireType
+        datetime ExpireTime
+        string AllowedApiIds
+        string ContactEmail
         bool IsEnabled
+        bool IsDeleted
+        datetime PreviousValidUntil
+        string PreviousApiKey
+        string PreviousApiSecret
+        uuid CreatedBy
+        uuid UpdatedBy
     }
 ```
 
