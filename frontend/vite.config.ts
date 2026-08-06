@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
     plugins: [vue()],
     resolve: {
       alias: {
-        '@': resolve(__dirname, 'src')
+        '@': resolve(import.meta.dirname, 'src')
       }
     },
     build: {
