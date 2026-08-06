@@ -74,7 +74,7 @@ scripts\security-scan.bat
 ### 部署时
 
 - 生产环境必须使用强密钥（JWT Key ≥ 32 字节，DataProtection Key ≥ 32 字节）
-- 所有敏感配置通过环境变量注入，不写入代码或配置文件
+- 生产环境敏感配置建议通过环境变量覆盖 appsettings.json 中的默认值
 - 启用 HTTPS 并配置 HSTS
 - 定期更新依赖包
 - 数据库使用强密码并限制网络访问
