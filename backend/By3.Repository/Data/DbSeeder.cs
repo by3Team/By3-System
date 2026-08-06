@@ -189,19 +189,6 @@ public static class DbSeeder
 
         // 对外 API 菜单（增量添加）
         await EnsureExternalApiMenuAsync(db);
-
-        // 修正系统管理图标：统一使用 Setting 并确保已存在的旧值被覆盖
-        await FixSystemManagementIconAsync(db);
-    }
-
-    private static async Task FixSystemManagementIconAsync(AppDbContext db)
-    {
-        var sysMgmt = await db.Menus.FirstOrDefaultAsync(m => m.Route == "/system" && m.MenuType == 1 && m.ParentId == null);
-        if (sysMgmt != null && sysMgmt.Icon != "Setting")
-        {
-            sysMgmt.Icon = "Setting";
-            await db.SaveChangesAsync();
-        }
     }
 
     private static async Task EnsureDictTypeAsync(AppDbContext db, Guid id, string dictName, string dictType, (string Label, string Value, string Remark, int Sort, bool Default)[] items)
