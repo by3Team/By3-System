@@ -72,7 +72,7 @@ public static class DbSeeder
 
             var menus = new List<SysMenu>
             {
-                new() { Id = sysMgmtId, MenuName = "系统管理", MenuType = 1, Route = "/system", Icon = "Setting", SortOrder = 1 },
+                new() { Id = sysMgmtId, MenuName = "系统管理", MenuType = 1, Route = "/system", Icon = "Tools", SortOrder = 1 },
                 new() { Id = Guid.NewGuid(), MenuName = "用户管理", MenuType = 2, Route = "/system/user", Component = "system/user/index", Permission = "user:list", SortOrder = 1, ParentId = sysMgmtId },
                 new() { Id = Guid.NewGuid(), MenuName = "用户新增", MenuType = 3, Permission = "user:create", SortOrder = 1, ParentId = sysMgmtId },
                 new() { Id = Guid.NewGuid(), MenuName = "用户编辑", MenuType = 3, Permission = "user:update", SortOrder = 2, ParentId = sysMgmtId },
@@ -816,4 +816,3 @@ public static class DbSeeder
         await db.SaveChangesAsync();
     }
 }
-
