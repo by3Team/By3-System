@@ -50,6 +50,11 @@ public static class DependencyInjection
         services.AddTransient<UserDataSeedQuartzJob>();
         services.AddSingleton<IJobFactory, QuartzJobFactory>();
         services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+
+        // 数据库初始化 HostedService 必须早于 QuartzSchedulerHostedService 注册，确保先建库建表
+        services.AddSingleton<DatabaseInitializerHostedService>();
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DatabaseInitializerHostedService>());
+
         services.AddSingleton<QuartzSchedulerHostedService>();
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<QuartzSchedulerHostedService>());
 
