@@ -273,14 +273,19 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// 在构建最终服务提供程序之前，先初始化数据库。
+// AuthorizationOptionsConfigurator.Configure 会在 builder.Build() 时从数据库加载权限策略，
+// 所以数据库和种子数据必须在 Build 之前就绪。
+await DatabaseInitializer.InitializeAsync(builder.Services);
+
 var app = builder.Build();
 
-// HTTPS 强制跳转（生产环境）
+// HTTPS 强制跳转（仅生产环境；开发环境前端通过 Vite 代理访问 HTTP 后端）
 if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
-app.UseHttpsRedirection();
 
 // 安全响应头
 app.UseMiddleware<SecurityHeadersMiddleware>();
@@ -317,8 +322,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// 自动迁移并初始化种子数据
-await DatabaseInitializer.InitializeAsync(app.Services);
 
 app.Run();
