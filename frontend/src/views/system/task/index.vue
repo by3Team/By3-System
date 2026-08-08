@@ -214,14 +214,22 @@ async function handleSubmit() {
 }
 
 async function handleDelete(row: any) {
-  await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  try {
+    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
   await jobApi.delete(row.id)
   ElMessage.success('删除成功')
   loadData()
 }
 
 async function handleTrigger(row: any) {
-  await ElMessageBox.confirm('确认立即执行一次该任务？', '提示', { type: 'warning' })
+  try {
+    await ElMessageBox.confirm('确认立即执行一次该任务？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
   await jobApi.trigger(row.id)
   ElMessage.success('任务已触发')
   setTimeout(() => {
@@ -245,12 +253,16 @@ async function handleToggle(row: any) {
     ? `确认启用任务「${row.jobName}」？\nCron：${row.cronExpression}${nextTime ? `\n预计下次执行：${nextTime}` : ''}`
     : `确认停用任务「${row.jobName}」？停用后将不再按 Cron 表达式自动执行。`
 
-  await ElMessageBox.confirm(message, '提示', {
-    type: isEnable ? 'success' : 'warning',
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    dangerouslyUseHTMLString: false
-  })
+  try {
+    await ElMessageBox.confirm(message, '提示', {
+      type: isEnable ? 'success' : 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      dangerouslyUseHTMLString: false
+    })
+  } catch {
+    return
+  }
 
   await jobApi.toggle(row.id)
   ElMessage.success(isEnable ? '任务已启用' : '任务已停用')

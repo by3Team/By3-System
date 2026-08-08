@@ -50,4 +50,10 @@ public class DepartmentRepository
         dept.IsDeleted = true;
         return await _db.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// 检查指定部门是否有子部门。
+    /// </summary>
+    public async Task<bool> HasChildrenAsync(Guid id)
+        => await _db.Departments.AnyAsync(d => d.ParentId == id && !d.IsDeleted);
 }
