@@ -57,29 +57,29 @@
         <el-form-item label="密码" prop="password" v-if="!isEdit">
           <el-input v-model="form.password" type="password" />
         </el-form-item>
-        <el-form-item label="姓名">
+        <el-form-item label="姓名" prop="realName">
           <el-input v-model="form.realName" />
         </el-form-item>
-        <el-form-item label="邮箱">
+        <el-form-item label="邮箱" prop="email">
           <el-input v-model="form.email" />
         </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="form.phone" />
+        <el-form-item label="电话" prop="phone">
+          <el-input v-model="form.phone" @focus="onPhoneFocus" @blur="onPhoneBlur" @input="onPhoneInput" placeholder="未修改时显示掩码，点击后输入完整手机号" />
         </el-form-item>
-        <el-form-item label="角色">
+        <el-form-item label="角色" prop="roleIds">
           <el-select v-model="form.roleIds" multiple placeholder="选择角色">
             <el-option v-for="r in roles" :key="r.id" :label="r.roleName" :value="r.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="部门">
+        <el-form-item label="部门" prop="departmentId">
           <el-tree-select v-model="form.departmentId" :data="departments" :props="{ label: 'deptName', value: 'id', children: 'children' }" clearable check-strictly placeholder="选择部门" />
         </el-form-item>
-        <el-form-item label="职位">
+        <el-form-item label="职位" prop="positionId">
           <el-select v-model="form.positionId" clearable placeholder="选择职位">
             <el-option v-for="p in positions" :key="p.id" :label="p.positionName" :value="p.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="性别">
+        <el-form-item label="性别" prop="gender">
           <el-select v-model="form.gender" clearable placeholder="选择性别">
             <el-option v-for="g in dictStore.getDict('sys_gender')" :key="g.dictValue" :label="g.dictLabel" :value="g.dictValue" />
           </el-select>
@@ -131,9 +131,54 @@ const dialogTitle = ref('')
 const isEdit = ref(false)
 const formRef = ref()
 const form = reactive<any>({ userName: '', password: '', realName: '', email: '', phone: '', roleIds: [], departmentId: null, positionId: null, gender: '', isEnabled: true })
+const originalPhone = ref('')
+const isPhoneModified = ref(false)
+
 const formRules = {
-  userName: [{ required: true, message: '必填', trigger: 'blur' }],
-  password: [{ required: true, message: '必填', trigger: 'blur' }]
+  userName: [
+    { required: true, message: '用户名不能为空', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度3-20位', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '密码不能为空', trigger: 'blur' },
+    { min: 8, message: '密码最少8位', trigger: 'blur' },
+    { pattern: /[A-Z]/, message: '密码须包含至少一个大写字母', trigger: 'blur' },
+    { pattern: /[a-z]/, message: '密码须包含至少一个小写字母', trigger: 'blur' },
+    { pattern: /[0-9]/, message: '密码须包含至少一个数字', trigger: 'blur' }
+  ],
+  realName: [
+    { required: true, message: '姓名不能为空', trigger: 'blur' },
+    { min: 1, message: '姓名至少1个字符', trigger: 'blur' }
+  ],
+  email: [
+    { type: 'email', message: '邮箱格式错误', trigger: 'blur' }
+  ],
+  phone: [
+    {
+      validator: (_: any, value: string, callback: (err?: Error) => void) => {
+        // 未修改时（回显的是掩码值），跳过格式校验
+        if (!isPhoneModified.value) {
+          callback()
+          return
+        }
+        if (!value || /^1[3-9]\d{9}$/.test(value)) callback()
+        else callback(new Error('电话格式错误'))
+      },
+      trigger: 'blur'
+    }
+  ],
+  roleIds: [
+    { required: true, type: 'array', min: 1, message: '请选择角色', trigger: 'change' }
+  ],
+  departmentId: [
+    { required: true, message: '请选择部门', trigger: 'change' }
+  ],
+  positionId: [
+    { required: true, message: '请选择职位', trigger: 'change' }
+  ],
+  gender: [
+    { required: true, message: '请选择性别', trigger: 'change' }
+  ]
 }
 
 const resetPwdVisible = ref(false)
@@ -174,28 +219,98 @@ async function loadPositions() {
   positions.value = res.items
 }
 
-function openDialog(row?: any) {
+function resetForm() {
+  Object.assign(form, { userName: '', password: '', realName: '', email: '', phone: '', roleIds: [], departmentId: null, positionId: null, gender: '', isEnabled: true })
+  originalPhone.value = ''
+  isPhoneModified.value = false
+}
+
+function onPhoneFocus() {
+  if (form.phone.includes('*') && !isPhoneModified.value) {
+    form.phone = ''
+    isPhoneModified.value = true
+  }
+}
+
+function onPhoneInput() {
+  if (!isPhoneModified.value) {
+    isPhoneModified.value = true
+  }
+}
+
+function onPhoneBlur() {
+  if (isPhoneModified.value && !form.phone && originalPhone.value) {
+    form.phone = originalPhone.value
+    isPhoneModified.value = false
+  }
+}
+
+async function openDialog(row?: any) {
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑用户' : '新增用户'
-  Object.assign(form, row || { userName: '', password: '', realName: '', email: '', phone: '', roleIds: [], departmentId: null, positionId: null, gender: '', isEnabled: true })
+  resetForm()
+
+  if (row?.id) {
+    try {
+      const detail = await userApi.getById(row.id)
+      form.id = detail.id
+      form.userName = detail.userName || ''
+      form.realName = detail.realName || ''
+      form.email = detail.email || ''
+      form.phone = detail.phone || ''
+      originalPhone.value = detail.phone || ''
+      isPhoneModified.value = false
+      form.gender = detail.gender || ''
+      form.departmentId = detail.departmentId || null
+      form.positionId = detail.positionId || null
+      form.isEnabled = detail.isEnabled ?? true
+      form.roleIds = detail.roleIds || []
+    } catch {
+      ElMessage.error('获取用户详情失败')
+      return
+    }
+  }
+
   dialogVisible.value = true
 }
 
 async function handleSubmit() {
-  await formRef.value.validate()
-  if (isEdit.value) {
-    await userApi.update(form.id, form)
-    ElMessage.success('更新成功')
-  } else {
-    await userApi.create(form)
-    ElMessage.success('创建成功')
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) {
+    ElMessage.warning('请正确填写表单后再提交')
+    return
   }
-  dialogVisible.value = false
-  loadData()
+
+  const submitForm = { ...form }
+  if (isEdit.value) {
+    // 未修改手机号，或用户误清空后未输入，都使用原始手机号
+    if (!isPhoneModified.value || !submitForm.phone) {
+      submitForm.phone = originalPhone.value
+    }
+  }
+
+  try {
+    if (isEdit.value) {
+      await userApi.update(form.id, submitForm)
+      ElMessage.success('更新成功')
+    } else {
+      await userApi.create(submitForm)
+      ElMessage.success('创建成功')
+    }
+    dialogVisible.value = false
+    loadData()
+  } catch (err: any) {
+    const message = err?.message || err?.data?.message || '操作失败'
+    ElMessage.error(message)
+  }
 }
 
 async function handleDelete(row: any) {
-  await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  try {
+    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
   await userApi.delete(row.id)
   ElMessage.success('删除成功')
   loadData()

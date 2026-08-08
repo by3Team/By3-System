@@ -119,10 +119,18 @@ async function handleSubmit() {
 }
 
 async function handleDelete(row: any) {
-  await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
-  await positionApi.delete(row.id)
-  ElMessage.success('删除成功')
-  loadData()
+  try {
+    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
+  try {
+    await positionApi.delete(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch {
+    // 错误消息已由 request.ts 拦截器统一处理
+  }
 }
 
 onMounted(() => { loadData() })

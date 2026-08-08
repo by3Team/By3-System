@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using By3.Repository.Entities;
 using By3.Repository.Repositories;
 using By3.Service.DTOs;
@@ -22,11 +23,13 @@ namespace By3.Service.Services;
 public class DepartmentService
 {
     private readonly DepartmentRepository _repo;
+    private readonly UserRepository _userRepo;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public DepartmentService(DepartmentRepository repo, IHttpContextAccessor httpContextAccessor)
+    public DepartmentService(DepartmentRepository repo, UserRepository userRepo, IHttpContextAccessor httpContextAccessor)
     {
         _repo = repo;
+        _userRepo = userRepo;
         _httpContextAccessor = httpContextAccessor;
     }
 
@@ -94,10 +97,19 @@ public class DepartmentService
     }
 
     /// <summary>
-    /// 删除部门。
+    /// 删除部门。子部门存在或有用户关联时不允许删除，返回错误消息；成功返回 null。
     /// </summary>
-    public async Task<int> DeleteAsync(Guid id)
-        => await _repo.DeleteAsync(id);
+    public async Task<string?> DeleteAsync(Guid id)
+    {
+        if (await _repo.HasChildrenAsync(id))
+            return "该部门下存在子部门，请先删除子部门";
+
+        if (await _userRepo.ExistsByDepartmentIdAsync(id))
+            return "该部门下存在用户，请先迁移用户到其他部门";
+
+        await _repo.DeleteAsync(id);
+        return null;
+    }
 
     /// <summary>
     /// 将部门实体映射为树形 DTO。

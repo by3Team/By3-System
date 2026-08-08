@@ -84,7 +84,7 @@ const isEdit = ref(false)
 const formRef = ref()
 const form = reactive<any>({ id: '', deptName: '', deptCode: '', parentId: undefined, sortOrder: 0, isEnabled: true })
 const formRules = {
-  deptName: [{ required: true, message: '必填', trigger: 'blur' }]
+  deptName: [{ required: true, message: '部门名称不能为空', trigger: 'blur' }]
 }
 
 async function loadData() {
@@ -93,31 +93,65 @@ async function loadData() {
   loading.value = false
 }
 
+function resetForm() {
+  Object.assign(form, { id: '', deptName: '', deptCode: '', parentId: undefined, sortOrder: 0, isEnabled: true })
+}
+
 function openDialog(row?: any, parentId?: string) {
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑部门' : '新增部门'
-  Object.assign(form, row || { deptName: '', deptCode: '', parentId: parentId || undefined, sortOrder: 0, isEnabled: true })
+  resetForm()
+
+  if (row) {
+    form.id = row.id
+    form.deptName = row.deptName || ''
+    form.deptCode = row.deptCode || ''
+    form.parentId = row.parentId || undefined
+    form.sortOrder = row.sortOrder ?? 0
+    form.isEnabled = row.isEnabled ?? true
+  } else {
+    form.parentId = parentId || undefined
+  }
+
   dialogVisible.value = true
 }
 
 async function handleSubmit() {
-  await formRef.value.validate()
-  if (isEdit.value) {
-    await departmentApi.update(form.id, form)
-    ElMessage.success('更新成功')
-  } else {
-    await departmentApi.create(form)
-    ElMessage.success('创建成功')
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) {
+    ElMessage.warning('请正确填写表单后再提交')
+    return
   }
-  dialogVisible.value = false
-  loadData()
+
+  try {
+    if (isEdit.value) {
+      await departmentApi.update(form.id, form)
+      ElMessage.success('更新成功')
+    } else {
+      await departmentApi.create(form)
+      ElMessage.success('创建成功')
+    }
+    dialogVisible.value = false
+    loadData()
+  } catch (err: any) {
+    const message = err?.message || err?.data?.message || '操作失败'
+    ElMessage.error(message)
+  }
 }
 
 async function handleDelete(row: any) {
-  await ElMessageBox.confirm('确认删除该部门？', '提示', { type: 'warning' })
-  await departmentApi.delete(row.id)
-  ElMessage.success('删除成功')
-  loadData()
+  try {
+    await ElMessageBox.confirm('确认删除该部门？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
+  try {
+    await departmentApi.delete(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch {
+    // 错误消息已由 request.ts 拦截器统一处理
+  }
 }
 
 onMounted(() => { loadData() })

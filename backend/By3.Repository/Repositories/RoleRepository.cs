@@ -106,4 +106,10 @@ public class RoleRepository
             .Where(rm => rm.RoleId == roleId)
             .Select(rm => rm.MenuId)
             .ToListAsync();
+
+    /// <summary>
+    /// 检查是否有用户关联了指定角色。
+    /// </summary>
+    public async Task<bool> HasUsersAsync(Guid roleId)
+        => await _db.UserRoles.AnyAsync(ur => ur.RoleId == roleId);
 }

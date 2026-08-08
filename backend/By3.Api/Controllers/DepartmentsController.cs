@@ -106,8 +106,8 @@ public class DepartmentsController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var result = await _service.DeleteAsync(id);
-        if (result == 0) return NotFound(ApiResult<object>.Error("部门不存在", 404));
+        var error = await _service.DeleteAsync(id);
+        if (error != null) return BadRequest(ApiResult<object>.Error(error, 400));
         return Ok(ApiResult<object>.Ok(null, "删除成功"));
     }
 }

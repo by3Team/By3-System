@@ -69,6 +69,13 @@ public class GlobalExceptionFilter : IExceptionFilter
                 };
                 break;
 
+            case InvalidOperationException:
+                result = new ObjectResult(ApiResult<object>.Error(exception.Message, 400))
+                {
+                    StatusCode = StatusCodes.Status400BadRequest
+                };
+                break;
+
             default:
                 var message = _env.IsDevelopment()
                     ? $"{exception.Message} (TraceId: {traceId})"
