@@ -67,4 +67,10 @@ public class PositionRepository
         position.IsDeleted = true;
         return await _db.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// 检查是否有用户属于指定岗位。
+    /// </summary>
+    public async Task<bool> HasUsersAsync(Guid positionId)
+        => await _db.Users.AnyAsync(u => u.PositionId == positionId && !u.IsDeleted);
 }

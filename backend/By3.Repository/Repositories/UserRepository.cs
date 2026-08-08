@@ -146,4 +146,10 @@ public class UserRepository
             throw;
         }
     }
+
+    /// <summary>
+    /// 检查是否有用户属于指定部门。
+    /// </summary>
+    public async Task<bool> ExistsByDepartmentIdAsync(Guid departmentId)
+        => await _db.Users.AnyAsync(u => u.DepartmentId == departmentId && !u.IsDeleted);
 }

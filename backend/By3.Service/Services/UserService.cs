@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using By3.Repository.Entities;
@@ -84,6 +85,28 @@ public class UserService
     }
 
     /// <summary>
+    /// 获取解密后的明文手机号。
+    /// </summary>
+    private string GetPlainPhone(string? storedPhone)
+    {
+        if (string.IsNullOrEmpty(storedPhone))
+            return string.Empty;
+        if (_dataProtection.IsEncrypted(storedPhone))
+            return _dataProtection.Decrypt(storedPhone) ?? string.Empty;
+        return storedPhone;
+    }
+
+    /// <summary>
+    /// 校验手机号格式（中国大陆手机号）。
+    /// </summary>
+    private static bool IsValidPhone(string? phone)
+    {
+        if (string.IsNullOrEmpty(phone))
+            return true;
+        return System.Text.RegularExpressions.Regex.IsMatch(phone, @"^1[3-9]\d{9}$");
+    }
+
+    /// <summary>
     /// 分页查询用户列表。
     /// </summary>
     public async Task<PageResult<UserListDto>> GetListAsync(int page, int pageSize, string? keyword)
@@ -138,8 +161,8 @@ public class UserService
         {
             Id = u.Id,
             UserName = u.UserName,
-            Email = GetMaskedEmail(u.Email),
-            Phone = GetMaskedPhone(u.Phone),
+            Email = u.Email ?? string.Empty,
+            Phone = _dataProtection.MaskPhone(GetPlainPhone(u.Phone)),
             RealName = u.RealName,
             Gender = u.Gender,
             DepartmentId = u.DepartmentId,
@@ -158,6 +181,9 @@ public class UserService
     /// </summary>
     public async Task<Guid> CreateAsync(CreateUserDto dto)
     {
+        if (!string.IsNullOrEmpty(dto.Phone) && !IsValidPhone(dto.Phone))
+            throw new ValidationException("手机号格式错误");
+
         var user = new SysUser
         {
             UserName = dto.UserName,
@@ -185,7 +211,16 @@ public class UserService
         if (user == null) return 0;
 
         if (dto.Email != null) user.Email = dto.Email;
-        if (dto.Phone != null) user.Phone = ProtectPhone(dto.Phone);
+        if (dto.Phone != null)
+        {
+            var currentMaskedPhone = _dataProtection.MaskPhone(GetPlainPhone(user.Phone));
+            if (dto.Phone != currentMaskedPhone)
+            {
+                if (!IsValidPhone(dto.Phone))
+                    throw new FluentValidation.ValidationException("手机号格式错误");
+                user.Phone = ProtectPhone(dto.Phone);
+            }
+        }
         if (dto.RealName != null) user.RealName = dto.RealName;
         user.Gender = dto.Gender;
         user.DepartmentId = dto.DepartmentId;

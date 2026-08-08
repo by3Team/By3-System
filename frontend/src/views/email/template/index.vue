@@ -222,7 +222,11 @@ async function handleSubmitTemplate() {
 }
 
 async function handleDeleteTemplate(row: any) {
-  await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  try {
+    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
   await emailApi.deleteTemplate(row.id)
   ElMessage.success('删除成功')
   loadData()
@@ -257,7 +261,11 @@ async function handleSubmitVersion() {
 }
 
 async function handleDeleteVersion(row: any) {
-  await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  try {
+    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
   await emailApi.deleteVersion(row.id)
   ElMessage.success('删除成功')
   versions.value = await emailApi.getVersions(currentTemplateId.value)

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using By3.Repository.Entities;
 using By3.Repository.Repositories;
 using By3.Service.DTOs;
@@ -99,10 +100,16 @@ public class PositionService
     }
 
     /// <summary>
-    /// 删除岗位。
+    /// 删除岗位。有用户关联时不允许删除，返回错误消息；成功返回 null。
     /// </summary>
-    public async Task<int> DeleteAsync(Guid id)
-        => await _repo.DeleteAsync(id);
+    public async Task<string?> DeleteAsync(Guid id)
+    {
+        if (await _repo.HasUsersAsync(id))
+            return "该岗位下存在用户，请先迁移用户到其他岗位";
+
+        await _repo.DeleteAsync(id);
+        return null;
+    }
 
     private static PositionListDto MapToDto(SysPosition p) => new()
     {

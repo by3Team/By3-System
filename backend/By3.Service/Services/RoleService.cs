@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using By3.Repository.Entities;
 using By3.Repository.Repositories;
 using By3.Service.DTOs;
@@ -135,10 +136,16 @@ public class RoleService
     }
 
     /// <summary>
-    /// 删除角色。
+    /// 删除角色。有用户关联时不允许删除，返回错误消息；成功返回 null。
     /// </summary>
-    public async Task<int> DeleteAsync(Guid id)
-        => await _repo.DeleteAsync(id);
+    public async Task<string?> DeleteAsync(Guid id)
+    {
+        if (await _repo.HasUsersAsync(id))
+            return "该角色下存在用户，请先取消用户的角色关联";
+
+        await _repo.DeleteAsync(id);
+        return null;
+    }
 
     /// <summary>
     /// 获取角色关联的菜单ID列表。
