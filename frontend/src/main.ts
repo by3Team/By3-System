@@ -54,9 +54,12 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.directive('permission', permissionDirective)
 
 app.config.errorHandler = (err, vm, info) => {
+  // Element Plus 组件的预期异常（如 ElMessageBox 取消）不跳转 404
+  if (err instanceof Error && err.message === 'cancel') return
+  if (String(err).includes('cancel')) return
+
   console.error('Vue error:', err, info)
   const currentPath = router.currentRoute.value.path
-  // 页面渲染异常时跳转到 404；404 页面自身异常则只提示，避免死循环
   if (currentPath !== '/404' && currentPath !== '/login') {
     router.replace('/404')
   } else {

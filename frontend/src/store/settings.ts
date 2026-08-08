@@ -3,6 +3,53 @@ import { ref, watch } from 'vue'
 
 const STORAGE_KEY = 'app_settings'
 
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const clean = hex.replace('#', '')
+  const bigint = parseInt(clean, 16)
+  const r = (bigint >> 16) & 255
+  const g = (bigint >> 8) & 255
+  const b = bigint & 255
+  return { r, g, b }
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  return '#' + [r, g, b].map((v) => {
+    const hex = Math.max(0, Math.min(255, Math.round(v))).toString(16)
+    return hex.length === 1 ? '0' + hex : hex
+  }).join('')
+}
+
+function mixColor(color: string, mixColor: string, weight: number): string {
+  const c1 = hexToRgb(color)
+  const c2 = hexToRgb(mixColor)
+  const w = Math.max(0, Math.min(100, weight)) / 100
+  return rgbToHex(
+    c1.r * (1 - w) + c2.r * w,
+    c1.g * (1 - w) + c2.g * w,
+    c1.b * (1 - w) + c2.b * w
+  )
+}
+
+function generatePrimaryShades(color: string): Record<string, string> {
+  return {
+    '--el-color-primary': color,
+    '--el-color-primary-light-3': mixColor(color, '#ffffff', 30),
+    '--el-color-primary-light-5': mixColor(color, '#ffffff', 50),
+    '--el-color-primary-light-7': mixColor(color, '#ffffff', 70),
+    '--el-color-primary-light-8': mixColor(color, '#ffffff', 80),
+    '--el-color-primary-light-9': mixColor(color, '#ffffff', 90),
+    '--el-color-primary-dark-2': mixColor(color, '#000000', 20),
+    // 兼容项目内旧的 light-0 ~ light-11 用法
+    '--el-color-primary-light-0': mixColor(color, '#ffffff', 90),
+    '--el-color-primary-light-1': mixColor(color, '#ffffff', 80),
+    '--el-color-primary-light-2': mixColor(color, '#ffffff', 70),
+    '--el-color-primary-light-4': mixColor(color, '#ffffff', 60),
+    '--el-color-primary-light-6': mixColor(color, '#ffffff', 40),
+    '--el-color-primary-light-10': mixColor(color, '#000000', 10),
+    '--el-color-primary-light-11': mixColor(color, '#000000', 20)
+  }
+}
+
 export interface AppSettings {
   themeColor: string
   sidebarColor: 'dark' | 'light'
@@ -45,11 +92,9 @@ export const useSettingsStore = defineStore('settings', () => {
 
   function applyThemeColor(color: string) {
     const el = document.documentElement
-    el.style.setProperty('--el-color-primary', color)
-    // 生成一组主色阶
-    const shades = ['#ecf5ff', '#d9ecff', '#c6e2ff', '#b3d8ff', '#a0cfff', '#8cc5ff', '#79bbff', '#66b1ff', '#53a8ff', '#409EFF', '#3a8ee6', '#337ecc']
-    shades.forEach((c, i) => {
-      el.style.setProperty(`--el-color-primary-light-${i}`, c)
+    const shades = generatePrimaryShades(color)
+    Object.entries(shades).forEach(([key, value]) => {
+      el.style.setProperty(key, value)
     })
   }
 
