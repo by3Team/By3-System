@@ -192,8 +192,15 @@ public class EmailTemplatesController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Send(SendEmailDto dto)
     {
-        await _service.SendBatchAsync(dto);
-        return Ok(ApiResult<object>.Ok(null, "邮件已加入发送队列"));
+        try
+        {
+            await _service.SendBatchAsync(dto);
+            return Ok(ApiResult<object>.Ok(null, "邮件已加入发送队列"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResult<object>.Error(ex.Message, 400));
+        }
     }
 
 
@@ -207,8 +214,15 @@ public class EmailTemplatesController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Test(TestEmailDto dto)
     {
-        await _service.SendTestAsync(dto);
-        return Ok(ApiResult<object>.Ok(null, "测试邮件已发送"));
+        try
+        {
+            await _service.SendTestAsync(dto);
+            return Ok(ApiResult<object>.Ok(null, "测试邮件已发送"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResult<object>.Error(ex.Message, 400));
+        }
     }
 
 

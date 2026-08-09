@@ -106,9 +106,9 @@
         <el-form-item label="抄送人" prop="ccAddresses">
           <el-input v-model="testForm.ccAddresses" type="textarea" :rows="3" placeholder="多个抄送人用逗号或换行分隔" />
         </el-form-item>
-        <el-form-item label="版本号">
-          <el-select v-model="testForm.version" placeholder="默认最新启用版本" clearable>
-            <el-option v-for="v in currentVersions" :key="v.id" :label="v.version" :value="v.version" />
+        <el-form-item label="版本号" prop="version">
+          <el-select v-model="testForm.version" placeholder="请选择版本" clearable>
+            <el-option v-for="v in currentVersions" :key="v.id" :label="v.version + (v.isEnabled ? ' (启用)' : '')" :value="v.version" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -126,9 +126,9 @@
         <el-form-item label="抄送人" prop="ccAddresses">
           <el-input v-model="sendForm.ccAddresses" type="textarea" :rows="3" placeholder="多个抄送人用逗号或换行分隔" />
         </el-form-item>
-        <el-form-item label="版本号">
-          <el-select v-model="sendForm.version" placeholder="默认最新启用版本" clearable>
-            <el-option v-for="v in currentVersions" :key="v.id" :label="v.version" :value="v.version" />
+        <el-form-item label="版本号" prop="version">
+          <el-select v-model="sendForm.version" placeholder="请选择版本" clearable>
+            <el-option v-for="v in currentVersions" :key="v.id" :label="v.version + (v.isEnabled ? ' (启用)' : '')" :value="v.version" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -177,18 +177,38 @@ const versions = ref<any[]>([])
 const currentTemplateId = ref('')
 const currentVersions = ref<any[]>([])
 
+const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+
 const testDialogVisible = ref(false)
 const testFormRef = ref()
 const testForm = reactive<any>({ templateId: '', toAddress: '', ccAddresses: '', version: '' })
 const testRules = {
-  toAddress: [{ required: true, message: '必填', trigger: 'blur' }]
+  toAddress: [
+    { required: true, message: '请输入收件人邮箱', trigger: 'blur' },
+    { pattern: emailPattern, message: '请输入正确的邮箱格式', trigger: 'blur' }
+  ]
 }
 
 const sendDialogVisible = ref(false)
 const sendFormRef = ref()
 const sendForm = reactive<any>({ templateId: '', toAddresses: '', ccAddresses: '', version: '' })
 const sendRules = {
-  toAddresses: [{ required: true, message: '必填', trigger: 'blur' }]
+  toAddresses: [
+    { required: true, message: '请输入收件人邮箱', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string, callback: any) => {
+        if (!value) return callback()
+        const emails = value.split(/[,\n]+/).map(a => a.trim()).filter(a => a)
+        const invalid = emails.filter(e => !emailPattern.test(e))
+        if (invalid.length > 0) {
+          callback(new Error(`邮箱格式不正确: ${invalid.join(', ')}`))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
 }
 
 const sending = ref(false)
@@ -209,7 +229,8 @@ function openTemplateDialog(row?: any) {
 }
 
 async function handleSubmitTemplate() {
-  await templateFormRef.value.validate()
+  const valid = await templateFormRef.value.validate().catch(() => false)
+  if (!valid) return
   if (isEditTemplate.value) {
     await emailApi.updateTemplate(templateForm.id, templateForm)
     ElMessage.success('更新成功')
@@ -246,7 +267,8 @@ function openVersionFormDialog(row?: any) {
 }
 
 async function handleSubmitVersion() {
-  await versionFormRef.value.validate()
+  const valid = await versionFormRef.value.validate().catch(() => false)
+  if (!valid) return
   if (isEditVersion.value) {
     await emailApi.updateVersion(versionForm.id, versionForm)
     ElMessage.success('更新成功')
@@ -277,23 +299,40 @@ async function openTestDialog(templateId: string) {
   testForm.templateId = templateId
   testForm.toAddress = ''
   testForm.ccAddresses = ''
-  testForm.version = ''
+  // 默认选择已启用的版本
+  const enabledVersion = currentVersions.value.find((v: any) => v.isEnabled)
+  testForm.version = enabledVersion?.version || ''
   testDialogVisible.value = true
 }
 
+function validateEmails(text: string): boolean {
+  if (!text) return true
+  const emails = text.split(/[,\n]+/).map(a => a.trim()).filter(a => a)
+  return emails.every(e => emailPattern.test(e))
+}
+
 async function handleTest() {
-  await testFormRef.value.validate()
+  const valid = await testFormRef.value.validate().catch(() => false)
+  if (!valid) return
+  // 校验抄送人邮箱格式
+  if (testForm.ccAddresses && !validateEmails(testForm.ccAddresses)) {
+    ElMessage.error('抄送人邮箱格式不正确')
+    return
+  }
   sending.value = true
-  const ccList = testForm.ccAddresses.split(/[,\n]+/).map((a: string) => a.trim()).filter((a: string) => a)
-  await emailApi.test({
-    templateId: testForm.templateId,
-    toAddress: testForm.toAddress,
-    ccAddresses: ccList,
-    version: testForm.version || undefined
-  })
-  sending.value = false
-  ElMessage.success('测试邮件已发送')
-  testDialogVisible.value = false
+  try {
+    const ccList = testForm.ccAddresses?.split(/[,\n]+/).map((a: string) => a.trim()).filter((a: string) => a) || []
+    await emailApi.test({
+      templateId: testForm.templateId,
+      toAddress: testForm.toAddress,
+      ccAddresses: ccList,
+      version: testForm.version
+    })
+    ElMessage.success('测试邮件已发送')
+    testDialogVisible.value = false
+  } finally {
+    sending.value = false
+  }
 }
 
 async function openSendDialog(templateId: string) {
@@ -302,24 +341,40 @@ async function openSendDialog(templateId: string) {
   sendForm.templateId = templateId
   sendForm.toAddresses = ''
   sendForm.ccAddresses = ''
-  sendForm.version = ''
+  // 默认选择已启用的版本
+  const enabledVersion = currentVersions.value.find((v: any) => v.isEnabled)
+  sendForm.version = enabledVersion?.version || ''
   sendDialogVisible.value = true
 }
 
 async function handleSend() {
-  await sendFormRef.value.validate()
+  const valid = await sendFormRef.value.validate().catch(() => false)
+  if (!valid) return
+  // 校验收件人邮箱格式
+  if (!validateEmails(sendForm.toAddresses)) {
+    ElMessage.error('收件人邮箱格式不正确')
+    return
+  }
+  // 校验抄送人邮箱格式
+  if (sendForm.ccAddresses && !validateEmails(sendForm.ccAddresses)) {
+    ElMessage.error('抄送人邮箱格式不正确')
+    return
+  }
   sending.value = true
-  const addresses = sendForm.toAddresses.split(/[,\n]+/).map((a: string) => a.trim()).filter((a: string) => a)
-  const ccList = sendForm.ccAddresses.split(/[,\n]+/).map((a: string) => a.trim()).filter((a: string) => a)
-  await emailApi.send({
-    templateId: sendForm.templateId,
-    version: sendForm.version || undefined,
-    toAddresses: addresses,
-    ccAddresses: ccList
-  })
-  sending.value = false
-  ElMessage.success('邮件已加入发送队列')
-  sendDialogVisible.value = false
+  try {
+    const addresses = sendForm.toAddresses?.split(/[,\n]+/).map((a: string) => a.trim()).filter((a: string) => a) || []
+    const ccList = sendForm.ccAddresses?.split(/[,\n]+/).map((a: string) => a.trim()).filter((a: string) => a) || []
+    await emailApi.send({
+      templateId: sendForm.templateId,
+      version: sendForm.version,
+      toAddresses: addresses,
+      ccAddresses: ccList
+    })
+    ElMessage.success('邮件已加入发送队列')
+    sendDialogVisible.value = false
+  } finally {
+    sending.value = false
+  }
 }
 
 onMounted(() => { loadData() })

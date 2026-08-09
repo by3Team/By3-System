@@ -184,6 +184,13 @@ public class EmailService
         if (version == null)
             throw new InvalidOperationException("邮件模板或版本不存在");
 
+        // 预先验证邮件配置
+        var setting = await _settingRepo.GetAsync() ?? throw new InvalidOperationException("邮件发送端未配置，请先在系统设置中配置邮件参数");
+        if (string.IsNullOrWhiteSpace(setting.SmtpHost))
+            throw new InvalidOperationException("SMTP服务器地址未配置");
+        if (string.IsNullOrWhiteSpace(setting.Username))
+            throw new InvalidOperationException("SMTP用户名未配置");
+
         var subject = ReplaceVariables(version.Subject, dto.Variables);
         var body = ReplaceVariables(version.Body, dto.Variables);
         var bodyFormat = version.BodyFormat;
@@ -296,7 +303,12 @@ public class EmailService
     /// </summary>
     private async Task SendEmailAsync(string toAddress, List<string> ccAddresses, string subject, string body, string bodyFormat)
     {
-        var setting = await _settingRepo.GetAsync() ?? throw new InvalidOperationException("邮件发送端未配置，请先在系统设置中配置");
+        var setting = await _settingRepo.GetAsync() ?? throw new InvalidOperationException("邮件发送端未配置，请先在系统设置中配置邮件参数");
+
+        if (string.IsNullOrWhiteSpace(setting.SmtpHost))
+            throw new InvalidOperationException("SMTP服务器地址未配置");
+        if (string.IsNullOrWhiteSpace(setting.Username))
+            throw new InvalidOperationException("SMTP用户名未配置");
 
         var host = setting.SmtpHost;
         var port = setting.SmtpPort;
