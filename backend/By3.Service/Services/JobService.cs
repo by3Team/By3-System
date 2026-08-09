@@ -147,7 +147,7 @@ public class JobService
         Description = job.Description,
         ConfigJson = job.ConfigJson,
         IsEnabled = job.IsEnabled,
-        NextFireTime = job.IsEnabled ? QuartzSchedulerHostedService.GetNextFireTimeFromCron(job.CronExpression)?.DateTime : null,
+        NextFireTime = job.IsEnabled ? QuartzSchedulerHostedService.GetNextFireTimeFromCron(job.CronExpression)?.UtcDateTime : null,
         CreatedAt = job.CreatedAt,
         UpdatedAt = job.UpdatedAt
     };
