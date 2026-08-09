@@ -63,7 +63,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-drawer v-model="detailVisible" title="操作日志详情" size="600px" destroy-on-close>
+    <el-drawer v-model="detailVisible" title="操作日志详情" size="900px" destroy-on-close>
       <el-skeleton v-if="detailLoading" :rows="10" animated />
       <template v-else-if="detail">
         <el-descriptions :column="2" border class="detail-overview">

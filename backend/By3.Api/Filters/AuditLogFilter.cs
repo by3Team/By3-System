@@ -198,7 +198,7 @@ public class AuditLogFilter : IAsyncActionFilter
 
     private static readonly HashSet<string> SensitiveFieldNames = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Password", "PasswordHash", "OldPassword", "NewPassword", "ConfirmPassword", "Token", "RefreshToken",
+        "Password", "PasswordHash", "OldPassword", "NewPassword", "ConfirmPassword", "Token", "AccessToken", "RefreshToken",
         "Phone", "Email", "ApiSecret", "ApiKey"
     };
 

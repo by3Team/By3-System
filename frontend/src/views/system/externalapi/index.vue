@@ -497,7 +497,8 @@ function openDialog(row?: any) {
 }
 
 async function handleSubmit() {
-  await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
   if (form.expireType === 'custom' && !form.expireTime) {
     ElMessage.warning('请选择自定义有效期')
     return
