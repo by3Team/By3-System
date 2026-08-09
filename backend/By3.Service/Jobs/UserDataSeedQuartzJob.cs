@@ -72,7 +72,7 @@ public class UserDataSeedQuartzJob : IJob
                 EndTime = DateTime.UtcNow,
                 Status = "Success",
                 Result = $"插入 {result.InsertedCount} 条用户，备份 {result.BackupFilePath}，清理旧备份 {result.CleanedUpCount} 份",
-                NextFireTime = context.NextFireTimeUtc?.DateTime,
+                NextFireTime = context.NextFireTimeUtc?.UtcDateTime,
                 CreatedAt = DateTime.UtcNow
             });
         }
@@ -89,7 +89,7 @@ public class UserDataSeedQuartzJob : IJob
                 Status = "Failed",
                 Result = "执行失败",
                 ExceptionMessage = ex.Message,
-                NextFireTime = context.NextFireTimeUtc?.DateTime,
+                NextFireTime = context.NextFireTimeUtc?.UtcDateTime,
                 CreatedAt = DateTime.UtcNow
             });
             throw new JobExecutionException($"Job {jobName} failed", ex, false);
