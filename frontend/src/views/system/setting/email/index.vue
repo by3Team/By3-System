@@ -96,7 +96,8 @@ async function loadData() {
 }
 
 async function handleSave() {
-  await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
   saving.value = true
   try {
     await emailSettingApi.update(form)
@@ -108,7 +109,8 @@ async function handleSave() {
 }
 
 async function handleTest() {
-  await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
   testing.value = true
   try {
     await emailSettingApi.test(form)

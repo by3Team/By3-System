@@ -58,6 +58,12 @@ app.config.errorHandler = (err, vm, info) => {
   if (err instanceof Error && err.message === 'cancel') return
   if (String(err).includes('cancel')) return
 
+  // API 请求错误已在 request.ts 拦截器中处理，不跳转 404
+  if (err instanceof Error && err.message.includes('Request failed')) return
+  if (String(err).includes('AxiosError')) return
+  if (String(err).includes('status code 4')) return
+  if (String(err).includes('status code 5')) return
+
   console.error('Vue error:', err, info)
   const currentPath = router.currentRoute.value.path
   if (currentPath !== '/404' && currentPath !== '/login') {

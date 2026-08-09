@@ -86,8 +86,13 @@ instance.interceptors.response.use(
 
     if (status === 401) {
       handleUnauthorized()
+    } else if (status === 400) {
+      // 参数校验错误，显示具体错误信息
+      ElMessage.error(message || '请求参数错误')
     } else if (status === 403) {
       ElMessage.error(message || '暂无权限执行此操作')
+    } else if (status === 404) {
+      ElMessage.error(message || '请求的资源不存在')
     } else if (status === 429) {
       ElMessage.error('请求过于频繁，请稍后再试')
     } else if (status && status >= 500) {

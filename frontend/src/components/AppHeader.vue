@@ -124,7 +124,8 @@ function handleCommand(command: string) {
 }
 
 async function handleChangePassword() {
-  await pwdFormRef.value.validate()
+  const valid = await pwdFormRef.value.validate().catch(() => false)
+  if (!valid) return
   if (!auth.userId) {
     ElMessage.error('用户信息不完整，请重新登录')
     return

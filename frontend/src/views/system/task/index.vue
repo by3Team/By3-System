@@ -200,7 +200,8 @@ function openDialog(row?: any) {
 }
 
 async function handleSubmit() {
-  await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
   form.configJson = JSON.stringify({ batchSize: config.batchSize, backupDirectory: config.backupDirectory })
   if (isEdit.value) {
     await jobApi.update(form.id, form)

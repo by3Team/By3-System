@@ -117,7 +117,8 @@ function openDialog(row?: any) {
 }
 
 async function handleSubmit() {
-  await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
   if (isEdit.value) {
     await dictDataApi.update(form.id, form)
     ElMessage.success('更新成功')

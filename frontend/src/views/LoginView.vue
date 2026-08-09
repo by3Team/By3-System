@@ -54,7 +54,8 @@ const rules = {
 }
 
 async function handleLogin() {
-  await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
   loading.value = true
   try {
     const res = await authApi.login(form)
