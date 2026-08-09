@@ -5,15 +5,15 @@ import { useAuthStore } from '@/store/auth'
 const viewModules = import.meta.glob('@/views/**/*.vue')
 
 function loadComponent(componentPath: string) {
-  const fullPath = `/src/views/${componentPath}.vue`
-  const module = viewModules[fullPath]
-  if (!module) {
-    console.warn(`视图组件不存在: ${fullPath}`)
+  const suffix = `/views/${componentPath}.vue`
+  const matched = Object.keys(viewModules).find(path => path.endsWith(suffix))
+  if (!matched) {
+    console.warn(`视图组件不存在: ${componentPath} (查找后缀: ${suffix})`)
     return () => import('@/views/NotFoundView.vue')
   }
   return () =>
-    (module as () => Promise<any>)().catch((err) => {
-      console.error('加载视图组件失败: %s', fullPath, err)
+    (viewModules[matched] as () => Promise<any>)().catch((err) => {
+      console.error('加载视图组件失败: %s', componentPath, err)
       return import('@/views/NotFoundView.vue')
     })
 }
