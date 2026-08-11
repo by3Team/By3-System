@@ -49,7 +49,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" @opened="onDialogOpened">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="80px">
         <el-form-item label="用户名" prop="userName" v-if="!isEdit">
           <el-input v-model="form.userName" />
@@ -72,7 +72,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="部门" prop="departmentId">
-          <el-tree-select v-model="form.departmentId" :data="departments" :props="{ label: 'deptName', value: 'id', children: 'children' }" clearable check-strictly placeholder="选择部门" />
+          <el-tree-select :key="treeKey" v-model="form.departmentId" :data="departments" :props="{ label: 'deptName', value: 'id', children: 'children' }" clearable check-strictly placeholder="选择部门" />
         </el-form-item>
         <el-form-item label="职位" prop="positionId">
           <el-select v-model="form.positionId" clearable placeholder="选择职位">
@@ -130,6 +130,7 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const isEdit = ref(false)
 const formRef = ref()
+const treeKey = ref(0)
 const form = reactive<any>({ userName: '', password: '', realName: '', email: '', phone: '', roleIds: [], departmentId: null, positionId: null, gender: '', isEnabled: true })
 const originalPhone = ref('')
 const isPhoneModified = ref(false)
@@ -137,7 +138,8 @@ const isPhoneModified = ref(false)
 const formRules = {
   userName: [
     { required: true, message: '用户名不能为空', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度3-20位', trigger: 'blur' }
+    { min: 3, max: 20, message: '用户名长度3-20位', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9]+$/, message: '用户名只允许数字和字母', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '密码不能为空', trigger: 'blur' },
@@ -185,7 +187,13 @@ const resetPwdVisible = ref(false)
 const resetPwdFormRef = ref()
 const resetPwdForm = reactive<any>({ userId: '', newPassword: '', confirmPassword: '' })
 const resetPwdRules = {
-  newPassword: [{ required: true, message: '必填', trigger: 'blur' }],
+  newPassword: [
+    { required: true, message: '必填', trigger: 'blur' },
+    { min: 8, message: '密码最少8位', trigger: 'blur' },
+    { pattern: /[A-Z]/, message: '密码须包含至少一个大写字母', trigger: 'blur' },
+    { pattern: /[a-z]/, message: '密码须包含至少一个小写字母', trigger: 'blur' },
+    { pattern: /[0-9]/, message: '密码须包含至少一个数字', trigger: 'blur' }
+  ],
   confirmPassword: [
     { required: true, message: '必填', trigger: 'blur' },
     {
@@ -249,6 +257,7 @@ async function openDialog(row?: any) {
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑用户' : '新增用户'
   resetForm()
+  treeKey.value++
 
   if (row?.id) {
     try {
@@ -272,6 +281,10 @@ async function openDialog(row?: any) {
   }
 
   dialogVisible.value = true
+}
+
+function onDialogOpened() {
+  formRef.value?.clearValidate()
 }
 
 async function handleSubmit() {
@@ -324,10 +337,19 @@ function openResetPassword(row: any) {
 }
 
 async function handleResetPassword() {
-  await resetPwdFormRef.value.validate()
-  await userApi.resetPassword(resetPwdForm.userId, { newPassword: resetPwdForm.newPassword })
-  ElMessage.success('密码重置成功')
-  resetPwdVisible.value = false
+  const valid = await resetPwdFormRef.value.validate().catch(() => false)
+  if (!valid) {
+    ElMessage.warning('请正确填写表单后再提交')
+    return
+  }
+
+  try {
+    await userApi.resetPassword(resetPwdForm.userId, { newPassword: resetPwdForm.newPassword })
+    ElMessage.success('密码重置成功')
+    resetPwdVisible.value = false
+  } catch {
+    // 错误已在拦截器中统一处理
+  }
 }
 
 onMounted(() => { loadData(); loadRoles(); loadDepartments(); loadPositions() })
