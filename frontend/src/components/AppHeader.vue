@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Fold, Expand, Setting, FullScreen, Close, ArrowDown, UserFilled } from '@element-plus/icons-vue'
@@ -77,6 +77,18 @@ const tagsStore = useTagsStore()
 
 const isFullscreen = ref(false)
 
+function onFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement
+}
+
+onMounted(() => {
+  document.addEventListener('fullscreenchange', onFullscreenChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
+})
+
 const pwdVisible = ref(false)
 const pwdFormRef = ref()
 const pwdForm = reactive({ newPassword: '', confirmPassword: '' })
@@ -101,10 +113,8 @@ function toggleCollapse() {
 function toggleFullscreen() {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen()
-    isFullscreen.value = true
   } else {
     document.exitFullscreen()
-    isFullscreen.value = false
   }
 }
 
