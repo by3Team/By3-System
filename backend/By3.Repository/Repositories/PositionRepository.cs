@@ -79,4 +79,10 @@ public class PositionRepository
     /// </summary>
     public async Task<bool> ExistsByCodeAsync(string positionCode)
         => await Queryable().AnyAsync(p => p.PositionCode == positionCode);
+
+    /// <summary>
+    /// 检查岗位编码是否已被其他记录使用（排除已删除和指定 ID）。
+    /// </summary>
+    public async Task<bool> ExistsByCodeAsync(string positionCode, Guid excludeId)
+        => await Queryable().AnyAsync(p => p.PositionCode == positionCode && p.Id != excludeId);
 }

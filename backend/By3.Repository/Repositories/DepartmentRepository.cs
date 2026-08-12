@@ -62,4 +62,10 @@ public class DepartmentRepository
     /// </summary>
     public async Task<bool> ExistsByCodeAsync(string deptCode)
         => await Queryable().AnyAsync(d => d.DeptCode == deptCode);
+
+    /// <summary>
+    /// 检查部门编码是否已被其他记录使用（排除已删除和指定 ID）。
+    /// </summary>
+    public async Task<bool> ExistsByCodeAsync(string deptCode, Guid excludeId)
+        => await Queryable().AnyAsync(d => d.DeptCode == deptCode && d.Id != excludeId);
 }

@@ -138,9 +138,8 @@ async function handleSubmit() {
     }
     dialogVisible.value = false
     loadData()
-  } catch (err: any) {
-    const message = err?.message || err?.data?.message || '操作失败'
-    ElMessage.error(message)
+  } catch {
+    // 错误消息已由 request.ts 拦截器统一处理
   }
 }
 

@@ -94,7 +94,8 @@ public class PositionsController : ControllerBase
     public async Task<IActionResult> Update(Guid id, UpdatePositionDto dto)
     {
         dto.Id = id;
-        var result = await _service.UpdateAsync(dto);
+        var (result, error) = await _service.UpdateAsync(dto);
+        if (error != null) return BadRequest(ApiResult<object>.Error(error, 400));
         if (result == 0) return NotFound(ApiResult<object>.Error("岗位不存在", 404));
         return Ok(ApiResult<object>.Ok(null, "更新成功"));
     }

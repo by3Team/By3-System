@@ -89,21 +89,33 @@ public class PositionService
     }
 
     /// <summary>
-    /// 更新岗位信息。
+    /// 更新岗位信息。重复编码时返回 0 并通过 out 参数返回错误信息。
     /// </summary>
-    public async Task<int> UpdateAsync(UpdatePositionDto dto)
+    public async Task<(int Result, string? Error)> UpdateAsync(UpdatePositionDto dto)
     {
         var position = await _repo.GetByIdAsync(dto.Id);
-        if (position == null) return 0;
+        if (position == null) return (0, null);
+
+        if (dto.PositionCode != null)
+        {
+            if (string.IsNullOrWhiteSpace(dto.PositionCode))
+                return (0, "岗位编码不能为空");
+
+            if (!string.Equals(position.PositionCode, dto.PositionCode, StringComparison.OrdinalIgnoreCase)
+                && await _repo.ExistsByCodeAsync(dto.PositionCode, dto.Id))
+                return (0, "岗位编码已存在");
+
+            position.PositionCode = dto.PositionCode;
+        }
 
         if (dto.PositionName != null) position.PositionName = dto.PositionName;
-        if (dto.PositionCode != null) position.PositionCode = dto.PositionCode;
         if (dto.SortOrder.HasValue) position.SortOrder = dto.SortOrder.Value;
         if (dto.IsEnabled.HasValue) position.IsEnabled = dto.IsEnabled.Value;
         position.UpdatedAt = DateTime.UtcNow;
         position.UpdatedBy = CurrentUserId;
 
-        return await _repo.UpdateAsync(position);
+        var result = await _repo.UpdateAsync(position);
+        return (result, null);
     }
 
     /// <summary>
