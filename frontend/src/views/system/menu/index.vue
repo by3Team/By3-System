@@ -42,7 +42,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="父菜单" v-if="form.menuType !== 1">
-          <el-tree-select v-model="form.parentId" :data="parentMenus" :props="{ label: 'menuName', value: 'id', children: 'children' }" clearable check-strictly />
+          <el-tree-select :key="treeKey" v-model="form.parentId" :data="parentMenus" :props="{ label: 'menuName', value: 'id', children: 'children' }" clearable check-strictly />
         </el-form-item>
         <el-form-item label="路由" v-if="form.menuType === 2">
           <el-input v-model="form.route" />
@@ -81,6 +81,7 @@ const tableData = ref<any[]>([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const isEdit = ref(false)
+const treeKey = ref(0)
 const form = reactive<any>({ menuName: '', menuType: 2, route: '', component: '', permission: '', icon: '', sortOrder: 0, parentId: null })
 
 const parentMenus = computed(() => tableData.value.filter(m => m.menuType !== 3))
@@ -95,6 +96,7 @@ function openDialog(row?: any) {
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑菜单' : '新增菜单'
   Object.assign(form, row || { menuName: '', menuType: 2, route: '', component: '', permission: '', icon: '', sortOrder: 0, parentId: null })
+  treeKey.value++
   dialogVisible.value = true
 }
 

@@ -43,6 +43,7 @@
         </el-form-item>
         <el-form-item label="上级部门">
           <el-tree-select
+            :key="treeKey"
             v-model="form.parentId"
             :data="treeData"
             :props="{ label: 'deptName', value: 'id', children: 'children' }"
@@ -82,6 +83,7 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const isEdit = ref(false)
 const formRef = ref()
+const treeKey = ref(0)
 const form = reactive<any>({ id: '', deptName: '', deptCode: '', parentId: undefined, sortOrder: 0, isEnabled: true })
 const formRules = {
   deptName: [{ required: true, message: '部门名称不能为空', trigger: 'blur' }]
@@ -101,6 +103,7 @@ function openDialog(row?: any, parentId?: string) {
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑部门' : '新增部门'
   resetForm()
+  treeKey.value++
 
   if (row) {
     form.id = row.id

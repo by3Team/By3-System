@@ -43,7 +43,7 @@
           <el-input v-model="form.description" type="textarea" />
         </el-form-item>
         <el-form-item label="菜单权限">
-          <el-tree ref="treeRef" :data="menuTree" show-checkbox node-key="id" :default-checked-keys="form.menuIds" :props="{ label: 'menuName', children: 'children' }" />
+          <el-tree :key="treeKey" ref="treeRef" :data="menuTree" show-checkbox node-key="id" :default-checked-keys="form.menuIds" :props="{ label: 'menuName', children: 'children' }" />
         </el-form-item>
         <el-form-item label="状态" v-if="isEdit">
           <el-switch v-model="form.isEnabled" />
@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { roleApi, menuApi } from '@/api'
 import { useDictStore } from '@/store/dict'
@@ -75,6 +75,7 @@ const dialogTitle = ref('')
 const isEdit = ref(false)
 const formRef = ref()
 const treeRef = ref()
+const treeKey = ref(0)
 const form = reactive<any>({ roleName: '', description: '', menuIds: [], isEnabled: true })
 
 const formRules = {
@@ -107,7 +108,7 @@ async function openDialog(row?: any) {
     form.menuIds = await roleApi.getMenus(row.id)
   }
   dialogVisible.value = true
-  nextTick(() => treeRef.value?.setCheckedKeys(form.menuIds || []))
+  treeKey.value++
 }
 
 function onDialogOpened() {
