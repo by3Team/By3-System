@@ -53,8 +53,8 @@
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="form.sortOrder" :min="0" />
+        <el-form-item label="排序" prop="sortOrder">
+          <el-input-number v-model="form.sortOrder" :min="0" :precision="0" />
         </el-form-item>
         <el-form-item label="状态" v-if="isEdit">
           <el-switch v-model="form.isEnabled" />
@@ -87,7 +87,8 @@ const treeKey = ref(0)
 const form = reactive<any>({ id: '', deptName: '', deptCode: '', parentId: undefined, sortOrder: 0, isEnabled: true })
 const formRules = {
   deptName: [{ required: true, message: '部门名称不能为空', trigger: 'blur' }],
-  deptCode: [{ required: true, message: '部门编码不能为空', trigger: 'blur' }]
+  deptCode: [{ required: true, message: '部门编码不能为空', trigger: 'blur' }],
+  sortOrder: [{ required: true, type: 'number', min: 1, message: '排序必须为正整数', trigger: 'change' }]
 }
 
 async function loadData() {

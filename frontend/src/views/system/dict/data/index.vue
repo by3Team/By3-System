@@ -48,8 +48,8 @@
         <el-form-item label="字典值" prop="dictValue">
           <el-input v-model="form.dictValue" />
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="form.sortOrder" :min="0" />
+        <el-form-item label="排序" prop="sortOrder">
+          <el-input-number v-model="form.sortOrder" :min="0" :precision="0" />
         </el-form-item>
         <el-form-item label="是否默认">
           <el-switch v-model="form.isDefault" />
@@ -92,7 +92,8 @@ const formRef = ref()
 const form = reactive<any>({ dictTypeId: typeId, dictLabel: '', dictValue: '', sortOrder: 0, isDefault: false, isEnabled: true })
 const formRules = {
   dictLabel: [{ required: true, message: '必填', trigger: 'blur' }],
-  dictValue: [{ required: true, message: '必填', trigger: 'blur' }]
+  dictValue: [{ required: true, message: '必填', trigger: 'blur' }],
+  sortOrder: [{ required: true, type: 'number', min: 1, message: '排序必须为正整数', trigger: 'change' }]
 }
 
 function formatDate(value: string) {

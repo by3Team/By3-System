@@ -125,6 +125,7 @@ public class CreateMenuValidator : AbstractValidator<CreateMenuDto>
         RuleFor(x => x.ParentId).NotEmpty()
             .When(x => x.MenuType == 2 || x.MenuType == 3)
             .WithMessage("菜单和按钮必须选择父菜单");
+        RuleFor(x => x.SortOrder).GreaterThan(0).WithMessage("排序必须为正整数");
     }
 }
 
@@ -141,6 +142,7 @@ public class UpdateMenuValidator : AbstractValidator<UpdateMenuDto>
         RuleFor(x => x.ParentId).NotEmpty()
             .When(x => x.MenuType.HasValue && (x.MenuType.Value == 2 || x.MenuType.Value == 3))
             .WithMessage("菜单和按钮必须选择父菜单");
+        RuleFor(x => x.SortOrder).NotNull().GreaterThan(0).WithMessage("排序必须为正整数");
     }
 }
 
@@ -153,6 +155,7 @@ public class CreatePositionValidator : AbstractValidator<CreatePositionDto>
     {
         RuleFor(x => x.PositionName).NotEmpty().WithMessage("岗位名称不能为空");
         RuleFor(x => x.PositionCode).NotEmpty().WithMessage("岗位编码不能为空");
+        RuleFor(x => x.SortOrder).GreaterThan(0).WithMessage("排序必须为正整数");
     }
 }
 
@@ -165,6 +168,7 @@ public class UpdatePositionValidator : AbstractValidator<UpdatePositionDto>
     {
         RuleFor(x => x.PositionName).NotEmpty().WithMessage("岗位名称不能为空");
         RuleFor(x => x.PositionCode).NotEmpty().WithMessage("岗位编码不能为空");
+        RuleFor(x => x.SortOrder).NotNull().GreaterThan(0).WithMessage("排序必须为正整数");
     }
 }
 
@@ -177,6 +181,7 @@ public class CreateDepartmentValidator : AbstractValidator<CreateDepartmentDto>
     {
         RuleFor(x => x.DeptName).NotEmpty().WithMessage("部门名称不能为空");
         RuleFor(x => x.DeptCode).NotEmpty().WithMessage("部门编码不能为空");
+        RuleFor(x => x.SortOrder).GreaterThan(0).WithMessage("排序必须为正整数");
     }
 }
 
@@ -189,5 +194,32 @@ public class UpdateDepartmentValidator : AbstractValidator<UpdateDepartmentDto>
     {
         RuleFor(x => x.DeptName).NotEmpty().WithMessage("部门名称不能为空");
         RuleFor(x => x.DeptCode).NotEmpty().WithMessage("部门编码不能为空");
+        RuleFor(x => x.SortOrder).NotNull().GreaterThan(0).WithMessage("排序必须为正整数");
+    }
+}
+
+/// <summary>
+/// 创建字典数据参数验证器。
+/// </summary>
+public class CreateDictDataValidator : AbstractValidator<CreateDictDataDto>
+{
+    public CreateDictDataValidator()
+    {
+        RuleFor(x => x.DictLabel).NotEmpty().WithMessage("字典标签不能为空");
+        RuleFor(x => x.DictValue).NotEmpty().WithMessage("字典值不能为空");
+        RuleFor(x => x.SortOrder).GreaterThan(0).WithMessage("排序必须为正整数");
+    }
+}
+
+/// <summary>
+/// 更新字典数据参数验证器。
+/// </summary>
+public class UpdateDictDataValidator : AbstractValidator<UpdateDictDataDto>
+{
+    public UpdateDictDataValidator()
+    {
+        RuleFor(x => x.DictLabel).NotEmpty().WithMessage("字典标签不能为空");
+        RuleFor(x => x.DictValue).NotEmpty().WithMessage("字典值不能为空");
+        RuleFor(x => x.SortOrder).NotNull().GreaterThan(0).WithMessage("排序必须为正整数");
     }
 }

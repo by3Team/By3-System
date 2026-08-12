@@ -48,8 +48,8 @@
         <el-form-item label="岗位编码" prop="positionCode">
           <el-input v-model="form.positionCode" />
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="form.sortOrder" :min="0" />
+        <el-form-item label="排序" prop="sortOrder">
+          <el-input-number v-model="form.sortOrder" :min="0" :precision="0" />
         </el-form-item>
         <el-form-item label="状态" v-if="isEdit">
           <el-switch v-model="form.isEnabled" />
@@ -82,7 +82,8 @@ const formRef = ref()
 const form = reactive<any>({ positionName: '', positionCode: '', sortOrder: 0, isEnabled: true })
 const formRules = {
   positionName: [{ required: true, message: '必填', trigger: 'blur' }],
-  positionCode: [{ required: true, message: '必填', trigger: 'blur' }]
+  positionCode: [{ required: true, message: '必填', trigger: 'blur' }],
+  sortOrder: [{ required: true, type: 'number', min: 1, message: '排序必须为正整数', trigger: 'change' }]
 }
 
 function formatDate(value: string) {
