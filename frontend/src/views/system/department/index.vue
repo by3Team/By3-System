@@ -38,7 +38,7 @@
         <el-form-item label="部门名称" prop="deptName">
           <el-input v-model="form.deptName" />
         </el-form-item>
-        <el-form-item label="部门编码">
+        <el-form-item label="部门编码" prop="deptCode">
           <el-input v-model="form.deptCode" />
         </el-form-item>
         <el-form-item label="上级部门">
@@ -53,8 +53,8 @@
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="form.sortOrder" :min="0" />
+        <el-form-item label="排序" prop="sortOrder">
+          <el-input-number v-model="form.sortOrder" :min="0" :precision="0" />
         </el-form-item>
         <el-form-item label="状态" v-if="isEdit">
           <el-switch v-model="form.isEnabled" />
@@ -86,7 +86,9 @@ const formRef = ref()
 const treeKey = ref(0)
 const form = reactive<any>({ id: '', deptName: '', deptCode: '', parentId: undefined, sortOrder: 0, isEnabled: true })
 const formRules = {
-  deptName: [{ required: true, message: '部门名称不能为空', trigger: 'blur' }]
+  deptName: [{ required: true, message: '部门名称不能为空', trigger: 'blur' }],
+  deptCode: [{ required: true, message: '部门编码不能为空', trigger: 'blur' }],
+  sortOrder: [{ required: true, type: 'number', min: 1, message: '排序必须为正整数', trigger: 'change' }]
 }
 
 async function loadData() {
@@ -137,9 +139,8 @@ async function handleSubmit() {
     }
     dialogVisible.value = false
     loadData()
-  } catch (err: any) {
-    const message = err?.message || err?.data?.message || '操作失败'
-    ElMessage.error(message)
+  } catch {
+    // 错误消息已由 request.ts 拦截器统一处理
   }
 }
 

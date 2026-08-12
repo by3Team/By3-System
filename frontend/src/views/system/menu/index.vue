@@ -56,8 +56,8 @@
         <el-form-item label="图标" v-if="form.menuType !== 3">
           <el-input v-model="form.icon" />
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="form.sortOrder" />
+        <el-form-item label="排序" prop="sortOrder">
+          <el-input-number v-model="form.sortOrder" :min="0" :precision="0" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -87,6 +87,7 @@ const form = reactive<any>({ menuName: '', menuType: 2, route: '', component: ''
 
 const formRules = {
   menuName: [{ required: true, message: '菜单名不能为空', trigger: 'blur' }],
+  sortOrder: [{ required: true, type: 'number', min: 1, message: '排序必须为正整数', trigger: 'change' }],
   parentId: [
     {
       validator: (_rule: any, value: any, callback: any) => {

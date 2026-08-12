@@ -66,12 +66,15 @@ public class PositionService
     }
 
     /// <summary>
-    /// 创建岗位。
+    /// 创建岗位。重复编码时返回错误信息，成功时 Error 为 null。
     /// </summary>
-    public async Task<Guid> CreateAsync(CreatePositionDto dto)
+    public async Task<(Guid? Id, string? Error)> CreateAsync(CreatePositionDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.PositionCode) || await _repo.ExistsByCodeAsync(dto.PositionCode))
-            throw new InvalidOperationException("岗位编码已存在");
+        if (string.IsNullOrWhiteSpace(dto.PositionCode))
+            return (null, "岗位编码不能为空");
+
+        if (await _repo.ExistsByCodeAsync(dto.PositionCode))
+            return (null, "岗位编码已存在");
 
         var position = new SysPosition
         {
@@ -81,25 +84,38 @@ public class PositionService
             CreatedBy = CurrentUserId,
             CreatedAt = DateTime.UtcNow
         };
-        return await _repo.CreateAsync(position);
+        var id = await _repo.CreateAsync(position);
+        return (id, null);
     }
 
     /// <summary>
-    /// 更新岗位信息。
+    /// 更新岗位信息。重复编码时返回 0 并通过 out 参数返回错误信息。
     /// </summary>
-    public async Task<int> UpdateAsync(UpdatePositionDto dto)
+    public async Task<(int Result, string? Error)> UpdateAsync(UpdatePositionDto dto)
     {
         var position = await _repo.GetByIdAsync(dto.Id);
-        if (position == null) return 0;
+        if (position == null) return (0, null);
+
+        if (dto.PositionCode != null)
+        {
+            if (string.IsNullOrWhiteSpace(dto.PositionCode))
+                return (0, "岗位编码不能为空");
+
+            if (!string.Equals(position.PositionCode, dto.PositionCode, StringComparison.OrdinalIgnoreCase)
+                && await _repo.ExistsByCodeAsync(dto.PositionCode, dto.Id))
+                return (0, "岗位编码已存在");
+
+            position.PositionCode = dto.PositionCode;
+        }
 
         if (dto.PositionName != null) position.PositionName = dto.PositionName;
-        if (dto.PositionCode != null) position.PositionCode = dto.PositionCode;
         if (dto.SortOrder.HasValue) position.SortOrder = dto.SortOrder.Value;
         if (dto.IsEnabled.HasValue) position.IsEnabled = dto.IsEnabled.Value;
         position.UpdatedAt = DateTime.UtcNow;
         position.UpdatedBy = CurrentUserId;
 
-        return await _repo.UpdateAsync(position);
+        var result = await _repo.UpdateAsync(position);
+        return (result, null);
     }
 
     /// <summary>
