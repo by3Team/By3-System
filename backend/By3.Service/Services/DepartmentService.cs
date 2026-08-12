@@ -61,12 +61,15 @@ public class DepartmentService
     }
 
     /// <summary>
-    /// 创建部门。
+    /// 创建部门。重复编码时返回错误信息，成功时 Error 为 null。
     /// </summary>
-    public async Task<Guid> CreateAsync(CreateDepartmentDto dto)
+    public async Task<(Guid? Id, string? Error)> CreateAsync(CreateDepartmentDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.DeptCode) || await _repo.ExistsByCodeAsync(dto.DeptCode))
-            throw new InvalidOperationException("部门编码已存在");
+        if (string.IsNullOrWhiteSpace(dto.DeptCode))
+            return (null, "部门编码不能为空");
+
+        if (await _repo.ExistsByCodeAsync(dto.DeptCode))
+            return (null, "部门编码已存在");
 
         var dept = new SysDepartment
         {
@@ -77,7 +80,8 @@ public class DepartmentService
             CreatedBy = CurrentUserId,
             CreatedAt = DateTime.UtcNow
         };
-        return await _repo.CreateAsync(dept);
+        var id = await _repo.CreateAsync(dept);
+        return (id, null);
     }
 
     /// <summary>

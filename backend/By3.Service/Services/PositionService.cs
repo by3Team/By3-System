@@ -66,12 +66,15 @@ public class PositionService
     }
 
     /// <summary>
-    /// 创建岗位。
+    /// 创建岗位。重复编码时返回错误信息，成功时 Error 为 null。
     /// </summary>
-    public async Task<Guid> CreateAsync(CreatePositionDto dto)
+    public async Task<(Guid? Id, string? Error)> CreateAsync(CreatePositionDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.PositionCode) || await _repo.ExistsByCodeAsync(dto.PositionCode))
-            throw new InvalidOperationException("岗位编码已存在");
+        if (string.IsNullOrWhiteSpace(dto.PositionCode))
+            return (null, "岗位编码不能为空");
+
+        if (await _repo.ExistsByCodeAsync(dto.PositionCode))
+            return (null, "岗位编码已存在");
 
         var position = new SysPosition
         {
@@ -81,7 +84,8 @@ public class PositionService
             CreatedBy = CurrentUserId,
             CreatedAt = DateTime.UtcNow
         };
-        return await _repo.CreateAsync(position);
+        var id = await _repo.CreateAsync(position);
+        return (id, null);
     }
 
     /// <summary>

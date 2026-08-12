@@ -76,7 +76,8 @@ public class PositionsController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Create(CreatePositionDto dto)
     {
-        var id = await _service.CreateAsync(dto);
+        var (id, error) = await _service.CreateAsync(dto);
+        if (error != null) return BadRequest(ApiResult<object>.Error(error, 400));
         return Ok(ApiResult<object>.Ok(new { Id = id }, "创建成功"));
     }
 
