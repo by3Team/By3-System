@@ -171,6 +171,7 @@ async function loadData() {
 }
 
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑任务' : '新增任务'
   if (row) {

@@ -127,6 +127,7 @@ function handleCommand(command: string) {
   } else if (command === 'profile') {
     router.push('/profile')
   } else if (command === 'password') {
+    pwdFormRef.value?.clearValidate()
     pwdForm.newPassword = ''
     pwdForm.confirmPassword = ''
     pwdVisible.value = true

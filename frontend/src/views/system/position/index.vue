@@ -45,7 +45,7 @@
         <el-form-item label="岗位名称" prop="positionName">
           <el-input v-model="form.positionName" />
         </el-form-item>
-        <el-form-item label="岗位编码">
+        <el-form-item label="岗位编码" prop="positionCode">
           <el-input v-model="form.positionCode" />
         </el-form-item>
         <el-form-item label="排序">
@@ -81,7 +81,8 @@ const isEdit = ref(false)
 const formRef = ref()
 const form = reactive<any>({ positionName: '', positionCode: '', sortOrder: 0, isEnabled: true })
 const formRules = {
-  positionName: [{ required: true, message: '必填', trigger: 'blur' }]
+  positionName: [{ required: true, message: '必填', trigger: 'blur' }],
+  positionCode: [{ required: true, message: '必填', trigger: 'blur' }]
 }
 
 function formatDate(value: string) {
@@ -99,6 +100,7 @@ async function loadData() {
 }
 
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑岗位' : '新增岗位'
   Object.assign(form, row || { positionName: '', positionCode: '', sortOrder: 0, isEnabled: true })

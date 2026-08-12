@@ -73,4 +73,10 @@ public class PositionRepository
     /// </summary>
     public async Task<bool> HasUsersAsync(Guid positionId)
         => await _db.Users.AnyAsync(u => u.PositionId == positionId && !u.IsDeleted);
+
+    /// <summary>
+    /// 检查岗位编码是否已存在（排除已删除）。
+    /// </summary>
+    public async Task<bool> ExistsByCodeAsync(string positionCode)
+        => await Queryable().AnyAsync(p => p.PositionCode == positionCode);
 }

@@ -93,7 +93,9 @@ public class CreateRoleValidator : AbstractValidator<CreateRoleDto>
 {
     public CreateRoleValidator()
     {
-        RuleFor(x => x.RoleName).NotEmpty().MaximumLength(50).WithMessage("角色名称不能为空");
+        RuleFor(x => x.RoleName).NotEmpty().WithMessage("角色名称不能为空")
+            .MaximumLength(100).WithMessage("角色名称长度不能超过100");
+        RuleFor(x => x.Description).MaximumLength(500).When(x => !string.IsNullOrEmpty(x.Description)).WithMessage("描述长度不能超过500");
     }
 }
 
@@ -104,7 +106,9 @@ public class UpdateRoleValidator : AbstractValidator<UpdateRoleDto>
 {
     public UpdateRoleValidator()
     {
-        RuleFor(x => x.RoleName).NotEmpty().When(x => !string.IsNullOrEmpty(x.RoleName)).MaximumLength(50).WithMessage("角色名称长度不能超过50");
+        RuleFor(x => x.RoleName).NotEmpty().WithMessage("角色名称不能为空")
+            .MaximumLength(100).WithMessage("角色名称长度不能超过100");
+        RuleFor(x => x.Description).MaximumLength(500).When(x => !string.IsNullOrEmpty(x.Description)).WithMessage("描述长度不能超过500");
     }
 }
 
@@ -115,8 +119,12 @@ public class CreateMenuValidator : AbstractValidator<CreateMenuDto>
 {
     public CreateMenuValidator()
     {
-        RuleFor(x => x.MenuName).NotEmpty().MaximumLength(50).WithMessage("菜单名称不能为空");
+        RuleFor(x => x.MenuName).NotEmpty().WithMessage("菜单名称不能为空")
+            .MaximumLength(50).WithMessage("菜单名称长度不能超过50");
         RuleFor(x => x.MenuType).InclusiveBetween(1, 3).WithMessage("菜单类型只能是1-3");
+        RuleFor(x => x.ParentId).NotEmpty()
+            .When(x => x.MenuType == 2 || x.MenuType == 3)
+            .WithMessage("菜单和按钮必须选择父菜单");
     }
 }
 
@@ -127,6 +135,35 @@ public class UpdateMenuValidator : AbstractValidator<UpdateMenuDto>
 {
     public UpdateMenuValidator()
     {
+        RuleFor(x => x.MenuName).NotEmpty().WithMessage("菜单名称不能为空")
+            .MaximumLength(50).WithMessage("菜单名称长度不能超过50");
         RuleFor(x => x.MenuType).InclusiveBetween(1, 3).When(x => x.MenuType.HasValue).WithMessage("菜单类型只能是1-3");
+        RuleFor(x => x.ParentId).NotEmpty()
+            .When(x => x.MenuType.HasValue && (x.MenuType.Value == 2 || x.MenuType.Value == 3))
+            .WithMessage("菜单和按钮必须选择父菜单");
+    }
+}
+
+/// <summary>
+/// 创建岗位参数验证器。
+/// </summary>
+public class CreatePositionValidator : AbstractValidator<CreatePositionDto>
+{
+    public CreatePositionValidator()
+    {
+        RuleFor(x => x.PositionName).NotEmpty().WithMessage("岗位名称不能为空");
+        RuleFor(x => x.PositionCode).NotEmpty().WithMessage("岗位编码不能为空");
+    }
+}
+
+/// <summary>
+/// 更新岗位参数验证器。
+/// </summary>
+public class UpdatePositionValidator : AbstractValidator<UpdatePositionDto>
+{
+    public UpdatePositionValidator()
+    {
+        RuleFor(x => x.PositionName).NotEmpty().WithMessage("岗位名称不能为空");
+        RuleFor(x => x.PositionCode).NotEmpty().WithMessage("岗位编码不能为空");
     }
 }

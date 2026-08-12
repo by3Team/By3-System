@@ -35,15 +35,15 @@
     </el-card>
 
     <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form :model="form" ref="formRef" label-width="80px">
-        <el-form-item label="角色名">
+      <el-form :model="form" :rules="formRules" ref="formRef" label-width="80px">
+        <el-form-item label="角色名" prop="roleName">
           <el-input v-model="form.roleName" />
         </el-form-item>
-        <el-form-item label="描述">
+        <el-form-item label="描述" prop="description">
           <el-input v-model="form.description" type="textarea" />
         </el-form-item>
         <el-form-item label="菜单权限">
-          <el-tree ref="treeRef" :data="menuTree" show-checkbox node-key="id" :default-checked-keys="form.menuIds" :props="{ label: 'menuName', children: 'children' }" />
+          <el-tree :key="treeKey" ref="treeRef" :data="menuTree" show-checkbox node-key="id" :default-checked-keys="form.menuIds" :props="{ label: 'menuName', children: 'children' }" />
         </el-form-item>
         <el-form-item label="状态" v-if="isEdit">
           <el-switch v-model="form.isEnabled" />
@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { roleApi, menuApi } from '@/api'
 import { useDictStore } from '@/store/dict'
@@ -75,7 +75,18 @@ const dialogTitle = ref('')
 const isEdit = ref(false)
 const formRef = ref()
 const treeRef = ref()
+const treeKey = ref(0)
 const form = reactive<any>({ roleName: '', description: '', menuIds: [], isEnabled: true })
+
+const formRules = {
+  roleName: [
+    { required: true, message: '角色名不能为空', trigger: 'blur' },
+    { max: 100, message: '角色名长度不能超过100', trigger: 'blur' }
+  ],
+  description: [
+    { max: 500, message: '描述长度不能超过500', trigger: 'blur' }
+  ]
+}
 
 async function loadData() {
   loading.value = true
@@ -90,6 +101,7 @@ async function loadMenus() {
 }
 
 async function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑角色' : '新增角色'
   Object.assign(form, row || { roleName: '', description: '', menuIds: [], isEnabled: true })
@@ -97,10 +109,13 @@ async function openDialog(row?: any) {
     form.menuIds = await roleApi.getMenus(row.id)
   }
   dialogVisible.value = true
-  nextTick(() => treeRef.value?.setCheckedKeys(form.menuIds || []))
+  treeKey.value++
 }
 
 async function handleSubmit() {
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
   form.menuIds = treeRef.value.getCheckedKeys()
   if (isEdit.value) {
     await roleApi.update(form.id, form)

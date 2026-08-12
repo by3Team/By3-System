@@ -252,6 +252,7 @@ async function loadData() {
 }
 
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑接口' : '新增接口'
   Object.assign(form, row || {

@@ -480,6 +480,7 @@ function toggleAll(checked: boolean) {
 }
 
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑 Token' : '新增 Token'
   Object.assign(form, { appName: '', description: '', contactEmail: '', expireType: '30', expireTime: '', allowedApiIds: [], isEnabled: true })

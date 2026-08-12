@@ -70,6 +70,9 @@ public class PositionService
     /// </summary>
     public async Task<Guid> CreateAsync(CreatePositionDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.PositionCode) || await _repo.ExistsByCodeAsync(dto.PositionCode))
+            throw new InvalidOperationException("岗位编码已存在");
+
         var position = new SysPosition
         {
             PositionName = dto.PositionName,
