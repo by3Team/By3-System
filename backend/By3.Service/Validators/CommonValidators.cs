@@ -119,8 +119,12 @@ public class CreateMenuValidator : AbstractValidator<CreateMenuDto>
 {
     public CreateMenuValidator()
     {
-        RuleFor(x => x.MenuName).NotEmpty().MaximumLength(50).WithMessage("菜单名称不能为空");
+        RuleFor(x => x.MenuName).NotEmpty().WithMessage("菜单名称不能为空")
+            .MaximumLength(50).WithMessage("菜单名称长度不能超过50");
         RuleFor(x => x.MenuType).InclusiveBetween(1, 3).WithMessage("菜单类型只能是1-3");
+        RuleFor(x => x.ParentId).NotEmpty()
+            .When(x => x.MenuType == 2 || x.MenuType == 3)
+            .WithMessage("菜单和按钮必须选择父菜单");
     }
 }
 
@@ -131,6 +135,11 @@ public class UpdateMenuValidator : AbstractValidator<UpdateMenuDto>
 {
     public UpdateMenuValidator()
     {
+        RuleFor(x => x.MenuName).NotEmpty().WithMessage("菜单名称不能为空")
+            .MaximumLength(50).WithMessage("菜单名称长度不能超过50");
         RuleFor(x => x.MenuType).InclusiveBetween(1, 3).When(x => x.MenuType.HasValue).WithMessage("菜单类型只能是1-3");
+        RuleFor(x => x.ParentId).NotEmpty()
+            .When(x => x.MenuType.HasValue && (x.MenuType.Value == 2 || x.MenuType.Value == 3))
+            .WithMessage("菜单和按钮必须选择父菜单");
     }
 }
