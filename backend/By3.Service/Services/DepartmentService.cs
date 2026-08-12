@@ -65,6 +65,9 @@ public class DepartmentService
     /// </summary>
     public async Task<Guid> CreateAsync(CreateDepartmentDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.DeptCode) || await _repo.ExistsByCodeAsync(dto.DeptCode))
+            throw new InvalidOperationException("部门编码已存在");
+
         var dept = new SysDepartment
         {
             DeptName = dto.DeptName,

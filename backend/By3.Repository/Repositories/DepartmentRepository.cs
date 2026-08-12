@@ -56,4 +56,10 @@ public class DepartmentRepository
     /// </summary>
     public async Task<bool> HasChildrenAsync(Guid id)
         => await _db.Departments.AnyAsync(d => d.ParentId == id && !d.IsDeleted);
+
+    /// <summary>
+    /// 检查部门编码是否已存在（排除已删除）。
+    /// </summary>
+    public async Task<bool> ExistsByCodeAsync(string deptCode)
+        => await Queryable().AnyAsync(d => d.DeptCode == deptCode);
 }

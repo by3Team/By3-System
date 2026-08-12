@@ -38,7 +38,7 @@
         <el-form-item label="部门名称" prop="deptName">
           <el-input v-model="form.deptName" />
         </el-form-item>
-        <el-form-item label="部门编码">
+        <el-form-item label="部门编码" prop="deptCode">
           <el-input v-model="form.deptCode" />
         </el-form-item>
         <el-form-item label="上级部门">
@@ -86,7 +86,8 @@ const formRef = ref()
 const treeKey = ref(0)
 const form = reactive<any>({ id: '', deptName: '', deptCode: '', parentId: undefined, sortOrder: 0, isEnabled: true })
 const formRules = {
-  deptName: [{ required: true, message: '部门名称不能为空', trigger: 'blur' }]
+  deptName: [{ required: true, message: '部门名称不能为空', trigger: 'blur' }],
+  deptCode: [{ required: true, message: '部门编码不能为空', trigger: 'blur' }]
 }
 
 async function loadData() {

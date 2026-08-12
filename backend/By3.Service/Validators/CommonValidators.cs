@@ -167,3 +167,27 @@ public class UpdatePositionValidator : AbstractValidator<UpdatePositionDto>
         RuleFor(x => x.PositionCode).NotEmpty().WithMessage("岗位编码不能为空");
     }
 }
+
+/// <summary>
+/// 创建部门参数验证器。
+/// </summary>
+public class CreateDepartmentValidator : AbstractValidator<CreateDepartmentDto>
+{
+    public CreateDepartmentValidator()
+    {
+        RuleFor(x => x.DeptName).NotEmpty().WithMessage("部门名称不能为空");
+        RuleFor(x => x.DeptCode).NotEmpty().WithMessage("部门编码不能为空");
+    }
+}
+
+/// <summary>
+/// 更新部门参数验证器。
+/// </summary>
+public class UpdateDepartmentValidator : AbstractValidator<UpdateDepartmentDto>
+{
+    public UpdateDepartmentValidator()
+    {
+        RuleFor(x => x.DeptName).NotEmpty().WithMessage("部门名称不能为空");
+        RuleFor(x => x.DeptCode).NotEmpty().WithMessage("部门编码不能为空");
+    }
+}
