@@ -93,7 +93,9 @@ public class CreateRoleValidator : AbstractValidator<CreateRoleDto>
 {
     public CreateRoleValidator()
     {
-        RuleFor(x => x.RoleName).NotEmpty().MaximumLength(50).WithMessage("角色名称不能为空");
+        RuleFor(x => x.RoleName).NotEmpty().WithMessage("角色名称不能为空")
+            .MaximumLength(100).WithMessage("角色名称长度不能超过100");
+        RuleFor(x => x.Description).MaximumLength(500).When(x => !string.IsNullOrEmpty(x.Description)).WithMessage("描述长度不能超过500");
     }
 }
 
@@ -104,7 +106,9 @@ public class UpdateRoleValidator : AbstractValidator<UpdateRoleDto>
 {
     public UpdateRoleValidator()
     {
-        RuleFor(x => x.RoleName).NotEmpty().When(x => !string.IsNullOrEmpty(x.RoleName)).MaximumLength(50).WithMessage("角色名称长度不能超过50");
+        RuleFor(x => x.RoleName).NotEmpty().WithMessage("角色名称不能为空")
+            .MaximumLength(100).WithMessage("角色名称长度不能超过100");
+        RuleFor(x => x.Description).MaximumLength(500).When(x => !string.IsNullOrEmpty(x.Description)).WithMessage("描述长度不能超过500");
     }
 }
 

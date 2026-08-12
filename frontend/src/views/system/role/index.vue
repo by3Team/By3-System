@@ -34,12 +34,12 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form :model="form" ref="formRef" label-width="80px">
-        <el-form-item label="角色名">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" @opened="onDialogOpened">
+      <el-form :model="form" :rules="formRules" ref="formRef" label-width="80px">
+        <el-form-item label="角色名" prop="roleName">
           <el-input v-model="form.roleName" />
         </el-form-item>
-        <el-form-item label="描述">
+        <el-form-item label="描述" prop="description">
           <el-input v-model="form.description" type="textarea" />
         </el-form-item>
         <el-form-item label="菜单权限">
@@ -77,6 +77,16 @@ const formRef = ref()
 const treeRef = ref()
 const form = reactive<any>({ roleName: '', description: '', menuIds: [], isEnabled: true })
 
+const formRules = {
+  roleName: [
+    { required: true, message: '角色名不能为空', trigger: 'blur' },
+    { max: 100, message: '角色名长度不能超过100', trigger: 'blur' }
+  ],
+  description: [
+    { max: 500, message: '描述长度不能超过500', trigger: 'blur' }
+  ]
+}
+
 async function loadData() {
   loading.value = true
   const res = await roleApi.getList(search)
@@ -100,7 +110,14 @@ async function openDialog(row?: any) {
   nextTick(() => treeRef.value?.setCheckedKeys(form.menuIds || []))
 }
 
+function onDialogOpened() {
+  formRef.value?.clearValidate()
+}
+
 async function handleSubmit() {
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
   form.menuIds = treeRef.value.getCheckedKeys()
   if (isEdit.value) {
     await roleApi.update(form.id, form)
