@@ -222,6 +222,7 @@ async function loadData() {
 }
 
 function openTemplateDialog(row?: any) {
+  templateFormRef.value?.clearValidate()
   isEditTemplate.value = !!row
   templateDialogTitle.value = row ? '编辑模板' : '新增模板'
   Object.assign(templateForm, row || { templateCode: '', templateName: '', description: '', isEnabled: true })
@@ -260,6 +261,7 @@ async function openVersionDialog(templateId: string) {
 }
 
 function openVersionFormDialog(row?: any) {
+  versionFormRef.value?.clearValidate()
   isEditVersion.value = !!row
   versionFormTitle.value = row ? '编辑版本' : '新增版本'
   Object.assign(versionForm, row || { templateId: currentTemplateId.value, version: '', subject: '', body: '', bodyFormat: 'html', isEnabled: true })
@@ -294,6 +296,7 @@ async function handleDeleteVersion(row: any) {
 }
 
 async function openTestDialog(templateId: string) {
+  testFormRef.value?.clearValidate()
   currentTemplateId.value = templateId
   currentVersions.value = await emailApi.getVersions(templateId)
   testForm.templateId = templateId
@@ -336,6 +339,7 @@ async function handleTest() {
 }
 
 async function openSendDialog(templateId: string) {
+  sendFormRef.value?.clearValidate()
   currentTemplateId.value = templateId
   currentVersions.value = await emailApi.getVersions(templateId)
   sendForm.templateId = templateId

@@ -30,8 +30,8 @@
     </el-card>
 
     <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form :model="form" ref="formRef" label-width="100px">
-        <el-form-item label="菜单名">
+      <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
+        <el-form-item label="菜单名" prop="menuName">
           <el-input v-model="form.menuName" />
         </el-form-item>
         <el-form-item label="类型">
@@ -41,8 +41,8 @@
             <el-radio :label="3">按钮</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="父菜单" v-if="form.menuType !== 1">
-          <el-tree-select v-model="form.parentId" :data="parentMenus" :props="{ label: 'menuName', value: 'id', children: 'children' }" clearable check-strictly />
+        <el-form-item label="父菜单" prop="parentId" v-if="form.menuType !== 1">
+          <el-tree-select :key="treeKey" v-model="form.parentId" :data="parentMenus" :props="{ label: 'menuName', value: 'id', children: 'children' }" clearable check-strictly />
         </el-form-item>
         <el-form-item label="路由" v-if="form.menuType === 2">
           <el-input v-model="form.route" />
@@ -56,8 +56,8 @@
         <el-form-item label="图标" v-if="form.menuType !== 3">
           <el-input v-model="form.icon" />
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="form.sortOrder" />
+        <el-form-item label="排序" prop="sortOrder">
+          <el-input-number v-model="form.sortOrder" :min="0" :precision="0" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -81,7 +81,26 @@ const tableData = ref<any[]>([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const isEdit = ref(false)
+const treeKey = ref(0)
+const formRef = ref()
 const form = reactive<any>({ menuName: '', menuType: 2, route: '', component: '', permission: '', icon: '', sortOrder: 0, parentId: null })
+
+const formRules = {
+  menuName: [{ required: true, message: '菜单名不能为空', trigger: 'blur' }],
+  sortOrder: [{ required: true, type: 'number', min: 1, message: '排序必须为正整数', trigger: 'change' }],
+  parentId: [
+    {
+      validator: (_rule: any, value: any, callback: any) => {
+        if (form.menuType !== 1 && !value) {
+          callback(new Error('请选择父菜单'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'change'
+    }
+  ]
+}
 
 const parentMenus = computed(() => tableData.value.filter(m => m.menuType !== 3))
 
@@ -92,13 +111,18 @@ async function loadData() {
 }
 
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑菜单' : '新增菜单'
   Object.assign(form, row || { menuName: '', menuType: 2, route: '', component: '', permission: '', icon: '', sortOrder: 0, parentId: null })
+  treeKey.value++
   dialogVisible.value = true
 }
 
 async function handleSubmit() {
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
   if (isEdit.value) {
     await menuApi.update(form.id, form)
     ElMessage.success('更新成功')

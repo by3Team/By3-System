@@ -61,10 +61,16 @@ public class DepartmentService
     }
 
     /// <summary>
-    /// 创建部门。
+    /// 创建部门。重复编码时返回错误信息，成功时 Error 为 null。
     /// </summary>
-    public async Task<Guid> CreateAsync(CreateDepartmentDto dto)
+    public async Task<(Guid? Id, string? Error)> CreateAsync(CreateDepartmentDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.DeptCode))
+            return (null, "部门编码不能为空");
+
+        if (await _repo.ExistsByCodeAsync(dto.DeptCode))
+            return (null, "部门编码已存在");
+
         var dept = new SysDepartment
         {
             DeptName = dto.DeptName,
@@ -74,26 +80,39 @@ public class DepartmentService
             CreatedBy = CurrentUserId,
             CreatedAt = DateTime.UtcNow
         };
-        return await _repo.CreateAsync(dept);
+        var id = await _repo.CreateAsync(dept);
+        return (id, null);
     }
 
     /// <summary>
-    /// 更新部门信息。
+    /// 更新部门信息。重复编码时返回 0 并通过 out 参数返回错误信息。
     /// </summary>
-    public async Task<int> UpdateAsync(UpdateDepartmentDto dto)
+    public async Task<(int Result, string? Error)> UpdateAsync(UpdateDepartmentDto dto)
     {
         var dept = await _repo.GetByIdAsync(dto.Id);
-        if (dept == null) return 0;
+        if (dept == null) return (0, null);
+
+        if (dto.DeptCode != null)
+        {
+            if (string.IsNullOrWhiteSpace(dto.DeptCode))
+                return (0, "部门编码不能为空");
+
+            if (!string.Equals(dept.DeptCode, dto.DeptCode, StringComparison.OrdinalIgnoreCase)
+                && await _repo.ExistsByCodeAsync(dto.DeptCode, dto.Id))
+                return (0, "部门编码已存在");
+
+            dept.DeptCode = dto.DeptCode;
+        }
 
         if (dto.DeptName != null) dept.DeptName = dto.DeptName;
-        if (dto.DeptCode != null) dept.DeptCode = dto.DeptCode;
         if (dto.ParentId.HasValue) dept.ParentId = dto.ParentId.Value;
         if (dto.SortOrder.HasValue) dept.SortOrder = dto.SortOrder.Value;
         if (dto.IsEnabled.HasValue) dept.IsEnabled = dto.IsEnabled.Value;
         dept.UpdatedAt = DateTime.UtcNow;
         dept.UpdatedBy = CurrentUserId;
 
-        return await _repo.UpdateAsync(dept);
+        var result = await _repo.UpdateAsync(dept);
+        return (result, null);
     }
 
     /// <summary>

@@ -49,7 +49,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" @opened="onDialogOpened">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="80px">
         <el-form-item label="用户名" prop="userName" v-if="!isEdit">
           <el-input v-model="form.userName" />
@@ -254,6 +254,7 @@ function onPhoneBlur() {
 }
 
 async function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑用户' : '新增用户'
   resetForm()
@@ -281,10 +282,6 @@ async function openDialog(row?: any) {
   }
 
   dialogVisible.value = true
-}
-
-function onDialogOpened() {
-  formRef.value?.clearValidate()
 }
 
 async function handleSubmit() {
@@ -330,6 +327,7 @@ async function handleDelete(row: any) {
 }
 
 function openResetPassword(row: any) {
+  resetPwdFormRef.value?.clearValidate()
   resetPwdForm.userId = row.id
   resetPwdForm.newPassword = ''
   resetPwdForm.confirmPassword = ''

@@ -99,6 +99,7 @@ async function loadData() {
 }
 
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑字典类型' : '新增字典类型'
   Object.assign(form, row || { dictName: '', dictType: '', isEnabled: true })
