@@ -57,7 +57,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, sizes, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="600px" @opened="onDialogOpened">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="110px">
         <el-form-item label="任务名称" prop="jobName">
           <el-input v-model="form.jobName" />
@@ -168,6 +168,10 @@ async function loadData() {
   tableData.value = res.items
   total.value = res.total
   loading.value = false
+}
+
+function onDialogOpened() {
+  formRef.value?.clearValidate()
 }
 
 function openDialog(row?: any) {

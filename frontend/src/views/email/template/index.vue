@@ -30,7 +30,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="templateDialogTitle" v-model="templateDialogVisible" width="500px">
+    <el-dialog :title="templateDialogTitle" v-model="templateDialogVisible" width="500px" @opened="onTemplateDialogOpened">
       <el-form :model="templateForm" :rules="templateRules" ref="templateFormRef" label-width="100px">
         <el-form-item label="模板编码" prop="templateCode">
           <el-input v-model="templateForm.templateCode" :disabled="isEditTemplate" />
@@ -70,7 +70,7 @@
       </el-table>
     </el-dialog>
 
-    <el-dialog :title="versionFormTitle" v-model="versionFormVisible" width="900px" top="5vh">
+    <el-dialog :title="versionFormTitle" v-model="versionFormVisible" width="900px" top="5vh" @opened="onVersionDialogOpened">
       <el-form :model="versionForm" :rules="versionRules" ref="versionFormRef" label-width="100px">
         <el-form-item label="版本号" v-if="isEditVersion">
           <el-input v-model="versionForm.version" disabled />
@@ -98,7 +98,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog title="发送测试邮件" v-model="testDialogVisible" width="560px">
+    <el-dialog title="发送测试邮件" v-model="testDialogVisible" width="560px" @opened="onTestDialogOpened">
       <el-form :model="testForm" :rules="testRules" ref="testFormRef" label-width="100px">
         <el-form-item label="收件人" prop="toAddress">
           <el-input v-model="testForm.toAddress" placeholder="test@example.com" />
@@ -118,7 +118,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog title="批量发送邮件" v-model="sendDialogVisible" width="560px">
+    <el-dialog title="批量发送邮件" v-model="sendDialogVisible" width="560px" @opened="onSendDialogOpened">
       <el-form :model="sendForm" :rules="sendRules" ref="sendFormRef" label-width="100px">
         <el-form-item label="收件人" prop="toAddresses">
           <el-input v-model="sendForm.toAddresses" type="textarea" rows="5" placeholder="多个邮箱用逗号或换行分隔" />
@@ -212,6 +212,22 @@ const sendRules = {
 }
 
 const sending = ref(false)
+
+function onTemplateDialogOpened() {
+  templateFormRef.value?.clearValidate()
+}
+
+function onVersionDialogOpened() {
+  versionFormRef.value?.clearValidate()
+}
+
+function onTestDialogOpened() {
+  testFormRef.value?.clearValidate()
+}
+
+function onSendDialogOpened() {
+  sendFormRef.value?.clearValidate()
+}
 
 async function loadData() {
   loading.value = true

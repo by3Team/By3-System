@@ -79,7 +79,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, sizes, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="900px">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="900px" @opened="onDialogOpened">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="应用名称" prop="appName">
           <el-input v-model="form.appName" />
@@ -477,6 +477,10 @@ const isIndeterminate = computed(() => {
 
 function toggleAll(checked: boolean) {
   selectableApis.value.forEach((api: any) => toggleApi(api.id, checked))
+}
+
+function onDialogOpened() {
+  formRef.value?.clearValidate()
 }
 
 function openDialog(row?: any) {

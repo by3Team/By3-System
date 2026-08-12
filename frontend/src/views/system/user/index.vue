@@ -94,7 +94,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog title="重置密码" v-model="resetPwdVisible" width="400px">
+    <el-dialog title="重置密码" v-model="resetPwdVisible" width="400px" @opened="onResetPwdDialogOpened">
       <el-form :model="resetPwdForm" :rules="resetPwdRules" ref="resetPwdFormRef" label-width="100px">
         <el-form-item label="新密码" prop="newPassword">
           <el-input v-model="resetPwdForm.newPassword" type="password" />
@@ -334,6 +334,10 @@ function openResetPassword(row: any) {
   resetPwdForm.newPassword = ''
   resetPwdForm.confirmPassword = ''
   resetPwdVisible.value = true
+}
+
+function onResetPwdDialogOpened() {
+  resetPwdFormRef.value?.clearValidate()
 }
 
 async function handleResetPassword() {

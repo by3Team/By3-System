@@ -40,7 +40,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, sizes, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" @opened="onDialogOpened">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="岗位名称" prop="positionName">
           <el-input v-model="form.positionName" />
@@ -103,6 +103,10 @@ function openDialog(row?: any) {
   dialogTitle.value = row ? '编辑岗位' : '新增岗位'
   Object.assign(form, row || { positionName: '', positionCode: '', sortOrder: 0, isEnabled: true })
   dialogVisible.value = true
+}
+
+function onDialogOpened() {
+  formRef.value?.clearValidate()
 }
 
 async function handleSubmit() {
