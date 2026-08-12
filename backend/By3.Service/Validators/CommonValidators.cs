@@ -143,3 +143,27 @@ public class UpdateMenuValidator : AbstractValidator<UpdateMenuDto>
             .WithMessage("菜单和按钮必须选择父菜单");
     }
 }
+
+/// <summary>
+/// 创建岗位参数验证器。
+/// </summary>
+public class CreatePositionValidator : AbstractValidator<CreatePositionDto>
+{
+    public CreatePositionValidator()
+    {
+        RuleFor(x => x.PositionName).NotEmpty().WithMessage("岗位名称不能为空");
+        RuleFor(x => x.PositionCode).NotEmpty().WithMessage("岗位编码不能为空");
+    }
+}
+
+/// <summary>
+/// 更新岗位参数验证器。
+/// </summary>
+public class UpdatePositionValidator : AbstractValidator<UpdatePositionDto>
+{
+    public UpdatePositionValidator()
+    {
+        RuleFor(x => x.PositionName).NotEmpty().WithMessage("岗位名称不能为空");
+        RuleFor(x => x.PositionCode).NotEmpty().WithMessage("岗位编码不能为空");
+    }
+}
