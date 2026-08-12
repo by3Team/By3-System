@@ -34,7 +34,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" @opened="onDialogOpened">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="80px">
         <el-form-item label="角色名" prop="roleName">
           <el-input v-model="form.roleName" />
@@ -101,6 +101,7 @@ async function loadMenus() {
 }
 
 async function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑角色' : '新增角色'
   Object.assign(form, row || { roleName: '', description: '', menuIds: [], isEnabled: true })
@@ -109,10 +110,6 @@ async function openDialog(row?: any) {
   }
   dialogVisible.value = true
   treeKey.value++
-}
-
-function onDialogOpened() {
-  formRef.value?.clearValidate()
 }
 
 async function handleSubmit() {

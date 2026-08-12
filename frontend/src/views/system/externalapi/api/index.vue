@@ -64,7 +64,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, sizes, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="600px" @opened="onDialogOpened">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="120px">
         <el-form-item label="接口名称" prop="apiName">
           <el-input v-model="form.apiName" />
@@ -251,11 +251,8 @@ async function loadData() {
   }
 }
 
-function onDialogOpened() {
-  formRef.value?.clearValidate()
-}
-
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑接口' : '新增接口'
   Object.assign(form, row || {

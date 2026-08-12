@@ -29,7 +29,7 @@
       </el-table>
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" @opened="onDialogOpened">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="菜单名" prop="menuName">
           <el-input v-model="form.menuName" />
@@ -109,11 +109,8 @@ async function loadData() {
   loading.value = false
 }
 
-function onDialogOpened() {
-  formRef.value?.clearValidate()
-}
-
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑菜单' : '新增菜单'
   Object.assign(form, row || { menuName: '', menuType: 2, route: '', component: '', permission: '', icon: '', sortOrder: 0, parentId: null })

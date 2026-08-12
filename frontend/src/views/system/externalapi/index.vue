@@ -79,7 +79,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, sizes, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="900px" @opened="onDialogOpened">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="900px">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="应用名称" prop="appName">
           <el-input v-model="form.appName" />
@@ -479,11 +479,8 @@ function toggleAll(checked: boolean) {
   selectableApis.value.forEach((api: any) => toggleApi(api.id, checked))
 }
 
-function onDialogOpened() {
-  formRef.value?.clearValidate()
-}
-
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑 Token' : '新增 Token'
   Object.assign(form, { appName: '', description: '', contactEmail: '', expireType: '30', expireTime: '', allowedApiIds: [], isEnabled: true })

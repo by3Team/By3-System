@@ -40,7 +40,7 @@
       <el-pagination v-model:current-page="search.page" v-model:page-size="search.pageSize" :total="total" layout="total, sizes, prev, pager, next" @change="loadData" class="pagination" />
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" @opened="onDialogOpened">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="字典名称" prop="dictName">
           <el-input v-model="form.dictName" />
@@ -99,14 +99,11 @@ async function loadData() {
 }
 
 function openDialog(row?: any) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑字典类型' : '新增字典类型'
   Object.assign(form, row || { dictName: '', dictType: '', isEnabled: true })
   dialogVisible.value = true
-}
-
-function onDialogOpened() {
-  formRef.value?.clearValidate()
 }
 
 async function handleSubmit() {

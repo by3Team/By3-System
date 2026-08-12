@@ -34,7 +34,7 @@
     </div>
   </div>
 
-  <el-dialog title="修改密码" v-model="pwdVisible" width="400px" @opened="onPwdDialogOpened">
+  <el-dialog title="修改密码" v-model="pwdVisible" width="400px">
     <el-form :model="pwdForm" :rules="pwdRules" ref="pwdFormRef" label-width="100px">
       <el-form-item label="新密码" prop="newPassword">
         <el-input v-model="pwdForm.newPassword" type="password" show-password />
@@ -127,14 +127,11 @@ function handleCommand(command: string) {
   } else if (command === 'profile') {
     router.push('/profile')
   } else if (command === 'password') {
+    pwdFormRef.value?.clearValidate()
     pwdForm.newPassword = ''
     pwdForm.confirmPassword = ''
     pwdVisible.value = true
   }
-}
-
-function onPwdDialogOpened() {
-  pwdFormRef.value?.clearValidate()
 }
 
 async function handleChangePassword() {

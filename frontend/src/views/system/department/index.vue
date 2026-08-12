@@ -33,7 +33,7 @@
       </el-tree>
     </el-card>
 
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" @opened="onDialogOpened">
+    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="部门名称" prop="deptName">
           <el-input v-model="form.deptName" />
@@ -99,11 +99,8 @@ function resetForm() {
   Object.assign(form, { id: '', deptName: '', deptCode: '', parentId: undefined, sortOrder: 0, isEnabled: true })
 }
 
-function onDialogOpened() {
-  formRef.value?.clearValidate()
-}
-
 function openDialog(row?: any, parentId?: string) {
+  formRef.value?.clearValidate()
   isEdit.value = !!row
   dialogTitle.value = row ? '编辑部门' : '新增部门'
   resetForm()
