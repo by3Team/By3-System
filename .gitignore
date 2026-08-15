@@ -1,3 +1,6 @@
+# Java
+backend-java/
+
 # .NET
 backend/**/bin/
 backend/**/obj/
@@ -7,6 +10,7 @@ backend/**/.vs/
 backend/**/appsettings.Development.json
 backend/**/appsettings.Production.json
 !backend/**/appsettings.json
+backend/**/uploads/
 backend/coverage-results/
 backend/coverage-report/
 
