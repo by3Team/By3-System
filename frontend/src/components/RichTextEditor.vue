@@ -22,6 +22,7 @@ import { ref, watch, shallowRef, onBeforeUnmount } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import type { IDomEditor, IToolbarConfig, IEditorConfig } from '@wangeditor/editor'
+import { useAuthStore } from '@/store/auth'
 
 const props = defineProps<{
   modelValue?: string
@@ -46,6 +47,8 @@ const toolbarConfig: Partial<IToolbarConfig> = {
   excludeKeys: ['fullScreen', 'group-video', 'group-file']
 }
 
+const auth = useAuthStore()
+
 const editorConfig: Partial<IEditorConfig> = {
   placeholder: props.placeholder || '请输入内容...',
   MENU_CONF: {
@@ -55,6 +58,10 @@ const editorConfig: Partial<IEditorConfig> = {
       maxFileSize: 10 * 1024 * 1024,
       allowedFileTypes: ['image/*'],
       meta: { category: 'image' },
+      headers: {
+        ...(auth.token ? { Authorization: `Bearer ${auth.token}` } : {}),
+        'Idempotency-Key': typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ''
+      },
       customInsert(res: any, insertFn: (url: string, alt?: string, href?: string) => void) {
         const url = res.data?.downloadUrl || res.data?.url
         if (url) insertFn(url, '', url)

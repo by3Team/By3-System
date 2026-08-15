@@ -1,15 +1,13 @@
 <template>
   <el-upload
-    :action="uploadAction"
-    :headers="headers"
+    :http-request="customUpload"
     :before-upload="beforeUpload"
-    :on-success="onSuccess"
-    :on-error="onError"
     :on-change="onChange"
     :on-remove="onRemove"
     :auto-upload="false"
     :data="{ category }"
     :accept="accept"
+    name="files"
     multiple
     drag
     :file-list="fileList"
@@ -34,9 +32,9 @@
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
-import { useAuthStore } from '@/store/auth'
+import api from '@/api/request'
 import { useDictStore } from '@/store/dict'
-import type { UploadFile, UploadFiles, UploadInstance } from 'element-plus'
+import type { UploadFile, UploadFiles, UploadInstance, UploadRequestOptions } from 'element-plus'
 
 const props = defineProps<{
   category?: string
@@ -46,14 +44,13 @@ const emit = defineEmits<{
   (e: 'success', data: any): void
 }>()
 
-const auth = useAuthStore()
 const dictStore = useDictStore()
 const uploading = ref(false)
 const fileList = ref<UploadFiles>([])
 const uploadRef = ref<UploadInstance>()
+let completedCount = 0
+let totalCount = 0
 
-const uploadAction = computed(() => `${import.meta.env.VITE_API_BASE_URL || '/api'}/v1/multifiles/upload`)
-const headers = computed(() => auth.token ? { Authorization: `Bearer ${auth.token}` } : {})
 const accept = computed(() => {
   const category = props.category || 'general'
   const item = dictStore.getDict('sys_file_category').find((d) => d.dictValue === category)
@@ -67,25 +64,43 @@ function beforeUpload() {
   return true
 }
 
+async function customUpload(options: UploadRequestOptions) {
+  const formData = new FormData()
+  formData.append('files', options.file)
+  if (props.category) formData.append('category', props.category)
+
+  try {
+    const res = await api.post('/v1/multifiles/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    completedCount++
+    ElMessage.success('上传成功')
+    if (completedCount >= totalCount) {
+      uploading.value = false
+      fileList.value = []
+      emit('success', res)
+    }
+    options.onSuccess(res)
+  } catch (err: any) {
+    completedCount++
+    ElMessage.error(err?.message || '上传失败')
+    if (completedCount >= totalCount) {
+      uploading.value = false
+      fileList.value = []
+    }
+    options.onError(err)
+  }
+}
+
 function submitUpload() {
   if (fileList.value.length === 0) {
     ElMessage.warning('请选择文件')
     return
   }
+  completedCount = 0
+  totalCount = fileList.value.length
+  uploading.value = true
   uploadRef.value?.submit()
-}
-
-function onSuccess(response: any) {
-  uploading.value = false
-  ElMessage.success(response.message || '上传成功')
-  fileList.value = []
-  emit('success', response.data)
-}
-
-function onError(err: any) {
-  uploading.value = false
-  const msg = err?.message || '上传失败'
-  ElMessage.error(msg)
 }
 
 function onChange(_file: UploadFile, files: UploadFiles) {
