@@ -16,6 +16,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { v4 as uuidv4 } from 'uuid'
 import { useAuthStore } from '@/store/auth'
 import { useDictStore } from '@/store/dict'
 
@@ -33,7 +34,12 @@ const dictStore = useDictStore()
 const uploading = ref(false)
 
 const uploadAction = computed(() => `${import.meta.env.VITE_API_BASE_URL || '/api'}/v1/singlefiles/upload`)
-const headers = computed(() => auth.token ? { Authorization: `Bearer ${auth.token}` } : {})
+const headers = computed(() => {
+  const h: Record<string, string> = {}
+  if (auth.token) h.Authorization = `Bearer ${auth.token}`
+  h['Idempotency-Key'] = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : uuidv4()
+  return h
+})
 const accept = computed(() => {
   const category = props.category || 'general'
   const item = dictStore.getDict('sys_file_category').find((d) => d.dictValue === category)

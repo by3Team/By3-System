@@ -35,7 +35,8 @@ public class RequestBodyCaptureFilter : IAsyncResourceFilter
         if (!HttpMethods.IsGet(request.Method)
             && !HttpMethods.IsHead(request.Method)
             && request.ContentLength > 0
-            && request.Path.StartsWithSegments("/api"))
+            && request.Path.StartsWithSegments("/api")
+            && !(request.ContentType?.StartsWith("multipart/", StringComparison.OrdinalIgnoreCase) == true))
         {
             request.EnableBuffering();
             request.Body.Position = 0;
