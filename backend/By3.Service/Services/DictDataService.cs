@@ -87,6 +87,13 @@ public class DictDataService
     /// </summary>
     public async Task<Guid> CreateAsync(CreateDictDataDto dto)
     {
+        dto.DictValue = dto.DictValue?.Trim() ?? string.Empty;
+        if (await _repo.ExistsByValueAsync(dto.DictTypeId, dto.DictValue))
+            throw new InvalidOperationException($"字典值 {dto.DictValue} 已存在");
+
+        if (dto.IsDefault)
+            await _repo.ClearDefaultAsync(dto.DictTypeId);
+
         var data = new SysDictData
         {
             DictTypeId = dto.DictTypeId,
@@ -109,12 +116,26 @@ public class DictDataService
         var data = await _repo.GetByIdAsync(dto.Id);
         if (data == null) return 0;
 
+        var dictTypeId = dto.DictTypeId ?? data.DictTypeId;
+        if (dto.DictValue != null)
+        {
+            dto.DictValue = dto.DictValue.Trim();
+            if (!dto.DictValue.Equals(data.DictValue, StringComparison.OrdinalIgnoreCase) &&
+                await _repo.ExistsByValueAsync(dictTypeId, dto.DictValue, dto.Id))
+                throw new InvalidOperationException($"字典值 {dto.DictValue} 已存在");
+            data.DictValue = dto.DictValue;
+        }
+
         if (dto.DictTypeId.HasValue) data.DictTypeId = dto.DictTypeId.Value;
         if (dto.DictLabel != null) data.DictLabel = dto.DictLabel;
-        if (dto.DictValue != null) data.DictValue = dto.DictValue;
         if (dto.Remark != null) data.Remark = dto.Remark;
         if (dto.SortOrder.HasValue) data.SortOrder = dto.SortOrder.Value;
-        if (dto.IsDefault.HasValue) data.IsDefault = dto.IsDefault.Value;
+        if (dto.IsDefault.HasValue)
+        {
+            if (dto.IsDefault.Value && !data.IsDefault)
+                await _repo.ClearDefaultAsync(data.DictTypeId, dto.Id);
+            data.IsDefault = dto.IsDefault.Value;
+        }
         if (dto.IsEnabled.HasValue) data.IsEnabled = dto.IsEnabled.Value;
         data.UpdatedAt = DateTime.UtcNow;
         data.UpdatedBy = CurrentUserId;

@@ -12,17 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace By3.Repository.Entities;
+using System.Text.Json.Serialization;
 
-public class SysEmailTemplate
+namespace By3.Service.Enums;
+
+/// <summary>
+/// 邮件发送来源类型。
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum EmailSenderType
 {
-    public Guid Id { get; set; }
-    public string TemplateCode { get; set; } = string.Empty;
-    public string TemplateName { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public bool IsEnabled { get; set; } = true;
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
-    public Guid? CreatedBy { get; set; }
-    public Guid? UpdatedBy { get; set; }
+    /// <summary>
+    /// 系统内部触发。
+    /// </summary>
+    System,
+
+    /// <summary>
+    /// 后台手动发送。
+    /// </summary>
+    Manual,
+
+    /// <summary>
+    /// 定时任务触发。
+    /// </summary>
+    Scheduled,
+
+    /// <summary>
+    /// 外部 API 触发。
+    /// </summary>
+    Api
 }

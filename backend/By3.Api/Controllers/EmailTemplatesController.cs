@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Claims;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using By3.Api.Filters;
 using By3.Service.DTOs;
+using By3.Service.Enums;
 using By3.Service.Services;
 
 namespace By3.Api.Controllers;
@@ -25,6 +27,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 邮件模板管理：提供邮件模板分页查询、详情、增删改及测试发送功能。
 /// </summary>
+[Tags("邮件模板")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
@@ -113,7 +116,7 @@ public class EmailTemplatesController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var result = await _service.DeleteTemplateAsync(id);
+        var result = await _service.DeleteTemplateAsync(id, GetCurrentUserId());
         if (result == 0) return NotFound(ApiResult<object>.Error("模板不存在", 404));
         return Ok(ApiResult<object>.Ok(null, "删除成功"));
     }
@@ -149,9 +152,24 @@ public class EmailTemplatesController : ControllerBase
 
 
     /// <summary>
-    /// 更新。
+    /// 根据 ID 获取版本详情。
     /// </summary>
-    /// <param name="id">记录唯一标识</param>
+    /// <param name="id">版本唯一标识</param>
+    /// <returns>ApiResult 包装的操作结果</returns>
+    [HttpGet("versions/{id}")]
+    [Authorize(Policy = "email:list")]
+    public async Task<IActionResult> GetVersion(Guid id)
+    {
+        var version = await _service.GetVersionByIdAsync(id);
+        if (version == null) return NotFound(ApiResult<object>.Error("版本不存在", 404));
+        return Ok(ApiResult<EmailTemplateVersionDto>.Ok(version));
+    }
+
+
+    /// <summary>
+    /// 更新启用中的版本内容（已禁用版本不可编辑）。
+    /// </summary>
+    /// <param name="id">版本唯一标识</param>
     /// <param name="dto">请求数据传输对象</param>
     /// <returns>ApiResult 包装的操作结果</returns>
     [HttpPut("versions/{id}")]
@@ -159,10 +177,17 @@ public class EmailTemplatesController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> UpdateVersion(Guid id, UpdateEmailTemplateVersionDto dto)
     {
-        dto.Id = id;
-        var result = await _service.UpdateVersionAsync(dto);
-        if (result == 0) return NotFound(ApiResult<object>.Error("版本不存在", 404));
-        return Ok(ApiResult<object>.Ok(null, "更新成功"));
+        try
+        {
+            dto.Id = id;
+            var result = await _service.UpdateVersionAsync(dto);
+            if (result == 0) return NotFound(ApiResult<object>.Error("版本不存在", 404));
+            return Ok(ApiResult<object>.Ok(null, "更新成功"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResult<object>.Error(ex.Message, 400));
+        }
     }
 
 
@@ -176,9 +201,16 @@ public class EmailTemplatesController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> DeleteVersion(Guid id)
     {
-        var result = await _service.DeleteVersionAsync(id);
-        if (result == 0) return NotFound(ApiResult<object>.Error("版本不存在", 404));
-        return Ok(ApiResult<object>.Ok(null, "删除成功"));
+        try
+        {
+            var result = await _service.DeleteVersionAsync(id, GetCurrentUserId());
+            if (result == 0) return NotFound(ApiResult<object>.Error("版本不存在", 404));
+            return Ok(ApiResult<object>.Ok(null, "删除成功"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResult<object>.Error(ex.Message, 400));
+        }
     }
 
 
@@ -194,7 +226,7 @@ public class EmailTemplatesController : ControllerBase
     {
         try
         {
-            await _service.SendBatchAsync(dto);
+            await _service.SendBatchAsync(dto, EmailSenderType.Manual, GetCurrentUserName());
             return Ok(ApiResult<object>.Ok(null, "邮件已加入发送队列"));
         }
         catch (InvalidOperationException ex)
@@ -216,7 +248,7 @@ public class EmailTemplatesController : ControllerBase
     {
         try
         {
-            await _service.SendTestAsync(dto);
+            await _service.SendTestAsync(dto, EmailSenderType.Manual, GetCurrentUserName());
             return Ok(ApiResult<object>.Ok(null, "测试邮件已发送"));
         }
         catch (InvalidOperationException ex)
@@ -233,12 +265,14 @@ public class EmailTemplatesController : ControllerBase
     /// <param name="pageSize">每页大小</param>
     /// <param name="keyword">搜索关键词</param>
     /// <param name="status">status</param>
+    /// <param name="startDate">开始时间</param>
+    /// <param name="endDate">结束时间</param>
     /// <returns>ApiResult 包装的操作结果</returns>
     [HttpGet("logs")]
     [Authorize(Policy = "email:list")]
-    public async Task<IActionResult> GetLogs(int page = 1, int pageSize = 10, string? keyword = null, string? status = null)
+    public async Task<IActionResult> GetLogs(int page = 1, int pageSize = 10, string? keyword = null, string? status = null, DateTime? startDate = null, DateTime? endDate = null)
     {
-        var result = await _service.GetLogListAsync(page, pageSize, keyword, status);
+        var result = await _service.GetLogListAsync(page, pageSize, keyword, status, startDate, endDate);
         return Ok(ApiResult<PageResult<EmailLogDto>>.Ok(result));
     }
 
@@ -246,5 +280,10 @@ public class EmailTemplatesController : ControllerBase
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         return Guid.TryParse(userId, out var id) ? id : null;
+    }
+
+    private string? GetCurrentUserName()
+    {
+        return User.FindFirst(ClaimTypes.Name)?.Value;
     }
 }

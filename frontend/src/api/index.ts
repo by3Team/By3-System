@@ -99,6 +99,7 @@ export const emailApi = {
   deleteTemplate: (id: string) => api.delete(`/v1/emailtemplates/${id}`),
   getVersions: (templateId: string) => api.get(`/v1/emailtemplates/${templateId}/versions`),
   createVersion: (data: any) => api.post('/v1/emailtemplates/versions', data),
+  getVersion: (id: string) => api.get(`/v1/emailtemplates/versions/${id}`),
   updateVersion: (id: string, data: any) => api.put(`/v1/emailtemplates/versions/${id}`, data),
   deleteVersion: (id: string) => api.delete(`/v1/emailtemplates/versions/${id}`),
   send: (data: any) => api.post('/v1/emailtemplates/send', data),

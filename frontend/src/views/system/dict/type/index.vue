@@ -81,7 +81,19 @@ const formRef = ref()
 const form = reactive<any>({ dictName: '', dictType: '', isEnabled: true })
 const formRules = {
   dictName: [{ required: true, message: '必填', trigger: 'blur' }],
-  dictType: [{ required: true, message: '必填', trigger: 'blur' }]
+  dictType: [
+    { required: true, message: '必填', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string, callback: any) => {
+        if (value && (value.startsWith(' ') || value.endsWith(' '))) {
+          callback(new Error('字典类型首尾不能包含空格'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
 }
 
 function formatDate(value: string) {

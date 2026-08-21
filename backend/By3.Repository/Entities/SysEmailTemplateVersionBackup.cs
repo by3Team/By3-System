@@ -14,15 +14,23 @@
 
 namespace By3.Repository.Entities;
 
-public class SysEmailTemplate
+/// <summary>
+/// 已删除邮件模板版本备份表。
+/// </summary>
+public class SysEmailTemplateVersionBackup
 {
     public Guid Id { get; set; }
-    public string TemplateCode { get; set; } = string.Empty;
-    public string TemplateName { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public bool IsEnabled { get; set; } = true;
+    public Guid OriginalId { get; set; }
+    public Guid TemplateId { get; set; }
+    public string Version { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
+    public string BodyFormat { get; set; } = "html";
+    public bool IsEnabled { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public Guid? CreatedBy { get; set; }
     public Guid? UpdatedBy { get; set; }
+    public DateTime DeletedAt { get; set; }
+    public Guid? DeletedBy { get; set; }
 }

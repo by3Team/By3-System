@@ -29,17 +29,17 @@ public class EmailTemplateVersionRepository
     public async Task<List<SysEmailTemplateVersion>> GetByTemplateIdAsync(Guid templateId)
         => await _db.EmailTemplateVersions
             .AsNoTracking()
-            .Where(e => e.TemplateId == templateId && !e.IsDeleted)
+            .Where(e => e.TemplateId == templateId)
             .OrderByDescending(e => e.CreatedAt)
             .ToListAsync();
 
     public async Task<SysEmailTemplateVersion?> GetByIdAsync(Guid id)
-        => await _db.EmailTemplateVersions.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
+        => await _db.EmailTemplateVersions.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
 
     public async Task<SysEmailTemplateVersion?> GetActiveByTemplateIdAsync(Guid templateId)
         => await _db.EmailTemplateVersions
             .AsNoTracking()
-            .Where(e => e.TemplateId == templateId && e.IsEnabled && !e.IsDeleted)
+            .Where(e => e.TemplateId == templateId && e.IsEnabled)
             .OrderByDescending(e => e.CreatedAt)
             .FirstOrDefaultAsync();
 
@@ -56,15 +56,46 @@ public class EmailTemplateVersionRepository
         return await _db.SaveChangesAsync();
     }
 
-    public async Task<int> DeleteAsync(Guid id)
+    public async Task<int> DeleteAsync(Guid id, Guid? deletedBy = null)
     {
         var version = await _db.EmailTemplateVersions.FindAsync(id);
         if (version == null) return 0;
-        version.IsDeleted = true;
-        version.IsEnabled = false;
+
+        var deletedAt = DateTime.UtcNow;
+        _db.EmailTemplateVersionBackups.Add(new SysEmailTemplateVersionBackup
+        {
+            Id = Guid.NewGuid(),
+            OriginalId = version.Id,
+            TemplateId = version.TemplateId,
+            Version = version.Version,
+            Subject = version.Subject,
+            Body = version.Body,
+            BodyFormat = version.BodyFormat,
+            IsEnabled = version.IsEnabled,
+            CreatedAt = version.CreatedAt,
+            UpdatedAt = version.UpdatedAt,
+            CreatedBy = version.CreatedBy,
+            UpdatedBy = version.UpdatedBy,
+            DeletedAt = deletedAt,
+            DeletedBy = deletedBy
+        });
+        _db.EmailTemplateVersions.Remove(version);
         return await _db.SaveChangesAsync();
     }
 
     public async Task<bool> ExistsAsync(Guid templateId, string version)
-        => await _db.EmailTemplateVersions.AnyAsync(e => e.TemplateId == templateId && e.Version == version && !e.IsDeleted);
+        => await _db.EmailTemplateVersions.AnyAsync(e => e.TemplateId == templateId && e.Version == version);
+
+    public async Task<int> DisableOtherVersionsAsync(Guid templateId, Guid exceptVersionId)
+    {
+        var versions = await _db.EmailTemplateVersions
+            .Where(e => e.TemplateId == templateId && e.Id != exceptVersionId && e.IsEnabled)
+            .ToListAsync();
+        foreach (var version in versions)
+        {
+            version.IsEnabled = false;
+            version.UpdatedAt = DateTime.UtcNow;
+        }
+        return await _db.SaveChangesAsync();
+    }
 }

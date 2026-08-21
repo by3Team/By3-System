@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 对外 API 接口管理：维护允许被外部 AK/SK 访问的接口清单，包含限流与幂等配置。
 /// </summary>
+[Tags("外部接口")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

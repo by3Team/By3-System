@@ -389,7 +389,7 @@ public class ExternalApiTokenService
                     ToAddresses = new List<string> { address },
                     CcAddresses = new List<string>(),
                     Variables = variables
-                });
+                }, Enums.EmailSenderType.System, "系统");
             }
         }
         catch

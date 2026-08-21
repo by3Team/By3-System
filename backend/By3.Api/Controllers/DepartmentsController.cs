@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 部门管理：提供组织机构树查询、详情、增删改功能。
 /// </summary>
+[Tags("部门管理")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

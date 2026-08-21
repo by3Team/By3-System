@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 邮件发送设置：提供邮件服务端配置的查询与更新功能。
 /// </summary>
+[Tags("邮件配置")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

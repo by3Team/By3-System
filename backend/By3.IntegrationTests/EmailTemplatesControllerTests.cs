@@ -57,9 +57,33 @@ public class EmailTemplatesControllerTests : IntegrationTestBase
         var versions = await DeserializeAsync<List<EmailTemplateVersionDto>>(versionsResponse);
         Assert.Single(versions!);
         Assert.Equal("v1.0", versions![0].Version);
+        Assert.True(versions![0].IsEnabled);
 
-        var versionUpdateResponse = await PutAsJsonAsync($"/api/v1/emailtemplates/versions/{versionId}", new { subject = "更新主题 {{name}}" });
-        await DeserializeAsync<object>(versionUpdateResponse);
+        var version2Response = await PostAsJsonAsync("/api/v1/emailtemplates/versions", new
+        {
+            templateId = templateId,
+            version = "v2.0",
+            subject = "第二版邮件 {{name}}",
+            body = "<h1>第二版 你好 {{name}}</h1>"
+        });
+        var version2Result = await DeserializeAsync<IdResponse>(version2Response);
+        var version2Id = version2Result!.Id;
+
+        versionsResponse = await Client.GetAsync($"/api/v1/emailtemplates/{templateId}/versions");
+        versions = await DeserializeAsync<List<EmailTemplateVersionDto>>(versionsResponse);
+        Assert.Equal(2, versions!.Count);
+        Assert.Single(versions, v => v.Version == "v1.0" && !v.IsEnabled);
+        Assert.Single(versions, v => v.Version == "v2.0" && v.IsEnabled);
+
+        var versionViewResponse = await Client.GetAsync($"/api/v1/emailtemplates/versions/{versionId}");
+        var viewedVersion = await DeserializeAsync<EmailTemplateVersionDto>(versionViewResponse);
+        Assert.Equal("测试邮件 {{name}}", viewedVersion!.Subject);
+
+        var disabledVersionUpdateResponse = await PutAsJsonAsync($"/api/v1/emailtemplates/versions/{versionId}", new { subject = "尝试编辑禁用版本" });
+        Assert.False(disabledVersionUpdateResponse.IsSuccessStatusCode);
+
+        var enabledVersionUpdateResponse = await PutAsJsonAsync($"/api/v1/emailtemplates/versions/{version2Id}", new { subject = "更新启用版本主题" });
+        await DeserializeAsync<object>(enabledVersionUpdateResponse);
 
         var versionDeleteResponse = await DeleteAsync($"/api/v1/emailtemplates/versions/{versionId}");
         await DeserializeAsync<object>(versionDeleteResponse);

@@ -26,6 +26,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 认证授权：提供登录、刷新 Token、登出及获取当前用户信息功能。
 /// </summary>
+[Tags("认证授权")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

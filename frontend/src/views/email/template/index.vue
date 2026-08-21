@@ -63,38 +63,45 @@
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="{ row }">
-            <el-button v-permission="'email:update'" type="primary" size="small" @click="openVersionFormDialog(row)">编辑</el-button>
-            <el-button v-permission="'email:delete'" type="danger" size="small" @click="handleDeleteVersion(row)">删除</el-button>
+            <el-button v-if="row.isEnabled" v-permission="'email:update'" type="primary" size="small" @click="openVersionFormDialog(row)">编辑</el-button>
+            <el-button v-else v-permission="'email:list'" type="primary" size="small" @click="openVersionFormDialog(row)">查看</el-button>
+            <el-button v-permission="'email:delete'" v-if="!row.isEnabled" type="danger" size="small" @click="handleDeleteVersion(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-dialog>
 
     <el-dialog :title="versionFormTitle" v-model="versionFormVisible" width="900px" top="5vh">
-      <el-form :model="versionForm" :rules="versionRules" ref="versionFormRef" label-width="100px">
+      <el-form :model="versionForm" :rules="isViewVersion ? {} : versionRules" ref="versionFormRef" label-width="100px">
         <el-form-item label="版本号" v-if="isEditVersion">
           <el-input v-model="versionForm.version" disabled />
         </el-form-item>
         <el-form-item label="邮件主题" prop="subject">
-          <el-input v-model="versionForm.subject" />
+          <el-input v-model="versionForm.subject" :disabled="isViewVersion" />
         </el-form-item>
         <el-form-item label="内容格式" prop="bodyFormat">
-          <el-radio-group v-model="versionForm.bodyFormat">
+          <el-radio-group v-model="versionForm.bodyFormat" :disabled="isViewVersion">
             <el-radio-button label="html">HTML</el-radio-button>
             <el-radio-button label="plain">纯文本</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="邮件内容" prop="body">
-          <RichTextEditor v-if="versionForm.bodyFormat === 'html'" v-model="versionForm.body" :height="400" placeholder="编辑 HTML 邮件内容" />
-          <el-input v-else v-model="versionForm.body" type="textarea" :rows="20" placeholder="纯文本内容" />
+          <template v-if="isViewVersion">
+            <div v-if="versionForm.bodyFormat === 'html'" class="version-body-preview" v-html="versionForm.body"></div>
+            <el-input v-else v-model="versionForm.body" type="textarea" :rows="20" disabled />
+          </template>
+          <template v-else>
+            <RichTextEditor v-if="versionForm.bodyFormat === 'html'" v-model="versionForm.body" :height="400" placeholder="编辑 HTML 邮件内容" />
+            <el-input v-else v-model="versionForm.body" type="textarea" :rows="20" placeholder="纯文本内容" />
+          </template>
         </el-form-item>
         <el-form-item label="状态" v-if="isEditVersion">
-          <el-switch v-model="versionForm.isEnabled" />
+          <el-switch v-model="versionForm.isEnabled" disabled />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="versionFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmitVersion">确定</el-button>
+        <el-button @click="versionFormVisible = false">{{ isViewVersion ? '关闭' : '取消' }}</el-button>
+        <el-button v-if="!isViewVersion" type="primary" @click="handleSubmitVersion">确定</el-button>
       </template>
     </el-dialog>
 
@@ -141,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { emailApi } from '@/api'
 import { useDictStore } from '@/store/dict'
@@ -167,6 +174,7 @@ const versionDialogVisible = ref(false)
 const versionFormVisible = ref(false)
 const versionFormTitle = ref('')
 const isEditVersion = ref(false)
+const isViewVersion = ref(false)
 const versionFormRef = ref()
 const versionForm = reactive<any>({ templateId: '', version: '', subject: '', body: '', bodyFormat: 'html', isEnabled: true })
 const versionRules = {
@@ -261,18 +269,31 @@ async function openVersionDialog(templateId: string) {
 }
 
 function openVersionFormDialog(row?: any) {
-  versionFormRef.value?.clearValidate()
   isEditVersion.value = !!row
-  versionFormTitle.value = row ? '编辑版本' : '新增版本'
-  Object.assign(versionForm, row || { templateId: currentTemplateId.value, version: '', subject: '', body: '', bodyFormat: 'html', isEnabled: true })
-  versionFormVisible.value = true
+  isViewVersion.value = row ? !row.isEnabled : false
+  versionFormTitle.value = row ? (row.isEnabled ? '编辑版本' : '查看版本') : '新增版本'
+  if (row) {
+    emailApi.getVersion(row.id).then(detail => {
+      Object.assign(versionForm, detail)
+      versionFormVisible.value = true
+      nextTick(() => versionFormRef.value?.clearValidate())
+    })
+  } else {
+    Object.assign(versionForm, { templateId: currentTemplateId.value, version: '', subject: '', body: '', bodyFormat: 'html', isEnabled: true })
+    versionFormVisible.value = true
+    nextTick(() => {
+      versionFormRef.value?.resetFields()
+      versionFormRef.value?.clearValidate()
+    })
+  }
 }
 
 async function handleSubmitVersion() {
   const valid = await versionFormRef.value.validate().catch(() => false)
   if (!valid) return
   if (isEditVersion.value) {
-    await emailApi.updateVersion(versionForm.id, versionForm)
+    const { version, templateId, isEnabled, ...rest } = versionForm
+    await emailApi.updateVersion(versionForm.id, rest)
     ElMessage.success('更新成功')
   } else {
     const { version, ...rest } = versionForm
@@ -286,7 +307,7 @@ async function handleSubmitVersion() {
 
 async function handleDeleteVersion(row: any) {
   try {
-    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除该版本？', '提示', { type: 'warning' })
   } catch {
     return
   }
@@ -388,4 +409,15 @@ onMounted(() => { loadData() })
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .pagination { margin-top: 15px; justify-content: flex-end; }
 .version-table { margin-top: 15px; }
+.version-body-preview {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  padding: 15px;
+  min-height: 400px;
+  max-height: 600px;
+  overflow-y: auto;
+  background-color: #f5f7fa;
+}
 </style>

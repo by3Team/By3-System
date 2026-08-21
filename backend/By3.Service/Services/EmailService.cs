@@ -17,6 +17,7 @@ using MimeKit;
 using By3.Repository.Entities;
 using By3.Repository.Repositories;
 using By3.Service.DTOs;
+using By3.Service.Enums;
 
 namespace By3.Service.Services;
 
@@ -96,10 +97,10 @@ public class EmailService
     }
 
     /// <summary>
-    /// 删除邮件模板。
+    /// 删除邮件模板（先备份到删除备份表，再物理删除）。
     /// </summary>
-    public async Task<int> DeleteTemplateAsync(Guid id)
-        => await _templateRepo.DeleteAsync(id);
+    public async Task<int> DeleteTemplateAsync(Guid id, Guid? deletedBy)
+        => await _templateRepo.DeleteAsync(id, deletedBy);
 
     /// <summary>
     /// 获取指定模板的所有版本列表。
@@ -120,7 +121,7 @@ public class EmailService
     }
 
     /// <summary>
-    /// 创建邮件模板版本。
+    /// 创建邮件模板版本。新版本自动启用，并将同模板下其它版本禁用。
     /// </summary>
     public async Task<Guid> CreateVersionAsync(CreateEmailTemplateVersionDto dto, Guid? userId)
     {
@@ -148,37 +149,50 @@ public class EmailService
             Subject = dto.Subject,
             Body = dto.Body,
             BodyFormat = dto.BodyFormat ?? "html",
+            IsEnabled = true,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = userId
         };
-        return await _versionRepo.CreateAsync(version);
+        var newVersionId = await _versionRepo.CreateAsync(version);
+
+        // 仅保留最新版本启用
+        await _versionRepo.DisableOtherVersionsAsync(dto.TemplateId, newVersionId);
+
+        return newVersionId;
     }
 
     /// <summary>
-    /// 更新邮件模板版本内容。
+    /// 更新邮件模板版本内容（仅允许编辑启用中的版本）。
     /// </summary>
     public async Task<int> UpdateVersionAsync(UpdateEmailTemplateVersionDto dto)
     {
         var version = await _versionRepo.GetByIdAsync(dto.Id);
         if (version == null) return 0;
+        if (!version.IsEnabled)
+            throw new InvalidOperationException("已禁用的版本不允许编辑");
         version.Subject = dto.Subject ?? version.Subject;
         version.Body = dto.Body ?? version.Body;
         version.BodyFormat = dto.BodyFormat ?? version.BodyFormat;
-        version.IsEnabled = dto.IsEnabled ?? version.IsEnabled;
         version.UpdatedAt = DateTime.UtcNow;
         return await _versionRepo.UpdateAsync(version);
     }
 
     /// <summary>
-    /// 删除邮件模板版本。
+    /// 删除邮件模板版本（仅允许删除已禁用的版本）。
     /// </summary>
-    public async Task<int> DeleteVersionAsync(Guid id)
-        => await _versionRepo.DeleteAsync(id);
+    public async Task<int> DeleteVersionAsync(Guid id, Guid? deletedBy)
+    {
+        var version = await _versionRepo.GetByIdAsync(id);
+        if (version == null) return 0;
+        if (version.IsEnabled)
+            throw new InvalidOperationException("启用中的版本不能删除");
+        return await _versionRepo.DeleteAsync(id, deletedBy);
+    }
 
     /// <summary>
     /// 批量发送邮件，按模板渲染内容并记录日志。
     /// </summary>
-    public async Task SendBatchAsync(SendEmailDto dto)
+    public async Task SendBatchAsync(SendEmailDto dto, EmailSenderType senderType = EmailSenderType.System, string? senderName = null)
     {
         var version = await ResolveVersionAsync(dto.TemplateId, dto.Version);
         if (version == null)
@@ -197,6 +211,7 @@ public class EmailService
         var ccList = dto.CcAddresses.Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
         var ccAddresses = string.Join(",", ccList);
 
+        var resolvedSenderName = GetSenderName(senderType, senderName);
         foreach (var address in dto.ToAddresses.Where(a => !string.IsNullOrWhiteSpace(a)))
         {
             var logId = await _logRepo.CreateAsync(new SysEmailLog
@@ -209,6 +224,8 @@ public class EmailService
                 Subject = subject,
                 Body = body,
                 Status = "pending",
+                SenderType = senderType.ToString(),
+                SenderName = resolvedSenderName,
                 CreatedAt = DateTime.UtcNow
             });
 
@@ -225,9 +242,9 @@ public class EmailService
     }
 
     /// <summary>
-    /// 发送测试邮件（前缀 [TEST]）。
+    /// 发送测试邮件（前缀 [TEST] ）。
     /// </summary>
-    public async Task SendTestAsync(TestEmailDto dto)
+    public async Task SendTestAsync(TestEmailDto dto, EmailSenderType senderType = EmailSenderType.System, string? senderName = null)
     {
         var version = await ResolveVersionAsync(dto.TemplateId, dto.Version);
         if (version == null)
@@ -236,16 +253,42 @@ public class EmailService
         var subject = ReplaceVariables(version.Subject, dto.Variables);
         var body = ReplaceVariables(version.Body, dto.Variables);
         var ccList = dto.CcAddresses.Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
-        await SendEmailAsync(dto.ToAddress, ccList, "[TEST] " + subject, body, version.BodyFormat);
+        var resolvedSenderName = GetSenderName(senderType, senderName);
+
+        var logId = await _logRepo.CreateAsync(new SysEmailLog
+        {
+            Id = Guid.NewGuid(),
+            TemplateId = dto.TemplateId,
+            TemplateVersionId = version.Id,
+            ToAddresses = dto.ToAddress,
+            CcAddresses = string.Join(",", ccList),
+            Subject = "[TEST] " + subject,
+            Body = body,
+            Status = "pending",
+            SenderType = senderType.ToString(),
+            SenderName = resolvedSenderName,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        try
+        {
+            await SendEmailAsync(dto.ToAddress, ccList, "[TEST] " + subject, body, version.BodyFormat);
+            await _logRepo.UpdateStatusAsync(logId, "sent", null, DateTime.UtcNow);
+        }
+        catch (Exception ex)
+        {
+            await _logRepo.UpdateStatusAsync(logId, "failed", ex.Message, null);
+            throw;
+        }
     }
 
     /// <summary>
     /// 分页查询邮件发送日志。
     /// </summary>
-    public async Task<PageResult<EmailLogDto>> GetLogListAsync(int page, int pageSize, string? keyword, string? status)
+    public async Task<PageResult<EmailLogDto>> GetLogListAsync(int page, int pageSize, string? keyword, string? status, DateTime? startDate = null, DateTime? endDate = null)
     {
-        var items = await _logRepo.GetListAsync(page, pageSize, keyword, status);
-        var total = await _logRepo.GetCountAsync(keyword, status);
+        var items = await _logRepo.GetListAsync(page, pageSize, keyword, status, startDate, endDate);
+        var total = await _logRepo.GetCountAsync(keyword, status, startDate, endDate);
         return new PageResult<EmailLogDto>
         {
             Total = total,
@@ -258,10 +301,11 @@ public class EmailService
     /// <summary>
     /// 直接发送通知邮件（不依赖模板），并记录邮件日志。
     /// </summary>
-    public async Task SendRawAsync(string toAddress, List<string>? ccAddresses, string subject, string body, string bodyFormat)
+    public async Task SendRawAsync(string toAddress, List<string>? ccAddresses, string subject, string body, string bodyFormat, EmailSenderType senderType = EmailSenderType.System, string? senderName = null)
     {
         var ccList = ccAddresses?.Where(a => !string.IsNullOrWhiteSpace(a)).ToList() ?? new List<string>();
         var ccString = string.Join(",", ccList);
+        var resolvedSenderName = GetSenderName(senderType, senderName);
 
         var logId = await _logRepo.CreateAsync(new SysEmailLog
         {
@@ -271,6 +315,8 @@ public class EmailService
             Subject = subject,
             Body = body,
             Status = "pending",
+            SenderType = senderType.ToString(),
+            SenderName = resolvedSenderName,
             CreatedAt = DateTime.UtcNow
         });
 
@@ -293,7 +339,7 @@ public class EmailService
         if (!string.IsNullOrWhiteSpace(version))
         {
             var versions = await _versionRepo.GetByTemplateIdAsync(templateId);
-            return versions.FirstOrDefault(v => v.Version == version && v.IsEnabled && !v.IsDeleted);
+            return versions.FirstOrDefault(v => v.Version == version && v.IsEnabled);
         }
         return await _versionRepo.GetActiveByTemplateIdAsync(templateId);
     }
@@ -310,7 +356,7 @@ public class EmailService
         if (string.IsNullOrWhiteSpace(setting.Username))
             throw new InvalidOperationException("SMTP用户名未配置");
 
-        var host = setting.SmtpHost;
+        var host = NormalizeSmtpHost(setting.SmtpHost);
         var port = setting.SmtpPort;
         var username = setting.Username;
         var password = setting.Password;
@@ -330,13 +376,55 @@ public class EmailService
         message.Body = new TextPart(mimeFormat) { Text = body };
 
         using var client = new SmtpClient();
-        var sslOptions = setting.EnableSsl
-            ? MailKit.Security.SecureSocketOptions.StartTls
-            : MailKit.Security.SecureSocketOptions.Auto;
+        var sslOptions = ResolveSslOptions(port, setting.EnableSsl);
         await client.ConnectAsync(host, port, sslOptions);
         await client.AuthenticateAsync(username, password);
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
+    }
+
+    /// <summary>
+    /// 根据端口和 SSL 配置选择 SMTP 连接的安全选项。
+    /// </summary>
+    private static MailKit.Security.SecureSocketOptions ResolveSslOptions(int port, bool enableSsl)
+    {
+        if (!enableSsl)
+            return MailKit.Security.SecureSocketOptions.Auto;
+
+        return port switch
+        {
+            465 => MailKit.Security.SecureSocketOptions.SslOnConnect,
+            _ => MailKit.Security.SecureSocketOptions.StartTls,
+        };
+    }
+
+    /// <summary>
+    /// 规范化 SMTP 主机地址，去除 scheme 和端口号。
+    /// </summary>
+    private static string NormalizeSmtpHost(string host)
+    {
+        if (string.IsNullOrWhiteSpace(host)) return host;
+        var trimmed = host.Trim();
+
+        // 尝试按绝对 URI 解析并提取 Host
+        if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
+            return uri.Host;
+
+        // 去掉 scheme（如 smtp://、smtps://）
+        var schemeIndex = trimmed.IndexOf("://", StringComparison.Ordinal);
+        if (schemeIndex > 0)
+            trimmed = trimmed[(schemeIndex + 3)..];
+
+        // 去掉端口号
+        var colonIndex = trimmed.LastIndexOf(':');
+        if (colonIndex > 0)
+        {
+            var portPart = trimmed[(colonIndex + 1)..];
+            if (int.TryParse(portPart, out _))
+                trimmed = trimmed[..colonIndex];
+        }
+
+        return trimmed;
     }
 
     /// <summary>
@@ -393,39 +481,134 @@ public class EmailService
         Status = l.Status,
         ErrorMessage = l.ErrorMessage,
         SentAt = l.SentAt,
+        SenderType = l.SenderType,
+        SenderName = l.SenderName,
         CreatedAt = l.CreatedAt
     };
+
+    /// <summary>
+    /// 解析发送人名称：系统触发使用默认名称，其他情况使用传入名称。
+    /// </summary>
+    private static string GetSenderName(EmailSenderType senderType, string? senderName)
+    {
+        if (!string.IsNullOrWhiteSpace(senderName))
+            return senderName.Trim();
+
+        return senderType switch
+        {
+            EmailSenderType.System => "系统",
+            EmailSenderType.Scheduled => "定时任务",
+            EmailSenderType.Api => "外部接口",
+            _ => senderType.ToString()
+        };
+    }
 }
 
+/// <summary>
+/// 创建邮件模板请求。
+/// </summary>
 public class CreateEmailTemplateDto
 {
+    /// <summary>
+    /// 模板编码
+    /// </summary>
     public string TemplateCode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 模板名称
+    /// </summary>
     public string TemplateName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 描述
+    /// </summary>
     public string? Description { get; set; }
 }
 
+/// <summary>
+/// 更新邮件模板请求。
+/// </summary>
 public class UpdateEmailTemplateDto
 {
+    /// <summary>
+    /// 模板ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 模板名称
+    /// </summary>
     public string? TemplateName { get; set; }
+
+    /// <summary>
+    /// 描述
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
 }
 
+/// <summary>
+/// 创建邮件模板版本请求。
+/// </summary>
 public class CreateEmailTemplateVersionDto
 {
+    /// <summary>
+    /// 模板ID
+    /// </summary>
     public Guid TemplateId { get; set; }
+
+    /// <summary>
+    /// 版本号
+    /// </summary>
     public string? Version { get; set; }
+
+    /// <summary>
+    /// 邮件主题
+    /// </summary>
     public string Subject { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 邮件正文
+    /// </summary>
     public string Body { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 正文格式（html/text）
+    /// </summary>
     public string BodyFormat { get; set; } = "html";
 }
 
+/// <summary>
+/// 更新邮件模板版本请求。
+/// </summary>
 public class UpdateEmailTemplateVersionDto
 {
+    /// <summary>
+    /// 版本ID
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// 邮件主题
+    /// </summary>
     public string? Subject { get; set; }
+
+    /// <summary>
+    /// 邮件正文
+    /// </summary>
     public string? Body { get; set; }
+
+    /// <summary>
+    /// 正文格式（html/text）
+    /// </summary>
     public string? BodyFormat { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsEnabled { get; set; }
 }

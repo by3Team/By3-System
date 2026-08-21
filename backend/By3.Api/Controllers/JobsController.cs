@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 定时任务管理：提供定时任务分页查询、详情、增删改、启用禁用及触发功能。
 /// </summary>
+[Tags("定时任务")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

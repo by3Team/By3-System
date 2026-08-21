@@ -80,6 +80,8 @@ CREATE TABLE by3_sysemaillog (
     "Status" character varying(20) NOT NULL,
     "ErrorMessage" text,
     "SentAt" timestamp with time zone,
+    "SenderType" character varying(50) NOT NULL DEFAULT 'System',
+    "SenderName" character varying(100) NOT NULL DEFAULT '系统',
     "CreatedAt" timestamp with time zone NOT NULL,
     CONSTRAINT "PK_by3_sysemaillog" PRIMARY KEY ("Id")
 );
@@ -107,7 +109,6 @@ CREATE TABLE by3_sysemailtemplate (
     "TemplateName" character varying(100) NOT NULL,
     "Description" character varying(500),
     "IsEnabled" boolean NOT NULL DEFAULT TRUE,
-    "IsDeleted" boolean NOT NULL DEFAULT FALSE,
     "CreatedAt" timestamp with time zone NOT NULL,
     "UpdatedAt" timestamp with time zone,
     "CreatedBy" uuid,
@@ -124,12 +125,47 @@ CREATE TABLE by3_sysemailtemplateversion (
     "Body" text NOT NULL,
     "BodyFormat" character varying(20) NOT NULL,
     "IsEnabled" boolean NOT NULL DEFAULT TRUE,
-    "IsDeleted" boolean NOT NULL DEFAULT FALSE,
     "CreatedAt" timestamp with time zone NOT NULL,
     "UpdatedAt" timestamp with time zone,
     "CreatedBy" uuid,
     "UpdatedBy" uuid,
     CONSTRAINT "PK_by3_sysemailtemplateversion" PRIMARY KEY ("Id")
+);
+
+
+CREATE TABLE by3_sysemailtemplatebackup (
+    "Id" uuid NOT NULL,
+    "OriginalId" uuid NOT NULL,
+    "TemplateCode" character varying(100) NOT NULL,
+    "TemplateName" character varying(100) NOT NULL,
+    "Description" character varying(500),
+    "IsEnabled" boolean NOT NULL,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    "UpdatedAt" timestamp with time zone,
+    "CreatedBy" uuid,
+    "UpdatedBy" uuid,
+    "DeletedAt" timestamp with time zone NOT NULL,
+    "DeletedBy" uuid,
+    CONSTRAINT "PK_by3_sysemailtemplatebackup" PRIMARY KEY ("Id")
+);
+
+
+CREATE TABLE by3_sysemailtemplateversionbackup (
+    "Id" uuid NOT NULL,
+    "OriginalId" uuid NOT NULL,
+    "TemplateId" uuid NOT NULL,
+    "Version" character varying(50) NOT NULL,
+    "Subject" character varying(200) NOT NULL,
+    "Body" text NOT NULL,
+    "BodyFormat" character varying(20) NOT NULL,
+    "IsEnabled" boolean NOT NULL,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    "UpdatedAt" timestamp with time zone,
+    "CreatedBy" uuid,
+    "UpdatedBy" uuid,
+    "DeletedAt" timestamp with time zone NOT NULL,
+    "DeletedBy" uuid,
+    CONSTRAINT "PK_by3_sysemailtemplateversionbackup" PRIMARY KEY ("Id")
 );
 
 
@@ -393,6 +429,13 @@ CREATE UNIQUE INDEX "IX_by3_sysemailtemplate_TemplateCode" ON by3_sysemailtempla
 CREATE UNIQUE INDEX "IX_by3_sysemailtemplateversion_TemplateId_Version" ON by3_sysemailtemplateversion ("TemplateId", "Version");
 
 
+CREATE INDEX "IX_by3_sysemailtemplatebackup_OriginalId" ON by3_sysemailtemplatebackup ("OriginalId");
+
+
+CREATE INDEX "IX_by3_sysemailtemplateversionbackup_TemplateId" ON by3_sysemailtemplateversionbackup ("TemplateId");
+CREATE INDEX "IX_by3_sysemailtemplateversionbackup_OriginalId" ON by3_sysemailtemplateversionbackup ("OriginalId");
+
+
 CREATE UNIQUE INDEX "IX_by3_sysexternalapi_Route_Method" ON by3_sysexternalapi ("Route", "Method");
 
 
@@ -454,6 +497,8 @@ COMMENT ON TABLE by3_sysemaillog IS '邮件发送日志表';
 COMMENT ON TABLE by3_sysemailsetting IS '邮件发送配置表';
 COMMENT ON TABLE by3_sysemailtemplate IS '邮件模板表';
 COMMENT ON TABLE by3_sysemailtemplateversion IS '邮件模板版本表';
+COMMENT ON TABLE by3_sysemailtemplatebackup IS '已删除邮件模板备份表';
+COMMENT ON TABLE by3_sysemailtemplateversionbackup IS '已删除邮件模板版本备份表';
 COMMENT ON TABLE by3_sysexternalapi IS '对外API接口注册表';
 COMMENT ON TABLE by3_sysexternalapiaccesslog IS '对外API访问日志表';
 COMMENT ON TABLE by3_sysexternalapitoken IS '对外API Token表';
@@ -531,6 +576,8 @@ COMMENT ON COLUMN by3_sysemaillog."Body" IS '邮件内容';
 COMMENT ON COLUMN by3_sysemaillog."Status" IS '发送状态：pending/success/failed';
 COMMENT ON COLUMN by3_sysemaillog."ErrorMessage" IS '错误信息';
 COMMENT ON COLUMN by3_sysemaillog."SentAt" IS '发送时间';
+COMMENT ON COLUMN by3_sysemaillog."SenderType" IS '发送来源类型：System/Manual/Scheduled/Api';
+COMMENT ON COLUMN by3_sysemaillog."SenderName" IS '发送人名称，系统触发为"系统"，后台手动为操作人用户名';
 COMMENT ON COLUMN by3_sysemaillog."CreatedAt" IS '创建时间';
 COMMENT ON COLUMN by3_sysemailsetting."Id" IS '主键';
 COMMENT ON COLUMN by3_sysemailsetting."SmtpHost" IS 'SMTP服务器地址';
@@ -548,7 +595,6 @@ COMMENT ON COLUMN by3_sysemailtemplate."TemplateCode" IS '模板编码';
 COMMENT ON COLUMN by3_sysemailtemplate."TemplateName" IS '模板名称';
 COMMENT ON COLUMN by3_sysemailtemplate."Description" IS '描述';
 COMMENT ON COLUMN by3_sysemailtemplate."IsEnabled" IS '是否启用';
-COMMENT ON COLUMN by3_sysemailtemplate."IsDeleted" IS '软删除标记';
 COMMENT ON COLUMN by3_sysemailtemplate."CreatedAt" IS '创建时间';
 COMMENT ON COLUMN by3_sysemailtemplate."UpdatedAt" IS '更新时间';
 COMMENT ON COLUMN by3_sysemailtemplate."CreatedBy" IS '创建人';
@@ -560,11 +606,36 @@ COMMENT ON COLUMN by3_sysemailtemplateversion."Subject" IS '邮件主题';
 COMMENT ON COLUMN by3_sysemailtemplateversion."Body" IS '邮件内容';
 COMMENT ON COLUMN by3_sysemailtemplateversion."BodyFormat" IS '内容格式：html/text/markdown';
 COMMENT ON COLUMN by3_sysemailtemplateversion."IsEnabled" IS '是否启用';
-COMMENT ON COLUMN by3_sysemailtemplateversion."IsDeleted" IS '软删除标记';
 COMMENT ON COLUMN by3_sysemailtemplateversion."CreatedAt" IS '创建时间';
 COMMENT ON COLUMN by3_sysemailtemplateversion."UpdatedAt" IS '更新时间';
 COMMENT ON COLUMN by3_sysemailtemplateversion."CreatedBy" IS '创建人';
 COMMENT ON COLUMN by3_sysemailtemplateversion."UpdatedBy" IS '更新人';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."Id" IS '主键';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."OriginalId" IS '原模板ID';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."TemplateCode" IS '模板编码';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."TemplateName" IS '模板名称';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."Description" IS '描述';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."IsEnabled" IS '是否启用';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."CreatedAt" IS '创建时间';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."UpdatedAt" IS '更新时间';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."CreatedBy" IS '创建人';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."UpdatedBy" IS '更新人';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."DeletedAt" IS '删除时间';
+COMMENT ON COLUMN by3_sysemailtemplatebackup."DeletedBy" IS '删除人';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."Id" IS '主键';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."OriginalId" IS '原版本ID';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."TemplateId" IS '所属模板ID';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."Version" IS '版本号';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."Subject" IS '邮件主题';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."Body" IS '邮件内容';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."BodyFormat" IS '内容格式：html/text/markdown';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."IsEnabled" IS '是否启用';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."CreatedAt" IS '创建时间';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."UpdatedAt" IS '更新时间';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."CreatedBy" IS '创建人';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."UpdatedBy" IS '更新人';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."DeletedAt" IS '删除时间';
+COMMENT ON COLUMN by3_sysemailtemplateversionbackup."DeletedBy" IS '删除人';
 COMMENT ON COLUMN by3_sysexternalapiaccesslog."Id" IS '主键';
 COMMENT ON COLUMN by3_sysexternalapiaccesslog."ApiKey" IS '请求使用的API Key';
 COMMENT ON COLUMN by3_sysexternalapiaccesslog."RequestPath" IS '请求路径';

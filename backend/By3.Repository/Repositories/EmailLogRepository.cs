@@ -26,24 +26,30 @@ public class EmailLogRepository
         _db = db;
     }
 
-    public async Task<List<SysEmailLog>> GetListAsync(int page, int pageSize, string? keyword, string? status)
+    public async Task<List<SysEmailLog>> GetListAsync(int page, int pageSize, string? keyword, string? status, DateTime? startDate = null, DateTime? endDate = null)
+    {
+        var query = BuildQuery(keyword, status, startDate, endDate);
+        return await query.OrderByDescending(e => e.CreatedAt).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+    }
+
+    public async Task<int> GetCountAsync(string? keyword, string? status, DateTime? startDate = null, DateTime? endDate = null)
+    {
+        var query = BuildQuery(keyword, status, startDate, endDate);
+        return await query.CountAsync();
+    }
+
+    private IQueryable<SysEmailLog> BuildQuery(string? keyword, string? status, DateTime? startDate, DateTime? endDate)
     {
         var query = _db.EmailLogs.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(keyword))
             query = query.Where(e => e.ToAddresses.Contains(keyword) || e.Subject.Contains(keyword));
         if (!string.IsNullOrWhiteSpace(status))
             query = query.Where(e => e.Status == status);
-        return await query.OrderByDescending(e => e.CreatedAt).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-    }
-
-    public async Task<int> GetCountAsync(string? keyword, string? status)
-    {
-        var query = _db.EmailLogs.AsQueryable();
-        if (!string.IsNullOrWhiteSpace(keyword))
-            query = query.Where(e => e.ToAddresses.Contains(keyword) || e.Subject.Contains(keyword));
-        if (!string.IsNullOrWhiteSpace(status))
-            query = query.Where(e => e.Status == status);
-        return await query.CountAsync();
+        if (startDate.HasValue)
+            query = query.Where(e => e.CreatedAt >= startDate.Value);
+        if (endDate.HasValue)
+            query = query.Where(e => e.CreatedAt <= endDate.Value);
+        return query;
     }
 
     public async Task<Guid> CreateAsync(SysEmailLog log)

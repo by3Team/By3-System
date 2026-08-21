@@ -23,6 +23,7 @@ namespace By3.Api.Controllers.External;
 /// <summary>
 /// 对外 API 用户数据：提供经过签名认证的外部系统可访问的用户数据接口。
 /// </summary>
+[Tags("外部API-用户")]
 [ApiController]
 [Route("api/external/v{version:apiVersion}/users")]
 [ApiVersion("1.0")]

@@ -21,6 +21,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 健康检查：用于容器编排和负载均衡器探测应用及数据库状态。
 /// </summary>
+[Tags("系统")]
 [ApiController]
 [Route("api/[controller]")]
 public class HealthController : ControllerBase

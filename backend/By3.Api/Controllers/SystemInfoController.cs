@@ -24,6 +24,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 系统信息：提供系统版本、依赖包列表等运行信息查询功能。
 /// </summary>
+[Tags("系统")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

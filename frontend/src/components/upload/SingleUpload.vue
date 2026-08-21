@@ -32,14 +32,19 @@ const emit = defineEmits<{
 const auth = useAuthStore()
 const dictStore = useDictStore()
 const uploading = ref(false)
+const idempotencyKey = ref('')
 
 const uploadAction = computed(() => `${import.meta.env.VITE_API_BASE_URL || '/api'}/v1/singlefiles/upload`)
 const headers = computed(() => {
   const h: Record<string, string> = {}
   if (auth.token) h.Authorization = `Bearer ${auth.token}`
-  h['Idempotency-Key'] = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : uuidv4()
+  h['Idempotency-Key'] = idempotencyKey.value || uuidv4()
   return h
 })
+
+function generateIdempotencyKey() {
+  idempotencyKey.value = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : uuidv4()
+}
 const accept = computed(() => {
   const category = props.category || 'general'
   const item = dictStore.getDict('sys_file_category').find((d) => d.dictValue === category)
@@ -49,6 +54,7 @@ const accept = computed(() => {
 })
 
 function beforeUpload() {
+  generateIdempotencyKey()
   uploading.value = true
   return true
 }

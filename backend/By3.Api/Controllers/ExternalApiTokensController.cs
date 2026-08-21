@@ -26,6 +26,7 @@ namespace By3.Api.Controllers;
 /// 对外 API Token 管理：提供对外 API Token 的生成、查询、启用禁用、重生成、删除及操作日志功能。
 /// 删除为逻辑删除；已删除的 Token 不允许修改、重生成或再次删除。
 /// </summary>
+[Tags("外部接口令牌")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
