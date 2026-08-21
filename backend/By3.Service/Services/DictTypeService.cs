@@ -69,6 +69,9 @@ public class DictTypeService
     /// </summary>
     public async Task<Guid> CreateAsync(CreateDictTypeDto dto)
     {
+        if (await _repo.GetByTypeAsync(dto.DictType) != null)
+            throw new InvalidOperationException($"字典类型 {dto.DictType} 已存在");
+
         var type = new SysDictType
         {
             DictName = dto.DictName,
@@ -86,6 +89,13 @@ public class DictTypeService
     {
         var type = await _repo.GetByIdAsync(dto.Id);
         if (type == null) return 0;
+
+        if (dto.DictType != null && !dto.DictType.Equals(type.DictType, StringComparison.OrdinalIgnoreCase))
+        {
+            var existing = await _repo.GetByTypeAsync(dto.DictType);
+            if (existing != null && existing.Id != dto.Id)
+                throw new InvalidOperationException($"字典类型 {dto.DictType} 已存在");
+        }
 
         if (dto.DictName != null) type.DictName = dto.DictName;
         if (dto.DictType != null) type.DictType = dto.DictType;

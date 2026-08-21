@@ -23,6 +23,7 @@ namespace By3.Api.Controllers.External;
 /// <summary>
 /// 对外 API 部门数据：提供经过签名认证的外部系统可访问的部门信息接口。
 /// </summary>
+[Tags("外部API-部门")]
 [ApiController]
 [Route("api/external/v{version:apiVersion}/departments")]
 [ApiVersion("1.0")]

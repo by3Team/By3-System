@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 菜单管理：提供菜单树查询、详情、增删改功能。
 /// </summary>
+[Tags("菜单管理")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

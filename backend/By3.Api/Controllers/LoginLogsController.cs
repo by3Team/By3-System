@@ -24,6 +24,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 登录日志查询：提供登录日志分页查询及详情查看功能。
 /// </summary>
+[Tags("登录日志")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

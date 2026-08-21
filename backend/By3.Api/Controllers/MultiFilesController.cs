@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 多文件上传：提供多文件上传、列表查询、下载、删除及导出功能。
 /// </summary>
+[Tags("多文件管理")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
@@ -47,7 +48,6 @@ public class MultiFilesController : ControllerBase
     /// <returns>ApiResult 包装的操作结果</returns>
     [HttpPost("upload")]
     [Authorize(Policy = "file:create")]
-    [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Upload(List<IFormFile> files, string category = "general")
     {
         if (files == null || files.Count == 0)

@@ -18,6 +18,12 @@
             <el-option label="失败" value="failed" />
           </el-select>
         </el-form-item>
+        <el-form-item label="开始时间">
+          <el-date-picker v-model="search.startDate" type="datetime" placeholder="开始时间" clearable value-format="YYYY-MM-DDTHH:mm:ss" />
+        </el-form-item>
+        <el-form-item label="结束时间">
+          <el-date-picker v-model="search.endDate" type="datetime" placeholder="结束时间" clearable value-format="YYYY-MM-DDTHH:mm:ss" />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="loadData">搜索</el-button>
         </el-form-item>
@@ -34,6 +40,12 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="senderType" label="发送来源" width="100">
+          <template #default="{ row }">
+            {{ formatSenderType(row.senderType) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="senderName" label="发送人" width="120" />
         <el-table-column prop="errorMessage" label="错误信息" show-overflow-tooltip />
         <el-table-column prop="sentAt" label="发送时间" width="180">
           <template #default="{ row }">
@@ -58,12 +70,22 @@ import { emailApi } from '@/api'
 const loading = ref(false)
 const tableData = ref([])
 const total = ref(0)
-const search = reactive({ page: 1, pageSize: 10, keyword: '', status: '' })
+const search = reactive({ page: 1, pageSize: 10, keyword: '', status: '', startDate: '', endDate: '' })
 
 function formatDate(value: string) {
   if (!value) return '-'
   const d = new Date(value)
   return d.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\//g, '-')
+}
+
+function formatSenderType(value: string) {
+  const map: Record<string, string> = {
+    System: '系统',
+    Manual: '后台',
+    Scheduled: '定时任务',
+    Api: '外部接口'
+  }
+  return map[value] || value || '-'
 }
 
 async function loadData() {

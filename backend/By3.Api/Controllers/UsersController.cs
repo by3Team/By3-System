@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 用户管理：提供用户分页查询、详情、增删改、角色查询及密码重置功能。
 /// </summary>
+[Tags("用户管理")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

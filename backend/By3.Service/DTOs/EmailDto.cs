@@ -204,6 +204,16 @@ public class EmailLogDto
     public DateTime? SentAt { get; set; }
 
     /// <summary>
+    /// 发送来源类型
+    /// </summary>
+    public string SenderType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 发送人名称
+    /// </summary>
+    public string SenderName { get; set; } = string.Empty;
+
+    /// <summary>
     /// 创建时间
     /// </summary>
     public DateTime CreatedAt { get; set; }

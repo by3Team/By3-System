@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 角色管理：提供角色分页查询、详情、增删改及菜单分配功能。
 /// </summary>
+[Tags("角色管理")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

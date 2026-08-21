@@ -23,6 +23,7 @@ namespace By3.Api.Controllers.External;
 /// <summary>
 /// 对外 API 系统信息：提供经过签名认证的外部系统可访问的系统信息接口。
 /// </summary>
+[Tags("外部API-系统信息")]
 [ApiController]
 [Route("api/external/v{version:apiVersion}/systeminfo")]
 [ApiVersion("1.0")]

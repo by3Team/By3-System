@@ -23,6 +23,7 @@ namespace By3.Api.Controllers.External;
 /// <summary>
 /// 对外 API 岗位数据：提供经过签名认证的外部系统可访问的岗位信息接口。
 /// </summary>
+[Tags("外部API-岗位")]
 [ApiController]
 [Route("api/external/v{version:apiVersion}/positions")]
 [ApiVersion("1.0")]

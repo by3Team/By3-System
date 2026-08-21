@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 字典类型管理：提供字典类型分页查询、详情、增删改功能。
 /// </summary>
+[Tags("字典类型")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
@@ -76,8 +77,15 @@ public class DictTypesController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Create(CreateDictTypeDto dto)
     {
-        var id = await _service.CreateAsync(dto);
-        return Ok(ApiResult<object>.Ok(new { Id = id }, "创建成功"));
+        try
+        {
+            var id = await _service.CreateAsync(dto);
+            return Ok(ApiResult<object>.Ok(new { Id = id }, "创建成功"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResult<object>.Error(ex.Message, 400));
+        }
     }
 
 
@@ -92,10 +100,17 @@ public class DictTypesController : ControllerBase
     [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Update(Guid id, UpdateDictTypeDto dto)
     {
-        dto.Id = id;
-        var result = await _service.UpdateAsync(dto);
-        if (result == 0) return NotFound(ApiResult<object>.Error("字典类型不存在", 404));
-        return Ok(ApiResult<object>.Ok(null, "更新成功"));
+        try
+        {
+            dto.Id = id;
+            var result = await _service.UpdateAsync(dto);
+            if (result == 0) return NotFound(ApiResult<object>.Error("字典类型不存在", 404));
+            return Ok(ApiResult<object>.Ok(null, "更新成功"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResult<object>.Error(ex.Message, 400));
+        }
     }
 
 

@@ -96,6 +96,12 @@ public class AppDbContext : DbContext
     /// <summary>邮件模板版本表</summary>
     public DbSet<SysEmailTemplateVersion> EmailTemplateVersions => Set<SysEmailTemplateVersion>();
 
+    /// <summary>已删除邮件模板备份表</summary>
+    public DbSet<SysEmailTemplateBackup> EmailTemplateBackups => Set<SysEmailTemplateBackup>();
+
+    /// <summary>已删除邮件模板版本备份表</summary>
+    public DbSet<SysEmailTemplateVersionBackup> EmailTemplateVersionBackups => Set<SysEmailTemplateVersionBackup>();
+
     /// <summary>邮件发送日志表</summary>
     public DbSet<SysEmailLog> EmailLogs => Set<SysEmailLog>();
 
@@ -148,6 +154,8 @@ public class AppDbContext : DbContext
         ConfigureSysFileRecord(modelBuilder);
         ConfigureSysEmailTemplate(modelBuilder);
         ConfigureSysEmailTemplateVersion(modelBuilder);
+        ConfigureSysEmailTemplateBackup(modelBuilder);
+        ConfigureSysEmailTemplateVersionBackup(modelBuilder);
         ConfigureSysEmailLog(modelBuilder);
         ConfigureSysEmailSetting(modelBuilder);
         ConfigureSysJob(modelBuilder);
@@ -403,10 +411,8 @@ public class AppDbContext : DbContext
             entity.Property(e => e.TemplateName).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(500).IsRequired(false);
             entity.Property(e => e.IsEnabled).HasDefaultValue(true);
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UpdatedAt).IsRequired(false);
-            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => e.TemplateCode).IsUnique();
         });
     }
@@ -424,11 +430,50 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Body).HasColumnType("text").IsRequired();
             entity.Property(e => e.BodyFormat).HasMaxLength(20).IsRequired();
             entity.Property(e => e.IsEnabled).HasDefaultValue(true);
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UpdatedAt).IsRequired(false);
-            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => new { e.TemplateId, e.Version }).IsUnique();
+        });
+    }
+
+    /// <summary>配置已删除邮件模板备份表映射。</summary>
+    private void ConfigureSysEmailTemplateBackup(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SysEmailTemplateBackup>(entity =>
+        {
+            entity.ToTable(TableName("sysemailtemplatebackup"));
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.OriginalId).IsRequired();
+            entity.Property(e => e.TemplateCode).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.TemplateName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500).IsRequired(false);
+            entity.Property(e => e.IsEnabled).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired(false);
+            entity.Property(e => e.DeletedAt).IsRequired();
+            entity.HasIndex(e => e.OriginalId);
+        });
+    }
+
+    /// <summary>配置已删除邮件模板版本备份表映射。</summary>
+    private void ConfigureSysEmailTemplateVersionBackup(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SysEmailTemplateVersionBackup>(entity =>
+        {
+            entity.ToTable(TableName("sysemailtemplateversionbackup"));
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.OriginalId).IsRequired();
+            entity.Property(e => e.TemplateId).IsRequired();
+            entity.Property(e => e.Version).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Subject).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Body).HasColumnType("text").IsRequired();
+            entity.Property(e => e.BodyFormat).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.IsEnabled).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired(false);
+            entity.Property(e => e.DeletedAt).IsRequired();
+            entity.HasIndex(e => e.TemplateId);
+            entity.HasIndex(e => e.OriginalId);
         });
     }
 
@@ -448,6 +493,8 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Status).HasMaxLength(20).IsRequired();
             entity.Property(e => e.ErrorMessage).HasColumnType("text").IsRequired(false);
             entity.Property(e => e.SentAt).IsRequired(false);
+            entity.Property(e => e.SenderType).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.SenderName).HasMaxLength(100).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.HasIndex(e => e.CreatedAt);
             entity.HasIndex(e => e.Status);

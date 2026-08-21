@@ -70,10 +70,16 @@ public class AuditLogRepository
             q = q.Where(a => a.StatusCode == query.StatusCode.Value);
 
         if (query.StartTime.HasValue)
-            q = q.Where(a => a.CreatedAt >= query.StartTime.Value);
+        {
+            var start = DateTime.SpecifyKind(query.StartTime.Value, DateTimeKind.Utc);
+            q = q.Where(a => a.CreatedAt >= start);
+        }
 
         if (query.EndTime.HasValue)
-            q = q.Where(a => a.CreatedAt <= query.EndTime.Value);
+        {
+            var end = DateTime.SpecifyKind(query.EndTime.Value, DateTimeKind.Utc);
+            q = q.Where(a => a.CreatedAt <= end);
+        }
 
         return q;
     }

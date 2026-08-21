@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 单文件上传：提供单文件上传、下载、删除及导出功能。
 /// </summary>
+[Tags("单文件管理")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
@@ -47,7 +48,6 @@ public class SingleFilesController : ControllerBase
     /// <returns>ApiResult 包装的操作结果</returns>
     [HttpPost("upload")]
     [Authorize(Policy = "file:create")]
-    [ServiceFilter(typeof(IdempotencyFilter))]
     public async Task<IActionResult> Upload(IFormFile file, string category = "general")
     {
         var userId = GetCurrentUserId();

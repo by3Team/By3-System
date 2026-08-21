@@ -92,7 +92,35 @@ const formRef = ref()
 const form = reactive<any>({ dictTypeId: typeId, dictLabel: '', dictValue: '', sortOrder: 0, isDefault: false, isEnabled: true })
 const formRules = {
   dictLabel: [{ required: true, message: '必填', trigger: 'blur' }],
-  dictValue: [{ required: true, message: '必填', trigger: 'blur' }],
+  dictValue: [
+    { required: true, message: '必填', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string, callback: any) => {
+        if (value && (value.startsWith(' ') || value.endsWith(' '))) {
+          callback(new Error('字典值首尾不能包含空格'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    },
+    {
+      validator: (_rule: any, value: string, callback: any) => {
+        if (!value) return callback()
+        const exists = tableData.value.some(
+          (item: any) =>
+            item.id !== form.id &&
+            item.dictValue === value
+        )
+        if (exists) {
+          callback(new Error('当前字典类型下已存在该字典值'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
   sortOrder: [{ required: true, type: 'number', min: 1, message: '排序必须为正整数', trigger: 'change' }]
 }
 
@@ -121,6 +149,7 @@ function openDialog(row?: any) {
 async function handleSubmit() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
+  form.dictValue = form.dictValue.trim()
   if (isEdit.value) {
     await dictDataApi.update(form.id, form)
     ElMessage.success('更新成功')

@@ -1,6 +1,7 @@
 <template>
   <div class="rich-text-editor">
     <Toolbar
+      v-if="!disabled"
       :editor="editorRef"
       :defaultConfig="toolbarConfig"
       mode="default"
@@ -28,6 +29,7 @@ const props = defineProps<{
   modelValue?: string
   height?: number
   placeholder?: string
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -70,13 +72,28 @@ const editorConfig: Partial<IEditorConfig> = {
   }
 }
 
+function setEditorDisabled(disabled: boolean) {
+  const editor = editorRef.value
+  if (!editor) return
+  if (disabled) {
+    editor.disable()
+  } else {
+    editor.enable()
+  }
+}
+
 function handleCreated(editor: IDomEditor) {
   editorRef.value = editor
+  setEditorDisabled(props.disabled || false)
 }
 
 function handleChange(editor: IDomEditor) {
   emit('update:modelValue', editor.getHtml())
 }
+
+watch(() => props.disabled, (disabled) => {
+  setEditorDisabled(disabled || false)
+})
 
 onBeforeUnmount(() => {
   const editor = editorRef.value

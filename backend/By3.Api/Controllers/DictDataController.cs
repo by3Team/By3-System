@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 字典数据管理：提供字典数据分页查询、详情、增删改功能。
 /// </summary>
+[Tags("字典数据")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

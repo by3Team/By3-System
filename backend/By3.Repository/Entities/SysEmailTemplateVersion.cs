@@ -23,7 +23,6 @@ public class SysEmailTemplateVersion
     public string Body { get; set; } = string.Empty;
     public string BodyFormat { get; set; } = "html";
     public bool IsEnabled { get; set; } = true;
-    public bool IsDeleted { get; set; } = false;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public Guid? CreatedBy { get; set; }

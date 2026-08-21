@@ -24,6 +24,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 操作日志查询：提供操作日志分页查询及详情查看功能。
 /// </summary>
+[Tags("审计日志")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

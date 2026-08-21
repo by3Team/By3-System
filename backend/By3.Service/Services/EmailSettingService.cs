@@ -67,13 +67,13 @@ public class EmailSettingService
         if (string.IsNullOrWhiteSpace(dto.SmtpHost) || dto.SmtpPort <= 0)
             return (false, "SMTP 服务器地址或端口未配置");
 
+        var host = NormalizeSmtpHost(dto.SmtpHost);
+        var sslOptions = ResolveSslOptions(dto.SmtpPort, dto.EnableSsl);
+
         using var client = new MailKit.Net.Smtp.SmtpClient();
         try
         {
-            var sslOptions = dto.EnableSsl
-                ? MailKit.Security.SecureSocketOptions.StartTls
-                : MailKit.Security.SecureSocketOptions.Auto;
-            await client.ConnectAsync(dto.SmtpHost, dto.SmtpPort, sslOptions);
+            await client.ConnectAsync(host, dto.SmtpPort, sslOptions);
 
             if (!string.IsNullOrWhiteSpace(dto.Username))
             {
@@ -87,6 +87,50 @@ public class EmailSettingService
         {
             return (false, $"连接失败：{ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// 根据端口和 SSL 配置选择 SMTP 连接的安全选项。
+    /// </summary>
+    private static MailKit.Security.SecureSocketOptions ResolveSslOptions(int port, bool enableSsl)
+    {
+        if (!enableSsl)
+            return MailKit.Security.SecureSocketOptions.Auto;
+
+        return port switch
+        {
+            465 => MailKit.Security.SecureSocketOptions.SslOnConnect,
+            _ => MailKit.Security.SecureSocketOptions.StartTls,
+        };
+    }
+
+    /// <summary>
+    /// 规范化 SMTP 主机地址，去除 scheme 和端口号。
+    /// </summary>
+    private static string NormalizeSmtpHost(string host)
+    {
+        if (string.IsNullOrWhiteSpace(host)) return host;
+        var trimmed = host.Trim();
+
+        // 尝试按绝对 URI 解析并提取 Host
+        if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
+            return uri.Host;
+
+        // 去掉 scheme（如 smtp://、smtps://）
+        var schemeIndex = trimmed.IndexOf("://", StringComparison.Ordinal);
+        if (schemeIndex > 0)
+            trimmed = trimmed[(schemeIndex + 3)..];
+
+        // 去掉端口号
+        var colonIndex = trimmed.LastIndexOf(':');
+        if (colonIndex > 0)
+        {
+            var portPart = trimmed[(colonIndex + 1)..];
+            if (int.TryParse(portPart, out _))
+                trimmed = trimmed[..colonIndex];
+        }
+
+        return trimmed;
     }
 
     private static EmailSettingDto MapToDto(SysEmailSetting s) => new()

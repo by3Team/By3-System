@@ -26,5 +26,7 @@ public class SysEmailLog
     public string Status { get; set; } = "pending";
     public string? ErrorMessage { get; set; }
     public DateTime? SentAt { get; set; }
+    public string SenderType { get; set; } = "System";
+    public string SenderName { get; set; } = "系统";
     public DateTime CreatedAt { get; set; }
 }

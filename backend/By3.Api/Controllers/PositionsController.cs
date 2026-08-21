@@ -25,6 +25,7 @@ namespace By3.Api.Controllers;
 /// <summary>
 /// 岗位管理：提供岗位分页查询、详情、增删改功能。
 /// </summary>
+[Tags("岗位管理")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]

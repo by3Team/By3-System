@@ -27,6 +27,26 @@ public class DictDataRepository
     public async Task<SysDictData?> GetByIdAsync(Guid id)
         => await Queryable().FirstOrDefaultAsync(d => d.Id == id);
 
+    public async Task<bool> ExistsByValueAsync(Guid dictTypeId, string dictValue, Guid? excludeId = null)
+    {
+        var query = Queryable().Where(d => d.DictTypeId == dictTypeId && d.DictValue == dictValue);
+        if (excludeId.HasValue)
+            query = query.Where(d => d.Id != excludeId.Value);
+        return await query.AnyAsync();
+    }
+
+    public async Task<int> ClearDefaultAsync(Guid dictTypeId, Guid? excludeId = null)
+    {
+        var query = _db.DictData
+            .Where(d => d.DictTypeId == dictTypeId && d.IsDefault);
+        if (excludeId.HasValue)
+            query = query.Where(d => d.Id != excludeId.Value);
+
+        return await query.ExecuteUpdateAsync(setters => setters
+            .SetProperty(d => d.IsDefault, false)
+            .SetProperty(d => d.UpdatedAt, DateTime.UtcNow));
+    }
+
     public async Task<List<SysDictData>> GetByTypeIdAsync(Guid dictTypeId)
         => await Queryable()
             .Where(d => d.DictTypeId == dictTypeId)
