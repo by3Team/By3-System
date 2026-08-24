@@ -23,9 +23,9 @@
     "echarts": "^6.1.0",
     "element-plus": "^2.14.3",
     "marked": "^18.0.7",
-    "pinia": "^4.0.2",
+    "pinia": "^4.0.3",
     "uuid": "^14.0.1",
-    "vue": "^3.5.39",
+    "vue": "^3.5.41",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
