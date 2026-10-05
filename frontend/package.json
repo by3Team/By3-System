@@ -19,7 +19,7 @@
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^5.1.12",
     "axios": "^1.19.0",
-    "dompurify": "^3.3.0",
+    "dompurify": "^3.4.16",
     "echarts": "^6.1.0",
     "element-plus": "^2.14.3",
     "marked": "^18.0.7",
